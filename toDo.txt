@@ -1,0 +1,81 @@
+COMPLETED:
+- parse significant odi/t20i matches (world cup knock-outs, finals)
+- add graphs to player page 
+- display up/down moves in live ratings
+- add country flags images
+- setup current ratings tables so load times are faster
+- add explanations for each rating (team, batting, bowling, all-round for test, odi, t20i)
+- add contact us, about sections
+- add margin to the right
+- add footnote to pages
+- redesign home page
+- add team ratings
+- add search box
+- modify playerid to be different
+- add balls played for test batting innings where available
+- separate scorecard scraping and ratings calculation for less dependency + faster ratings runs
+- small cosmetic changes (last updated date etc, adjust ratings scale)
+- add team pages
+- add team rating over time graph
+- add innings # in scorecards
+- add country flags to scorecards
+- enable searching teams and separate search results
+- change player ratings graph x-axis to match dates from innings #
+- add styled bullet points in home page
+- incorporate team current ratings when calculating result factors in innings
+- add decade span performance selection option
+- add decade span team stat overall selection option
+- update methodology - add links from ratings page
+- resolve ratings anomalies 
+  + wasim akram vs andy caddick test bowling
+  + len hutton vs david gower test batting
+- setup hosting and test on different machines, mobile
+- add google web analytics
+- refactor player page to minimize duplicate code, add relevant columns (strike rate/econ) to innings table
+- add favicon
+- use team flags in performance pages
+- compare players page
+- clean-up folders, remove redundant files
+- scrape franchise t20s (ipl, bbl, cpl, etc)
+- resolve team page charting issue
+- tweak strike rate bonus for short limited over innings
+- match odds calculator
+- add target runs for last innings in scorecards
+- increase economy bonus for limited over innings (check t20i 400)
+- modify drop-down to responsively style
+- estimate test batting strike rates from minutes % played for past matches with no balls played data
+- lower longevity benefit in overall team rankings
+- add retired players list to ignore for current ratings
+- adjust odis/t20s to take changes in the game into account (power play etc)
+- adjust longevity divisor factor to take # of matches played by countery into account (not just overall in decade)
+- discount point of entry factor for players batting lower down the order
+- add country selection drop down in lists
+- parse ball-by-ball commentary data for ODIs to parse fielding info for new stat generation
+- identify wicketkeepers and separate from regular fielders
+- factor in stumpings for wicketkeepers
+- fix ODI odd calc when early wicket falls (0/1 gives 100% win for bowling team chasing) or early on 0/0 has 0% for both sides
+- resolve issue where bowlers who get hit out of the attack after a few overs don't get penalized due to it being a considered an "incomplete" innings
+- win shares
+- avoid crediting bowlers for runouts (non-directhit) in win share calcs
+- move navbar from left to top with drop downs
+- add date/match dropdown option for player/compare page
+- attribute 15% of caught wicket win shares to fielder when regulation catch (85% to bowler)
+
+TODO:
+- avoid penalizing all-rounders when they don't get a chance to bat
+- fix last over (non-50th) fielder wicket (runout non-direct hit) win shares being credited to bowler
+- parse fielder properly when he hasn't bowled or batted (check did not bat list) raina drop vs UAE WC
+- add wickets after point of entry to test match batting ratings
+- add series status to rating
+- display site update log on homepage
+- update team ratings to take series wins and home/away into account
+- fix franchise team assignment bug
+- best batting line-up/best bowling attack ratings
+- research adding logins, commenting articles, forums with social login support
+- setup match update shell script for fast/easy updates with minimal/no manual code modification
+
+ML:
+- plot fields
+- check for outliers
+- feature scale?
+- feature selection

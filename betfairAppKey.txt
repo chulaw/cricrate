@@ -1,0 +1,28 @@
+40613
+cricrate
+Version Id
+Version
+Application Key
+Owner
+Active
+Delay Data
+Subscription Required
+Owner Managed
+
+34188
+1.0-DELAY
+OQplzjisTMojes3u
+chinthanas@hotmail.com
+Yes
+Yes
+Yes
+No
+
+34187
+1.0
+G6S9PJtLzoMOfPtH
+chinthanas@hotmail.com
+Yes
+No
+Yes
+No
