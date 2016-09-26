@@ -144,7 +144,7 @@ for x in range(0, len(result)):
         ocId = overComp[i][0]
         overs = overComp[i][1]
         runs = overComp[i][2]
-        wkts = overComp[i][3]        
+        wkts = overComp[i][3]
         matchResult = overComp[i][4]
         if runs == 0:
             c.execute('select result, odiId from overComparisonODI where odiId<'+`odiId`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runs<=1 and wkts>='+`(wkts-1)`+' and wkts<='+`(wkts+1)`)
@@ -234,7 +234,7 @@ for x in range(0, len(result)):
         #c.execute('update overComparisonODI set matchOdds=? and adjMatchOdds1=? where ocId=?', (matchOdds, algSuccess, ocId))
         #conn.commit()
 
-    fd = open('odiOdds2.csv','a')
+    fd = open('odiOdds.csv','a')
     for oo in range(len(oddsOvers)):
         print `odiId` + ",1,"  + `oddsOvers[oo]` + "," + `oddsOdds[oo]` + "," + `oddsResult[oo]`
         fd.write(`odiId` + ",1,"  + `oddsOvers[oo]` + "," + `oddsOdds[oo]` + "," + `oddsResult[oo]` + "\n")

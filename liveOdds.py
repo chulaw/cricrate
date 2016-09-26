@@ -35,6 +35,8 @@ for i in range(0, len(rss['entries'])):
     else:
         team1Score = team1Score[0]
     team2Name = scoreTree.xpath('(//div[@class="team-2-name"]/text())')
+
+    print matchDetails
     if len(team2Name) == 0: continue
     team2Name = team2Name[0].strip()
     team2Score = scoreTree.xpath('(//div[@class="team-2-name"]/span/text())')
