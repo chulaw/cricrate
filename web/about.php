@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <?php
 
-if (isset($_POST['send'])) {    
+if (isset($_POST['send'])) {
    $subject = $_POST['subject'];
    $body = $_POST['body'];
    $to = "cricrate@gmail.com";
@@ -10,15 +10,15 @@ if (isset($_POST['send'])) {
    $headers .= "From: chulaww@gmail.com" . "\r\n" .
    "Reply-To: chulaww@gmail.com" . "\r\n" .
    "X-Mailer: PHP/" . phpversion();
-   
+
    mail($to, $subject, $body, $headers);
 }
 
 ?>
 <html>
-<head>    
+<head>
     <title>cricrate | About</title>
-    <link rel="icon" href="images/cricrate.png" /> 
+    <link rel="icon" href="images/cricrate.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link type="text/css" href="style.css" />
     <link href="css/bootstrap.css" rel="stylesheet">
@@ -26,20 +26,20 @@ if (isset($_POST['send'])) {
     <link rel="stylesheet" type="text/css" href="style.css" />
     <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
-    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>  
-    <script type="text/javascript">             
-    
-    $(function() {        
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script type="text/javascript">
+
+    $(function() {
         jQuery.get('searchSuggest.txt', function(data) {
             var autoSuggest = data.split('\n');
             $( "#search" ).autocomplete({
                 source: autoSuggest,
                 minLength: 3,
             });
-        });            
+        });
       });
     </script>
-</head>    
+</head>
 <body>
    <nav class="navbar navbar-default navbar-static-top">
         <div class="container-fluid">
@@ -51,14 +51,14 @@ if (isset($_POST['send'])) {
                     <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand" href="index.php"><b>cricrate</b></a>
-            </div>        
+            </div>
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <form class="navbar-form navbar-right" role="search"  name="input" action="search.php" method="get">
                     <div class="form-group">
                         <div class="ui-front ui-widget">
                             <input id="search" type="text" class="form-control" placeholder="Search" name="search">
                         </div>
-                    </div>                
+                    </div>
                     <button type="submit" class="btn btn-default">Submit</button>
                 </form>
                 <ul class="nav navbar-nav navbar">
@@ -176,7 +176,7 @@ if (isset($_POST['send'])) {
                     </li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Win Shares <span class="caret"></span></a>
-                        <ul class="dropdown-menu">                  
+                        <ul class="dropdown-menu">
                             <li><a href="methodology.php?matchFormat=ODI&disc=Win Shares"><b>ODI</b></a></li>
                             <li><a href="current.php?matchFormat=ODI&disc=Win Shares">&nbsp;&nbsp;Current</a></li>
                             <li><a href="career.php?matchFormat=ODI&disc=Win Shares">&nbsp;&nbsp;Career</a></li>
@@ -188,8 +188,9 @@ if (isset($_POST['send'])) {
                             <li><a href="performances.php?matchFormat=FT20&disc=Win Shares">&nbsp;&nbsp;Performances</a></li>
                         </ul>
                     </li>
-		    <li><a href="cricinsight.php"><b>cricinsight <span class="label label-warning">new</span></b></a></li>
-		    <li class="active"><a href="about.php">About <span class="sr-only">(current)</span></a></li>
+                    <li><a href="cricinsight.php"><b>cricinsight</b></a></li>
+		                <li><a href="cricodds.php"><b>cricodds <span class="label label-warning">new</span></b></a></li>
+		                <li class="active"><a href="about.php">About <span class="sr-only">(current)</span></a></li>
                 </ul>
                 <div class="twitter navbar-text pull-right"><a href="https://twitter.com/cricrate" class="twitter-follow-button" data-show-count="false" data-show-screen-name="false">Follow @cricrate</a></div>
                 <div class="fb-like navbar-text pull-right" data-href="https://www.facebook.com/cricrate" data-layout="button" data-action="like" data-show-faces="true" data-share="false"></div>
@@ -200,7 +201,7 @@ if (isset($_POST['send'])) {
       <h2><b>About</b></h2>
       <br/><br/>
       <ul class="list-group">
-	 <li class="list-group-item">   
+	 <li class="list-group-item">
 	    <h4><b>About</b></h4>
 	    <br/>
 	    &nbsp;&nbsp;<b>cricrate</b> is a product of a passionate interest in cricket, statistics and in making maximum use of available data for insights and comparisons otherwise thought impossible.
@@ -215,7 +216,7 @@ if (isset($_POST['send'])) {
 	       <li>Feel free to add us on <a href="https://www.facebook.com/cricrate">facebook</a> and <a href="https://twitter.com/cricrate">twitter</a> to get live updates.</li>
 	       <br/>
 	       <li><b>cricrate</b> is a constant work-in-progress and your input can drive it's direction. If you think a certain rating is mistaken, please provide an explanation that can be captured through available data instead of just a subjective opinion.</li>
-	    </ul>	      
+	    </ul>
 	    <br/><br/>
 	 </li>
 	 <li class="list-group-item">
@@ -233,12 +234,12 @@ if (isset($_POST['send'])) {
 	       <h4>Contact Us</h4>
 	    </div>
 	    <form class="form-inline" role="form" name="contactForm" method="post" action="about.php">
-	       <div class="modal-body">	    
+	       <div class="modal-body">
 		     <div class="form-group">
 			<select class="form-control" name="subject">
 			   <option selected="selected" value="Feedback">Feedback</option>
 			   <option value="Bug">Bug</option>
-			   <option value="Idea">Idea</option>       
+			   <option value="Idea">Idea</option>
 			</select>
 		     </div>
 		     <br/><br/>
@@ -251,12 +252,12 @@ if (isset($_POST['send'])) {
 	 </div>
       </div>
    </div>
-   <div id="fb-root"></div>    
+   <div id="fb-root"></div>
    <div class="navbar navbar-default navbar-fixed-bottom">
        <div class="container">
-	   <p class="navbar-text">© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>                        
+	   <p class="navbar-text">© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>
        </div>
-   </div>    
+   </div>
    <script>(function(d, s, id) {
      var js, fjs = d.getElementsByTagName(s)[0];
      if (d.getElementById(id)) return;
@@ -270,10 +271,10 @@ if (isset($_POST['send'])) {
      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-   
+
      ga('create', 'UA-50384653-1', 'auto');
      ga('send', 'pageview');
-   
+
    </script>
 </body>
 </html>

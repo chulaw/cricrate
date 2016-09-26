@@ -1,7 +1,7 @@
 <?php
 
 $searchTerm = $_GET["search"];
-  
+
 $db = new SQLite3('ccr.db');
 $sql = "select playerId, count(playerId) from playerInfo where player like \"%".$searchTerm."%\"";
 $result = $db->query($sql);
@@ -28,19 +28,19 @@ if ($multiplePlayers == false) {
 	if (!strstr($res[0], "XI")) {
 	    $team = $res[0];
 	    header("Location: team.php?team=".$team."&matchFormat=Test");
-	    die();   
-	}	
+	    die();
+	}
     }
 }
 $db->close();
-	
+
 if ($multiplePlayers == false) {
     $db = new SQLite3('ccrODI.db');
     $sql = "select playerId, count(playerId) from playerInfo where player like '%".$searchTerm."%'";
     $result = $db->query($sql);
     if (!$result) die("Cannot execute query.");
     $res = $result->fetchArray(SQLITE3_NUM);
-    
+
     if (!empty($res)) {
 	if ($res[1] == 1) {
 	    $playerId = $res[0];
@@ -50,12 +50,12 @@ if ($multiplePlayers == false) {
 	    $multiplePlayers = true;
 	}
     }
-    
+
     $sql = "select distinct team from teamODIOverall where team like '%".$searchTerm."%'";
     $result = $db->query($sql);
     if (!$result) die("Cannot execute query.");
     $res = $result->fetchArray(SQLITE3_NUM);
-    
+
     if (!empty($res)) {
 	if (!strstr($res[0], "XI")) {
 	    $team = $res[0];
@@ -63,7 +63,7 @@ if ($multiplePlayers == false) {
 	    die();
 	}
     }
-    $db->close();   
+    $db->close();
 }
 
 if ($multiplePlayers == false) {
@@ -72,7 +72,7 @@ if ($multiplePlayers == false) {
     $result = $db->query($sql);
     if (!$result) die("Cannot execute query.");
     $res = $result->fetchArray(SQLITE3_NUM);
-    
+
     if (!empty($res)) {
 	if ($res[1] == 1) {
 	    $playerId = $res[0];
@@ -80,12 +80,12 @@ if ($multiplePlayers == false) {
 	    die();
 	}
     }
-    
+
     $sql = "select distinct team from teamT20IOverall where team like '%".$searchTerm."%'";
     $result = $db->query($sql);
     if (!$result) die("Cannot execute query.");
     $res = $result->fetchArray(SQLITE3_NUM);
-    
+
     if (!empty($res)) {
 	if (!strstr($res[0], "XI")) {
 	    $team = $res[0];
@@ -102,7 +102,7 @@ if ($multiplePlayers == false) {
     $result = $db->query($sql);
     if (!$result) die("Cannot execute query.");
     $res = $result->fetchArray(SQLITE3_NUM);
-    
+
     if (!empty($res)) {
 	if ($res[1] == 1) {
 	    $playerId = $res[0];
@@ -110,12 +110,12 @@ if ($multiplePlayers == false) {
 	    die();
 	}
     }
-    
+
     $sql = "select distinct team from teamFT20Overall where team like '%".$searchTerm."%'";
     $result = $db->query($sql);
     if (!$result) die("Cannot execute query.");
     $res = $result->fetchArray(SQLITE3_NUM);
-    
+
     if (!empty($res)) {
 	if (!strstr($res[0], "XI")) {
 	    $team = $res[0];
@@ -129,8 +129,8 @@ if ($multiplePlayers == false) {
 
 <html>
 <head>
-    <title>cricrate | Search</title>		
-    <link rel="icon" href="images/cricrate.png" /> 
+    <title>cricrate | Search</title>
+    <link rel="icon" href="images/cricrate.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link type="text/css" href="style.css" />
     <link href="css/bootstrap.css" rel="stylesheet">
@@ -140,17 +140,17 @@ if ($multiplePlayers == false) {
     <script src="js/bootstrap.min.js"></script>
     <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <script type="text/javascript">
-    $(function() {        
+    $(function() {
         jQuery.get('searchSuggest.txt', function(data) {
             var autoSuggest = data.split('\n');
             $( "#search" ).autocomplete({
                 source: autoSuggest,
                 minLength: 3,
             });
-        });            
+        });
       });
     </script>
-</head>  
+</head>
 <body>
     <nav class="navbar navbar-default navbar-static-top">
         <div class="container-fluid">
@@ -162,14 +162,14 @@ if ($multiplePlayers == false) {
                     <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand" href="index.php"><b>cricrate</b></a>
-            </div>        
+            </div>
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <form class="navbar-form navbar-right" role="search"  name="input" action="search.php" method="get">
                     <div class="form-group">
                         <div class="ui-front ui-widget">
                             <input id="search" type="text" class="form-control" placeholder="Search" name="search">
                         </div>
-                    </div>                
+                    </div>
                     <button type="submit" class="btn btn-default">Submit</button>
                 </form>
                 <ul class="nav navbar-nav navbar">
@@ -287,7 +287,7 @@ if ($multiplePlayers == false) {
                     </li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Win Shares <span class="caret"></span></a>
-                        <ul class="dropdown-menu">                  
+                        <ul class="dropdown-menu">
                             <li><a href="methodology.php?matchFormat=ODI&disc=Win Shares"><b>ODI</b></a></li>
                             <li><a href="current.php?matchFormat=ODI&disc=Win Shares">&nbsp;&nbsp;Current</a></li>
                             <li><a href="career.php?matchFormat=ODI&disc=Win Shares">&nbsp;&nbsp;Career</a></li>
@@ -299,7 +299,8 @@ if ($multiplePlayers == false) {
                             <li><a href="performances.php?matchFormat=FT20&disc=Win Shares">&nbsp;&nbsp;Performances</a></li>
                         </ul>
                     </li>
-		    <li><a href="cricinsight.php"><b>cricinsight <span class="label label-warning">new</span></b></a></li>
+                    <li><a href="cricinsight.php"><b>cricinsight</b></a></li>
+		                <li><a href="cricodds.php"><b>cricodds <span class="label label-warning">new</span></b></a></li>
                     <li><a href="about.php">About</a></li>
                 </ul>
                 <div class="twitter navbar-text pull-right"><a href="https://twitter.com/cricrate" class="twitter-follow-button" data-show-count="false" data-show-screen-name="false">Follow @cricrate</a></div>
@@ -312,8 +313,8 @@ if ($multiplePlayers == false) {
     <div class="panel panel-default">
     <div class="panel-body">
 <?php
-  
-echo "<h2><b>Search Results</b></h2><br/>";    
+
+echo "<h2><b>Search Results</b></h2><br/>";
 
 $searchTerm = $_GET["search"];
 
@@ -328,7 +329,7 @@ echo "<h4><b>Teams</b></h4><br/>";
 echo "<ul>";
 while($res = $result->fetchArray(SQLITE3_NUM)) {
     if (!strstr($res[0], "XI")) {
-	echo "<li><a href=\"team.php?team=".$res[0]."\"><img src=\"images/".$res[0].".png\" alt=\"$res[0]\" border=1px/></a>&nbsp;&nbsp;&nbsp;<a href=\"team.php?team=".$res[0]."\">".$res[0]."</a></li>";
+	echo "<li><a href=\"team.php?team=".$res[0]."\"><img src=\"images/".$res[0].".png\" alt=\"$res[0]\" style='border:1px solid #A9A9A9'/></a>&nbsp;&nbsp;&nbsp;<a href=\"team.php?team=".$res[0]."\">".$res[0]."</a></li>";
 	$teamsFound[$res[0]] = 1;
 	$teamCount++;
     }
@@ -342,8 +343,8 @@ if (!$result) die("Cannot execute query.");
 while($res = $result->fetchArray(SQLITE3_NUM)) {
     if (array_key_exists($res[0], $teamsFound) || strstr($res[0], "XI")) {
 	continue;
-    }    
-    echo "<li><a href=\"team.php?team=".$res[0]."\"><img src=\"images/".$res[0].".png\" alt=\"$res[0]\" border=1px/></a>&nbsp;&nbsp;&nbsp;<a href=\"team.php?team=".$res[0]."\">".$res[0]."</a></li>";
+    }
+    echo "<li><a href=\"team.php?team=".$res[0]."\"><img src=\"images/".$res[0].".png\" alt=\"$res[0]\" style='border:1px solid #A9A9A9'/></a>&nbsp;&nbsp;&nbsp;<a href=\"team.php?team=".$res[0]."\">".$res[0]."</a></li>";
     $teamsFound[$res[0]] = 1;
     $teamCount++;
 }
@@ -357,7 +358,7 @@ while($res = $result->fetchArray(SQLITE3_NUM)) {
     if (array_key_exists($res[0], $teamsFound) || strstr($res[0], "XI")) {
 	continue;
     }
-    echo "<li><a href=\"team.php?team=".$res[0]."\"><img src=\"images/".$res[0].".png\" alt=\"$res[0]\" border=1px/></a>&nbsp;&nbsp;&nbsp;<a href=\"team.php?team=".$res[0]."\">".$res[0]."</a></li>";
+    echo "<li><a href=\"team.php?team=".$res[0]."\"><img src=\"images/".$res[0].".png\" alt=\"$res[0]\" style='border:1px solid #A9A9A9'/></a>&nbsp;&nbsp;&nbsp;<a href=\"team.php?team=".$res[0]."\">".$res[0]."</a></li>";
     $teamsFound[$res[0]] = 1;
     $teamCount++;
 }
@@ -379,7 +380,7 @@ $db->close();
 echo "</ul>";
 echo "</ul>";
 
-if ($teamCount == 0) {    
+if ($teamCount == 0) {
     echo "No matching team found.";
 }
 
@@ -393,7 +394,7 @@ $playerCount = 0;
 $playersFound = array();
 echo "<ul>";
 while($res = $result->fetchArray(SQLITE3_NUM)) {
-    echo "<li><img src=\"images/".$res[2].".png\" alt=\"$res[2]\" border=1px/>&nbsp;&nbsp;&nbsp;<a href=\"player.php?playerId=".$res[0]."\">".str_replace("Sir ","",$res[1])."</a></li>";
+    echo "<li><img src=\"images/".$res[2].".png\" alt=\"$res[2]\" style='border:1px solid #A9A9A9'/>&nbsp;&nbsp;&nbsp;<a href=\"player.php?playerId=".$res[0]."\">".str_replace("Sir ","",$res[1])."</a></li>";
     $playersFound[$res[0]] = 1;
     $playerCount++;
 }
@@ -407,7 +408,7 @@ while($res = $result->fetchArray(SQLITE3_NUM)) {
     if (array_key_exists($res[0], $playersFound)) {
 	continue;
     }
-    echo "<li><img src=\"images/".$res[2].".png\" alt=\"$res[2]\" border=1px/>&nbsp;&nbsp;&nbsp;<a href=\"player.php?playerId=".$res[0]."\">".str_replace("Sir ","",$res[1])."</a></li>";
+    echo "<li><img src=\"images/".$res[2].".png\" alt=\"$res[2]\" style='border:1px solid #A9A9A9'/>&nbsp;&nbsp;&nbsp;<a href=\"player.php?playerId=".$res[0]."\">".str_replace("Sir ","",$res[1])."</a></li>";
     $playersFound[$res[0]] = 1;
     $playerCount++;
 }
@@ -422,7 +423,7 @@ while($res = $result->fetchArray(SQLITE3_NUM)) {
     if (array_key_exists($res[0], $playersFound)) {
 	continue;
     }
-    echo "<li><img src=\"images/".$res[2].".png\" alt=\"$res[2]\" border=1px/>&nbsp;&nbsp;&nbsp;<a href=\"player.php?playerId=".$res[0]."\">".str_replace("Sir ","",$res[1])."</a></li>";
+    echo "<li><img src=\"images/".$res[2].".png\" alt=\"$res[2]\" style='border:1px solid #A9A9A9'/>&nbsp;&nbsp;&nbsp;<a href=\"player.php?playerId=".$res[0]."\">".str_replace("Sir ","",$res[1])."</a></li>";
     $playersFound[$res[0]] = 1;
     $playerCount++;
 }
@@ -444,7 +445,7 @@ while($res = $result->fetchArray(SQLITE3_NUM)) {
 $db->close();
 echo "</ul>";
 
-if ($playerCount == 0) {    
+if ($playerCount == 0) {
     echo "No matching player found.<br/><br/>";
 }
 echo "</div>";
@@ -452,12 +453,12 @@ echo "</div>";
 </div>
 </div>
 </div>
-    <div id="fb-root"></div>    
+    <div id="fb-root"></div>
     <div class="navbar navbar-default navbar-fixed-bottom">
         <div class="container">
-            <p class="navbar-text">© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>            
+            <p class="navbar-text">© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>
         </div>
-    </div>    
+    </div>
  <script>(function(d, s, id) {
       var js, fjs = d.getElementsByTagName(s)[0];
       if (d.getElementById(id)) return;

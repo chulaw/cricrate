@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>cricrate | Cricket Ratings and Analytics</title>
-    <link rel="icon" href="images/cricrate.png" /> 
+    <link rel="icon" href="images/cricrate.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link type="text/css" href="style.css" />
     <link href="css/bootstrap.css" rel="stylesheet">
@@ -10,16 +10,16 @@
     <link rel="stylesheet" type="text/css" href="style.css" />
     <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
-    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>  
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <script type="text/javascript">
-    $(function() {        
+    $(function() {
         jQuery.get('searchSuggest.txt', function(data) {
             var autoSuggest = data.split('\n');
             $( "#search" ).autocomplete({
                 source: autoSuggest,
                 minLength: 3,
             });
-        });            
+        });
       });
     </script>
 </head>
@@ -34,14 +34,14 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand" href="index.php"><b>cricrate</b></a>
-            </div>        
+            </div>
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <form class="navbar-form navbar-right" role="search"  name="input" action="search.php" method="get">
                     <div class="form-group">
                         <div class="ui-front ui-widget">
                             <input id="search" type="text" class="form-control" placeholder="Search" name="search">
                         </div>
-                    </div>                
+                    </div>
                     <button type="submit" class="btn btn-default">Submit</button>
                 </form>
                 <ul class="nav navbar-nav navbar">
@@ -159,7 +159,7 @@
                     </li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Win Shares <span class="caret"></span></a>
-                        <ul class="dropdown-menu">                  
+                        <ul class="dropdown-menu">
                             <li><a href="methodology.php?matchFormat=ODI&disc=Win Shares"><b>ODI</b></a></li>
                             <li><a href="current.php?matchFormat=ODI&disc=Win Shares">&nbsp;&nbsp;Current</a></li>
                             <li><a href="career.php?matchFormat=ODI&disc=Win Shares">&nbsp;&nbsp;Career</a></li>
@@ -171,7 +171,8 @@
                             <li><a href="performances.php?matchFormat=FT20&disc=Win Shares">&nbsp;&nbsp;Performances</a></li>
                         </ul>
                     </li>
-                    <li><a href="cricinsight.php"><b>cricinsight <span class="label label-warning">new</span></b></a></li>
+                    <li><a href="cricinsight.php"><b>cricinsight</b></a></li>
+		                <li><a href="cricodds.php"><b>cricodds <span class="label label-warning">new</span></b></a></li>
                     <li><a href="about.php">About</a></li>
                 </ul>
                 <div class="twitter navbar-text pull-right"><a href="https://twitter.com/cricrate" class="twitter-follow-button" data-show-count="false" data-show-screen-name="false">Follow @cricrate</a></div>
@@ -179,8 +180,8 @@
             </div>
         </div>
     </nav>
-    
-    <?php    
+
+    <?php
     function summaryTable($db, $tableTitle, $limitX, $typeDisc) {
         $typeDiscs = explode(" ", $typeDisc);
         $matchFormat = $typeDiscs[0];
@@ -191,18 +192,18 @@
         if (!$result) die("Cannot execute query.");
         $maxDate = $result->fetchArray(SQLITE3_NUM);
         $maxDateMod = substr($maxDate[0], 4, 2)."/".substr($maxDate[0], 6, 2);
-        
+
         $retiredPlayers = "";
         if (strrpos($tableTitle, "ODI") !== false || strrpos($tableTitle, "Test") !== false) {
-            $sql = "select playerId from retiredPlayers";   
+            $sql = "select playerId from retiredPlayers";
             $result = $db->query($sql);
-            if (!$result) die("Cannot execute query.");	
+            if (!$result) die("Cannot execute query.");
             while($res = $result->fetchArray(SQLITE3_NUM)) {
                $retiredPlayers = $retiredPlayers . $res[0] . ",";
             }
             $retiredPlayers = rtrim($retiredPlayers, ",");
         }
-    
+
         if (strrpos($tableTitle, "Franchise") === false) {
             $sql = "select playerId, rankDiff, player, rating, country from ".$discLower.$matchFormat."Current where playerId not in ($retiredPlayers) order by rating desc limit $limitX";
         } else {
@@ -218,9 +219,9 @@
         if (strrpos($tableTitle, "Franchise") === false) {
             echo "<th>Team</th>";
         }
-        echo "<th>Rating</th>"; 
+        echo "<th>Rating</th>";
         echo "</tr></thead>";
-        
+
         $k = 1;
         while($res = $result->fetchArray(SQLITE3_NUM)) {
             $rankDiff = $res[1];
@@ -231,19 +232,19 @@
             } else {
                 echo "<tr><td><font color=\"red\"><b>$rankDiff</b></font></td>";
             }
-            for ($j = 2; $j < $result->numColumns(); $j++) {	    
+            for ($j = 2; $j < $result->numColumns(); $j++) {
                 if ($j == 2) {
                     echo "<td><a href=\"player.php?playerId=".$res[0]."&matchFormat=".$matchFormat."&disc=".$disc."\">".str_replace("Sir ","",$res[$j])."</a></td>";
                     if (strrpos($tableTitle, "Franchise") === false) {
-                        echo "<td><a href=\"team.php?team=".$res[4]."&matchFormat=".$matchFormat."\"><img src=\"images/".$res[4].".png\" alt=\"$res[4]\" border=1px/></a></td>";
+                        echo "<td><a href=\"team.php?team=".$res[4]."&matchFormat=".$matchFormat."\"><img src=\"images/".$res[4].".png\" alt=\"$res[4]\" style='border:1px solid #A9A9A9'/></a></td>";
                     }
                 } elseif ($j == 3) { # rating
                     echo "<td><b>".round($res[$j], 0)."</b></td>";
                 } elseif ($j == 4) { # team flag already added
                 } else {
-                    echo "<td>$res[$j]</td>";   
-                }        
-            }       
+                    echo "<td>$res[$j]</td>";
+                }
+            }
             echo "</tr>";
             $k++;
         }
@@ -253,25 +254,25 @@
             echo "<tr><td></td><td><a href=\"current.php?matchFormat=$matchFormat&disc=$disc\"><b>Full list</b></a></td><td>Updated: $maxDateMod</td></tr>";
         }
         echo "</table>";
-    }     
-    
-    echo "<ul class=\"list-group\">";;    
+    }
+
+    echo "<ul class=\"list-group\">";;
     $db = new SQLite3('ccr.db');
     echo "<div class=\"panel panel-inverse\">";
     echo "<div class=\"panel-body\">";
-    echo "<div class=\"row\">";    
-    echo "<div class=\"col-lg-3\">";    
+    echo "<div class=\"row\">";
+    echo "<div class=\"col-lg-3\">";
     echo "<li class=\"list-group-item\">";
     summaryTable($db, "Test Top Batsmen", "5", "Test Batting");
-    echo "</li>";    
+    echo "</li>";
     echo "</div>";
     echo "<div class=\"col-lg-3\">";
     echo "<li class=\"list-group-item\">";
     summaryTable($db, "Test Top Bowlers", "5", "Test Bowling");
     echo "</li>";
-    echo "</div>";    
+    echo "</div>";
     $db->close();
-    
+
     $db = new SQLite3('ccrODI.db');
     echo "<div class=\"col-lg-3\">";
     echo "<li class=\"list-group-item\">";
@@ -287,7 +288,7 @@
     echo "</div>";
     echo "</div>";
     $db->close();
-    
+
     $db = new SQLite3('ccrT20I.db');
     echo "<div class=\"panel panel-inverse\">";
     echo "<div class=\"panel-body\">";
@@ -303,7 +304,7 @@
     echo "</li>";
     echo "</div>";
     $db->close();
-    
+
     $db = new SQLite3('ccrFT20.db');
     echo "<div class=\"col-lg-3\">";
     echo "<li class=\"list-group-item\">";
@@ -322,12 +323,12 @@
     echo "</ul>";
     echo "</div>";
     ?>
-    <div id="fb-root"></div>    
+    <div id="fb-root"></div>
     <div class="navbar navbar-default navbar-fixed-bottom">
         <div class="container">
-            <p class="navbar-text">© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>            
+            <p class="navbar-text">© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>
         </div>
-    </div>        <script>(function(d, s, id) {
+    </div>    <script>(function(d, s, id) {
       var js, fjs = d.getElementsByTagName(s)[0];
       if (d.getElementById(id)) return;
       js = d.createElement(s); js.id = id;
@@ -340,10 +341,10 @@
       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
       })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-    
+
       ga('create', 'UA-50384653-1', 'auto');
       ga('send', 'pageview');
-    
+
     </script>
 </body>
 </html>

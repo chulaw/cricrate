@@ -12,18 +12,18 @@ c = conn.cursor()
 c.execute('select distinct odiId from overComparisonODI order by odiId asc')
 result = c.fetchall()
 
-# loop through odi matches
-#for x in range(0, 1):
-#fd1 = open('odiML1.csv','a')
-#fd1.write("Id,Overs,Runs,Wkts,Team1Rating,Team2Rating,ExpRuns1,ExpRuns2,RuleChg,HomeAway,Momentum,MatchOdds,MatchOddsAdj,Result\n")
-#fd1.close()
+fd1 = open('odiML1.csv','a')
+fd1.write("Id,Overs,Runs,Wkts,Team1Rating,Team2Rating,ExpRuns1,ExpRuns2,RuleChg,HomeAway,Momentum,MatchOdds,MatchOddsAdj,Result\n")
+fd1.close()
 
-#fd2 = open('odiML2.csv','a')
-#fd2.write("Id,Overs,Runs,Wkts,RunsReq,BallsRem,Team1Rating,Team2Rating,ExpRuns1,ExpRuns2,RuleChg,HomeAway,Momentum,MatchOdds,MatchOddsAdj,Result\n")
-#fd2.close()
+fd2 = open('odiML2.csv','a')
+fd2.write("Id,Overs,Runs,Wkts,RunsReq,BallsRem,Team1Rating,Team2Rating,ExpRuns1,ExpRuns2,RuleChg,HomeAway,Momentum,MatchOdds,MatchOddsAdj,Result\n")
+fd2.close()
+
+# loop through odi matches
 for x in range(0, len(result)):
     odiId = result[x][0]
-    if odiId < 3449: continue
+    #if odiId < 3315: continue
     print odiId
     c.execute('select startDate from odiInfo where odiId=?',(odiId,))
     odiDate = c.fetchone()
