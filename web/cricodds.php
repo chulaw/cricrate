@@ -48,15 +48,29 @@ if(isset($_GET['bowlingTeam'])) {
 } else {
    $bowlingTeam = "Not Set";
 }
+if(isset($_GET['startDate'])) {
+   $startDate = $_GET['startDate'];
+} else {
+  if ($matchFormat == "T20") {
+    $startDate = "20050101";
+  } else {
+    $startDate = "19710101";
+  }
+}
+if(isset($_GET['endDate'])) {
+   $endDate = $_GET['endDate'];
+} else {
+   $endDate = "20991231";
+}
 
 if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
 } else if(isset($_REQUEST['width']) AND isset($_REQUEST['height'])) {
     $_SESSION['screen_width'] = $_REQUEST['width'];
     $_SESSION['screen_height'] = $_REQUEST['height'];
 
-    header("Location: cricodds.php?matchFormat=".$matchFormat."&inn=".$inn."&runs=".$runs."&overs=".$overs."&wkts=".$wkts."&battingTeam=".$battingTeam."&bowlingTeam=".$bowlingTeam);
+    header("Location: cricodds.php?matchFormat=".$matchFormat."&inn=".$inn."&runs=".$runs."&overs=".$overs."&wkts=".$wkts."&startDate=".$startDate."&endDate=".$endDate."&battingTeam=".$battingTeam."&bowlingTeam=".$bowlingTeam);
 } else {
-    echo '<script type="text/javascript">window.location = "' . $_SERVER['PHP_SELF'] . '?matchFormat='.$matchFormat.'&inn='.$inn.'&runs='.$runs.'&overs='.$overs.'&wkts='.$wkts.'&battingTeam='.$battingTeam.'&bowlingTeam='.$bowlingTeam.'&width="+screen.width+"&height="+screen.height;</script>';
+    echo '<script type="text/javascript">window.location = "' . $_SERVER['PHP_SELF'] . '?matchFormat='.$matchFormat.'&inn='.$inn.'&runs='.$runs.'&overs='.$overs.'&wkts='.$wkts.'&startDate='.$startDate.'&endDate='.$endDate.'&battingTeam='.$battingTeam.'&bowlingTeam='.$bowlingTeam.'&width="+screen.width+"&height="+screen.height;</script>';
 }
 
 ?>
@@ -94,14 +108,14 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
        $('#ratingsTable').DataTable( {
        "lengthChange":   false,
        "bFilter":   false,
-       "pageLength": 11,
+       "pageLength": 10,
        "order": [[ 0, "desc" ]],
     } );
     } );
 
     submitForms = function(){
       window.document.selectForm.submit();
-    }    
+    }
 
     function enterSubmit(ele) {
       if(event.keyCode == 13) {
@@ -117,9 +131,9 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
     var matchFormat = <?php echo json_encode($matchFormat); ?>;
 
     var chartWidth = screen.width * 0.375;
-    if (matchFormat == "T20") {
-      chartWidth = screen.width * 0.45;
-    }
+    // if (matchFormat == "T20") {
+    //   chartWidth = screen.width * 0.45;
+    // }
     var chartHeight = screen.height * 0.2;
     var chartHeightB = screen.height * 0.4;
 
@@ -131,6 +145,8 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
     var runs = <?php echo json_encode($runs); ?>;
     var overs = <?php echo json_encode($overs); ?>;
     var wkts = <?php echo json_encode($wkts); ?>;
+    var startDate = <?php echo json_encode($startDate); ?>;
+    var endDate = <?php echo json_encode($endDate); ?>;
     var hAxis = "Run Rate";
     if (inn == 2) {
         hAxis = "Required Run Rate"
@@ -141,7 +157,7 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
 
     function drawChartStacked() {
       var jsonData = $.ajax({
-       url: "charts/cricoddsColumn.php?matchFormat="+matchFormat+"&inn="+inn+"&runs="+runs+"&overs="+overs+"&wkts="+wkts,
+       url: "charts/cricoddsColumn.php?matchFormat="+matchFormat+"&inn="+inn+"&runs="+runs+"&overs="+overs+"&wkts="+wkts+"&startDate="+startDate+"&endDate="+endDate,
        dataType:"json",
        async: false
        }).responseText;
@@ -211,7 +227,7 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
 
         function drawChartBubble() {
            var jsonData = $.ajax({
-         url: "charts/cricoddsBubble.php?matchFormat="+matchFormat+"&inn="+inn+"&runs="+runs+"&overs="+overs+"&wkts="+wkts,
+         url: "charts/cricoddsBubble.php?matchFormat="+matchFormat+"&inn="+inn+"&runs="+runs+"&overs="+overs+"&wkts="+wkts+"&startDate="+startDate+"&endDate="+endDate,
     	   dataType:"json",
     	   async: false
     	   }).responseText;
@@ -461,7 +477,7 @@ echo "<div class=\"row\">";
 if ($matchFormat == "ODI") {
   echo "<div class=\"col-lg-7\">";
 } else {
-  echo "<div class=\"col-lg-6\">";
+  echo "<div class=\"col-lg-7\">";
 }
 echo "<ul class=\"list-group\">";
 echo "<li class=\"list-group-item\">";
@@ -560,6 +576,12 @@ echo "</select>";
 
 echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type=\"submit\" name=\"Submit\" class=\"btn btn-primary\" value=\"Submit\">";
 echo "<br/><br/>";
+
+if ($matchFormat == "ODI") {
+  echo "&nbsp;&nbsp;&nbsp;&nbsp;<b>Date range:</b>&nbsp;&nbsp;";
+  echo "<input type=\"date\" class=\"form-control\" name=\"startDate\" value=".$startDate." onChange=\"submitForms()\">&nbsp;to&nbsp;";
+  echo "<input type=\"date\" class=\"form-control\" name=\"endDate\" value=".$endDate." onChange=\"submitForms()\">&nbsp;&nbsp;";
+}
 
 $dbName = "ccrODI.db";
 if ($matchFormat == "T20") {
@@ -730,17 +752,46 @@ if (strpos($overs, ".")) {
 }
 
 if ($matchFormat == "ODI") {
+  $startDate = "19710000";
+} else if ($matchFormat == "T20") {
+  $startDate = "20050000";
+}
+$endDate = "20999999";
+
+if (isset($_GET['startDate'])) {
+  if ($_GET['startDate'] != "") {
+    if (strpos($_GET['startDate'], "-") == false) {
+      $startDate = $_GET['startDate'];
+    } else {
+      $startDates = explode("-", $_GET['startDate']);
+      $startDate = $startDates[0].$startDates[1].$startDates[2];
+    }
+  }
+}
+
+if (isset($_GET['endDate'])) {
+  if ($_GET['endDate'] != "") {
+    if (strpos($_GET['endDate'], "-") == false) {
+      $endDate = $_GET['endDate'];
+    } else {
+      $endDates = explode("-", $_GET['endDate']);
+      $endDate = $endDates[0].$endDates[1].$endDates[2];
+    }
+  }
+}
+
+if ($matchFormat == "ODI") {
   if ($inn == 1) {
     if ($runs == 0) {
-      $sql = 'select o.'.$matchFormatLower.'Id, o.runs, o.overs, o.runRate, o.wkts, o.teamBat, t.team1, t.team2, t.ground, t.startDate, o.result from overComparisonODI o, '.$matchFormatLower.'Info t where o.'.$matchFormatLower.'Id=t.'.$matchFormatLower.'Id and o.innings=1 and o.overs>='.($overs-1).' and o.overs<'.($overs+1).' and o.runs<=1 and o.wkts>='.($wkts-1).' and o.wkts<='.($wkts+1);
+      $sql = 'select o.'.$matchFormatLower.'Id, o.runs, o.overs, o.runRate, o.wkts, o.teamBat, t.team1, t.team2, t.ground, t.startDate, o.result from overComparisonODI o, '.$matchFormatLower.'Info t where o.'.$matchFormatLower.'Id=t.'.$matchFormatLower.'Id and o.innings=1 and t.startDate>='.$startDate.' and t.startDate<='.$endDate.' and o.overs>='.($overs-1).' and o.overs<'.($overs+1).' and o.runs<=1 and o.wkts>='.($wkts-1).' and o.wkts<='.($wkts+1);
     } else {
-      $sql = 'select o.'.$matchFormatLower.'Id, o.runs, o.overs, o.runRate, o.wkts, o.teamBat, t.team1, t.team2, t.ground, t.startDate, o.result from overComparisonODI o, '.$matchFormatLower.'Info t where o.'.$matchFormatLower.'Id=t.'.$matchFormatLower.'Id and o.innings=1 and o.overs>='.($overs-1).' and o.overs<'.($overs+1).' and o.runs<='.($runs*1.1).' and o.runs>'.($runs*0.9).' and o.wkts>='.($wkts-1).' and o.wkts<='.($wkts+1);
+      $sql = 'select o.'.$matchFormatLower.'Id, o.runs, o.overs, o.runRate, o.wkts, o.teamBat, t.team1, t.team2, t.ground, t.startDate, o.result from overComparisonODI o, '.$matchFormatLower.'Info t where o.'.$matchFormatLower.'Id=t.'.$matchFormatLower.'Id and o.innings=1 and t.startDate>='.$startDate.' and t.startDate<='.$endDate.' and o.overs>='.($overs-1).' and o.overs<'.($overs+1).' and o.runs<='.($runs*1.1).' and o.runs>'.($runs*0.9).' and o.wkts>='.($wkts-1).' and o.wkts<='.($wkts+1);
     }
   } else if ($inn == 2) {
     if ($ballsRem < 60) {
-      $sql = 'select o.'.$matchFormatLower.'Id, o.runsReq, o.ballsRem, o.reqRate, o.wkts, o.teamBat, t.team1, t.team2, t.ground, t.startDate, o.result from overComparisonODI o, '.$matchFormatLower.'Info t where o.'.$matchFormatLower.'Id=t.'.$matchFormatLower.'Id and o.innings=2 and o.ballsRem>'.($ballsRem*0.75).' and o.ballsRem<='.($ballsRem*1.25).' and o.runsReq<'.($runs*1.25).' and o.runsReq>='.($runs*0.75).' and o.wkts>='.($wkts-1).' and o.wkts<='.($wkts+1);
+      $sql = 'select o.'.$matchFormatLower.'Id, o.runsReq, o.ballsRem, o.reqRate, o.wkts, o.teamBat, t.team1, t.team2, t.ground, t.startDate, o.result from overComparisonODI o, '.$matchFormatLower.'Info t where o.'.$matchFormatLower.'Id=t.'.$matchFormatLower.'Id and o.innings=2 and t.startDate>='.$startDate.' and t.startDate<='.$endDate.' and o.ballsRem>'.($ballsRem*0.75).' and o.ballsRem<='.($ballsRem*1.25).' and o.runsReq<'.($runs*1.25).' and o.runsReq>='.($runs*0.75).' and o.wkts>='.($wkts-1).' and o.wkts<='.($wkts+1);
     } else {
-      $sql = 'select o.'.$matchFormatLower.'Id, o.runsReq, o.ballsRem, o.reqRate, o.wkts, o.teamBat, t.team1, t.team2, t.ground, t.startDate, o.result from overComparisonODI o, '.$matchFormatLower.'Info t where o.'.$matchFormatLower.'Id=t.'.$matchFormatLower.'Id and o.innings=2 and o.ballsRem>'.($ballsRem*0.9).' and o.ballsRem<='.($ballsRem*1.1).' and o.runsReq<'.($runs*1.1).' and o.runsReq>='.($runs*0.9).' and o.wkts>='.($wkts-1).' and o.wkts<='.($wkts+1);
+      $sql = 'select o.'.$matchFormatLower.'Id, o.runsReq, o.ballsRem, o.reqRate, o.wkts, o.teamBat, t.team1, t.team2, t.ground, t.startDate, o.result from overComparisonODI o, '.$matchFormatLower.'Info t where o.'.$matchFormatLower.'Id=t.'.$matchFormatLower.'Id and o.innings=2 and t.startDate>='.$startDate.' and t.startDate<='.$endDate.' and o.ballsRem>'.($ballsRem*0.9).' and o.ballsRem<='.($ballsRem*1.1).' and o.runsReq<'.($runs*1.1).' and o.runsReq>='.($runs*0.9).' and o.wkts>='.($wkts-1).' and o.wkts<='.($wkts+1);
     }
   }
 } else {
@@ -951,7 +1002,7 @@ echo "</div>";
 if ($matchFormat == "ODI") {
   echo "<div class=\"col-lg-5\">";
 } else {
-  echo "<div class=\"col-lg-6\">";
+  echo "<div class=\"col-lg-5\">";
 }
 echo "<ul class=\"list-group\">";
 echo "<li class=\"list-group-item\">";
@@ -971,7 +1022,7 @@ echo "<div class=\"row\">";
 if ($matchFormat == "ODI") {
   echo "<div class=\"col-lg-7\">";
 } else {
-  echo "<div class=\"col-lg-6\">";
+  echo "<div class=\"col-lg-7\">";
 }
 echo "<ul class=\"list-group\">";
 echo "<li class=\"list-group-item\">";
@@ -1068,7 +1119,7 @@ echo "</div>";
 if ($matchFormat == "ODI") {
   echo "<div class=\"col-lg-5\">";
 } else {
-  echo "<div class=\"col-lg-6\">";
+  echo "<div class=\"col-lg-5\">";
 }
 echo "<ul class=\"list-group\">";
 echo "<li class=\"list-group-item\">";
