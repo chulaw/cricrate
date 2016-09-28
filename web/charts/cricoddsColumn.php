@@ -52,29 +52,29 @@ if (strpos($overs, ".")) {
 if ($matchFormat == "ODI") {
   if ($inn == 1) {
     if ($runs == 0) {
-      $sql = 'select o.runRate, o.result from overComparisonODI o, odiInfo t where o.odiId = t.odiId and o.innings=1 and t.startDate>='.$startDate.' and t.startDate<='.$endDate.' and o.overs>='.($overs-1).' and o.overs<'.($overs+1).' and o.runs<=1 and o.wkts>='.($wkts-1).' and o.wkts<='.($wkts+1);
+      $sql = 'select avg(o.runRate), avg(o.result) from overComparisonODI o, odiInfo t where o.odiId = t.odiId and o.innings=1 and t.startDate>='.$startDate.' and t.startDate<='.$endDate.' and o.overs>='.($overs-1).' and o.overs<'.($overs+1).' and o.runs<=1 and o.wkts>='.($wkts-1).' and o.wkts<='.($wkts+1).' group by o.odiId';
     } else {
-      $sql = 'select o.runRate, o.result from overComparisonODI o, odiInfo t where o.odiId = t.odiId and o.innings=1 and t.startDate>='.$startDate.' and t.startDate<='.$endDate.' and o.overs>='.($overs-1).' and o.overs<'.($overs+1).' and o.runs<='.($runs*1.1).' and o.runs>'.($runs*0.9).' and o.wkts>='.($wkts-1).' and o.wkts<='.($wkts+1);
+      $sql = 'select avg(o.runRate), avg(o.result) from overComparisonODI o, odiInfo t where o.odiId = t.odiId and o.innings=1 and t.startDate>='.$startDate.' and t.startDate<='.$endDate.' and o.overs>='.($overs-1).' and o.overs<'.($overs+1).' and o.runs<='.($runs*1.1).' and o.runs>'.($runs*0.9).' and o.wkts>='.($wkts-1).' and o.wkts<='.($wkts+1).' group by o.odiId';
     }
   } else if ($inn == 2) {
     if ($ballsRem < 60) {
-      $sql = 'select o.reqRate, o.result from overComparisonODI o, odiInfo t where o.odiId = t.odiId and o.innings=2 and t.startDate>='.$startDate.' and t.startDate<='.$endDate.' and o.ballsRem>'.($ballsRem*0.75).' and o.ballsRem<='.($ballsRem*1.25).' and o.runsReq<'.($runs*1.25).' and o.runsReq>='.($runs*0.75).' and o.wkts>='.($wkts-1).' and o.wkts<='.($wkts+1);
+      $sql = 'select avg(o.reqRate), avg(o.result) from overComparisonODI o, odiInfo t where o.odiId = t.odiId and o.innings=2 and t.startDate>='.$startDate.' and t.startDate<='.$endDate.' and o.ballsRem>'.($ballsRem*0.75).' and o.ballsRem<='.($ballsRem*1.25).' and o.runsReq<'.($runs*1.25).' and o.runsReq>='.($runs*0.75).' and o.wkts>='.($wkts-1).' and o.wkts<='.($wkts+1).' group by o.odiId';
     } else {
-      $sql = 'select o.reqRate, o.result from overComparisonODI o, odiInfo t where o.odiId = t.odiId and o.innings=2 and t.startDate>='.$startDate.' and t.startDate<='.$endDate.' and o.ballsRem>'.($ballsRem*0.9).' and o.ballsRem<='.($ballsRem*1.1).' and o.runsReq<'.($runs*1.1).' and o.runsReq>='.($runs*0.9).' and o.wkts>='.($wkts-1).' and o.wkts<='.($wkts+1);
+      $sql = 'select avg(o.reqRate), avg(o.result) from overComparisonODI o, odiInfo t where o.odiId = t.odiId and o.innings=2 and t.startDate>='.$startDate.' and t.startDate<='.$endDate.' and o.ballsRem>'.($ballsRem*0.9).' and o.ballsRem<='.($ballsRem*1.1).' and o.runsReq<'.($runs*1.1).' and o.runsReq>='.($runs*0.9).' and o.wkts>='.($wkts-1).' and o.wkts<='.($wkts+1).' group by o.odiId';
     }
   }
 } else {
   if ($inn == 1) {
     if ($runs == 0) {
-      $sql = 'select runRate, result from overComparison where innings=1 and overs>='.($overs-1).' and overs<'.($overs+1).' and runs<=1 and wkts>='.($wkts-1).' and wkts<='.($wkts+1);
+      $sql = 'select avg(o.runRate), avg(o.result) from overComparison where innings=1 and overs>='.($overs-1).' and overs<'.($overs+1).' and runs<=1 and wkts>='.($wkts-1).' and wkts<='.($wkts+1).' group by ocId';
     } else {
-      $sql = 'select runRate, result from overComparison where innings=1 and overs>='.($overs-1).' and overs<'.($overs+1).' and runs<='.($runs*1.1).' and runs>'.($runs*0.9).' and wkts>='.($wkts-1).' and wkts<='.($wkts+1);
+      $sql = 'select avg(o.runRate), avg(o.result) from overComparison where innings=1 and overs>='.($overs-1).' and overs<'.($overs+1).' and runs<='.($runs*1.1).' and runs>'.($runs*0.9).' and wkts>='.($wkts-1).' and wkts<='.($wkts+1).' group by ocId';
     }
   } else if ($inn == 2) {
     if ($ballsRem < 60) {
-      $sql = 'select reqRate, result from overComparison where innings=2 and ballsRem>'.($ballsRem*0.75).' and ballsRem<='.($ballsRem*1.25).' and runsReq<'.($runs*1.25).' and runsReq>='.($runs*0.75).' and wkts>='.($wkts-1).' and wkts<='.($wkts+1);
+      $sql = 'select avg(o.reqRate), avg(o.result) from overComparison where innings=2 and ballsRem>'.($ballsRem*0.75).' and ballsRem<='.($ballsRem*1.25).' and runsReq<'.($runs*1.25).' and runsReq>='.($runs*0.75).' and wkts>='.($wkts-1).' and wkts<='.($wkts+1).' group by ocId';
     } else {
-      $sql = 'select reqRate, result from overComparison where innings=2 and ballsRem>'.($ballsRem*0.9).' and ballsRem<='.($ballsRem*1.1).' and runsReq<'.($runs*1.1).' and runsReq>='.($runs*0.9).' and wkts>='.($wkts-1).' and wkts<='.($wkts+1);
+      $sql = 'select avg(o.reqRate), avg(o.result) from overComparison where innings=2 and ballsRem>'.($ballsRem*0.9).' and ballsRem<='.($ballsRem*1.1).' and runsReq<'.($runs*1.1).' and runsReq>='.($runs*0.9).' and wkts>='.($wkts-1).' and wkts<='.($wkts+1).' group by ocId';
     }
   }
 }
