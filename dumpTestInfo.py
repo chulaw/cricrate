@@ -21,12 +21,12 @@ c.execute('create table teamTestOverall (teamSpan text unique, startDate text, e
 
 month2Num = {'Jan':'01', 'Feb':'02', 'Mar':'03', 'Apr':'04', 'May':'05', 'Jun':'06', 'Jul':'07', 'Aug':'08', 'Sep':'09', 'Oct':'10', 'Nov':'11', 'Dec':'12'}
 relativeURL = '/ci/engine/records/team/match_results.html?class=1;id=1877;type=year'
-defaultTeamRating = 100.0
-expSmoothFactor = 0.99
+defaultTeamRating = 500.0
+expSmoothFactor = 0.05
 
 # loop through test matches
 for x in range(0, 126):
-    # load cricinfo annual match list    
+    # load cricinfo annual match list
     yearURL = 'http://stats.espncricinfo.com' + relativeURL
     yearPage = requests.get(yearURL)
     yearTree = html.fromstring(yearPage.text)
@@ -34,7 +34,7 @@ for x in range(0, 126):
     data1 = yearTree.xpath('//a[@class="data-link"]/text()')
     data2 = yearTree.xpath('//td[@nowrap="nowrap"]/text()')
     links = yearTree.xpath('//a[@class="data-link"]/@href')
-    
+
     modD2 = []
     # handle one-off match forfeit
     if '2006' in relativeURL:
@@ -42,26 +42,28 @@ for x in range(0, 126):
             if 'Aug 17-21, 2006' in data2[k]:
                 modD2.append('forfeit')
                 modD2.append(data2[k])
-            else:            
+            else:
                 modD2.append(data2[k])
         data2 = modD2
-        
+
     relativeURL = yearTree.xpath('//a[@class="QuoteSummary"]/@href')
-    relativeURL = relativeURL[len(relativeURL)-1]    
-    
+    relativeURL = relativeURL[len(relativeURL)-1]
+
     groundLinks = []
     scoreLinks = []
     for j in range(0, len(links)):
         if 'match' in links[j]: scoreLinks.append(links[j])
         if 'ground' in links[j]: groundLinks.append(links[j])
     testNum = int(len(data2) / 2)
-    
+
     i = 0
+    k = 0
     teams1 = []
     teams2 = []
     grounds = []
     results = []
     testIds = []
+    locations = {}
     while (i < len(data1)):
         team1 = data1[i]
         team2 = data1[i+1]
@@ -83,7 +85,7 @@ for x in range(0, 126):
             testId = data1[i+3].split()[2]
             result = 'Draw'
             i = i + 4
-        
+
         team1LiveRating = {}
         c.execute('select rating from teamTestLive where team=? order by testTeamId desc', (team1, ))
         team1LiveRating = c.fetchone()
@@ -91,29 +93,51 @@ for x in range(0, 126):
             team1LiveRating = defaultTeamRating
         else:
             team1LiveRating = team1LiveRating[0]
-            
-        team2LiveRating = {}        
+
+        team2LiveRating = {}
         c.execute('select rating from teamTestLive where team=? order by testTeamId desc', (team2, ))
         team2LiveRating = c.fetchone()
         if team2LiveRating is None:
             team2LiveRating = defaultTeamRating
         else:
             team2LiveRating = team2LiveRating[0]
-        
+
+        groundURL = 'http://www.espncricinfo.com' + groundLinks[k]
+        groundPage = requests.get(groundURL)
+        groundTree = html.fromstring(groundPage.text)
+        location = groundTree.xpath('(//span[@class="SubnavSubsection"]/text())')[0]
+        locations[testId] = location
+        k += 1
+
+        team1LocWin = 1
+        team2LocWin = 1
+        team1LocLoss = 1
+        team2LocLoss = 1
+        if location == team1:
+            team1LocWin = 0.75
+            team2LocWin = 1.25
+            team1LocLoss = 1.25
+            team2LocLoss = 0.75
+        elif location == team2:
+            team1LocWin = 1.25
+            team2LocWin = 0.75
+            team1LocLoss = 0.75
+            team2LocLoss = 1.25
+
         if (result == team1):
-            team1LiveRating = team1LiveRating + (team2LiveRating / team1LiveRating) * 3
-            team2LiveRating = team2LiveRating - (team2LiveRating / team1LiveRating) * 3
+            team1LiveRating = expSmoothFactor * (500 + (team2LiveRating / team1LiveRating) * 1000 * team1LocWin) + (1 - expSmoothFactor) * team1LiveRating
+            team2LiveRating = expSmoothFactor * (500 - (team2LiveRating / team1LiveRating) * 1000 * team2LocLoss) + (1 - expSmoothFactor) * team2LiveRating
         elif (result == team2):
-            team1LiveRating = team1LiveRating - (team1LiveRating / team2LiveRating) * 3
-            team2LiveRating = team2LiveRating + (team1LiveRating / team2LiveRating) * 3
+            team1LiveRating = expSmoothFactor * (500 - (team1LiveRating / team2LiveRating) * 1000 * team1LocLoss) + (1 - expSmoothFactor) * team1LiveRating
+            team2LiveRating = expSmoothFactor * (500 + (team1LiveRating / team2LiveRating) * 1000 * team2LocWin) + (1 - expSmoothFactor) * team2LiveRating
         else:
             if (team1LiveRating > team2LiveRating):
-                team1LiveRating = team1LiveRating - (team1LiveRating / team2LiveRating) * 1.5
-                team2LiveRating = team2LiveRating + (team1LiveRating / team2LiveRating) * 1.5
+                team1LiveRating = expSmoothFactor * (500 - (team1LiveRating / team2LiveRating) * 500 * team1LocLoss) + (1 - expSmoothFactor) * team1LiveRating
+                team2LiveRating = expSmoothFactor * (500 + (team1LiveRating / team2LiveRating) * 500 * team2LocWin) + (1 - expSmoothFactor) * team2LiveRating
             elif (team1LiveRating < team2LiveRating):
-                team1LiveRating = team1LiveRating + (team2LiveRating / team1LiveRating) * 1.5
-                team2LiveRating = team2LiveRating - (team2LiveRating / team1LiveRating) * 1.5            
-        
+                team1LiveRating = expSmoothFactor * (500 + (team2LiveRating / team1LiveRating) * 500 * team1LocWin) + (1 - expSmoothFactor) * team1LiveRating
+                team2LiveRating = expSmoothFactor * (500 - (team2LiveRating / team1LiveRating) * 500 * team2LocLoss) + (1 - expSmoothFactor) * team2LiveRating
+
         testTeam1Id = repr(int(testId)) + '1'
         testTeam2Id = repr(int(testId)) + '2'
         c.execute('insert or ignore into teamTestLive (testTeamId, team, opposition, result, rating) values (?, ?, ?, ?, ?)',
@@ -121,9 +145,8 @@ for x in range(0, 126):
         c.execute('insert or ignore into teamTestLive (testTeamId, team, opposition, result, rating) values (?, ?, ?, ?, ?)',
                   (testTeam2Id, team2, team1, result, team2LiveRating))
         conn.commit()
-    
+
     startDates = {}
-    locations = {}
     for i in range(0, testNum):
         margin = data2[2*i]
         startDate = data2[2*i+1]
@@ -132,19 +155,14 @@ for x in range(0, 126):
         year = startDate.split()[len(startDate.split())-1]
         day = startDate.split()[1].split('-')[0]
         day = day.split(',')[0]
-        day = '0' + day if int(day) < 10 else day    
+        day = '0' + day if int(day) < 10 else day
         startDate = year + month2Num[month] + day
-        startDates[testIds[i]] = startDate        
-        groundURL = 'http://www.espncricinfo.com' + groundLinks[i]
-        groundPage = requests.get(groundURL)
-        groundTree = html.fromstring(groundPage.text)
-        location = groundTree.xpath('(//span[@class="SubnavSubsection"]/text())')[0]
-        locations[testIds[i]] = location
+        startDates[testIds[i]] = startDate
         print('Dumping details for test #'+repr(testIds[i])+' '+teams1[i]+' vs '+teams2[i]+', startDate: '+startDate+', result: '+results[i]+', margin: '+margin+', scoreLink: '+scoreLinks[i]+', ground: '+grounds[i]+', location: '+location)
         c.execute('insert or ignore into testInfo (testId, startDate, location, team1, team2, ground, result, margin, scoreLink) values (?, ?, ?, ?, ?, ?, ?, ?, ?)',
                   (testIds[i], startDate, location, teams1[i], teams2[i], grounds[i], results[i], margin, scoreLinks[i]))
         conn.commit()
-    
+
     for i in range(0, testNum):
         testTeam1Id = repr(int(testIds[i])) + '1'
         testTeam2Id = repr(int(testIds[i])) + '2'
@@ -170,7 +188,7 @@ for team in c.fetchall():
             testId = int((repr(teamMatch[0]))[0:-1])
             if testId < firstTest: firstTest = testId
             if testId > lastTest: lastTest = testId
-            tests += 1        
+            tests += 1
             if teamMatch[1] == team[0]:
                 wins += 1
             elif teamMatch[1] == "Draw":
@@ -182,7 +200,7 @@ for team in c.fetchall():
         if tests == 0:
             continue
         winPct = 100.0 * wins / tests
-        
+
         if tests < 40 and tests >= 20 and rating != None: rating = rating * math.exp(-float(40-tests)/150)
         if tests < 20 and tests >= 10 and rating != None: rating = rating * math.exp(-float(20-tests)/100)
         if tests < 10 and tests >= 5  and rating != None: rating = rating * math.exp(-float(10-tests)/50)

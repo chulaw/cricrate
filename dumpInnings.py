@@ -38,11 +38,11 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
     teamBat = detailInnings[3]
     teamBowl = detailInnings[4]
     totalBalls = detailInnings[7]
-    totalWkts = detailInnings[9]    
+    totalWkts = detailInnings[9]
     totalWktsMod = 1 if totalWkts == 0 else totalWkts
     numBatInns = totalWkts if totalWkts == 10 else totalWkts + 2
-        
-    for battingInn in batInnings:        
+
+    for battingInn in batInnings:
         batsmanId = battingInn[1]
         position = battingInn[5]
         c.execute('select inningsId, rating from battingTestLive where playerId=? order by inningsId desc', (batsmanId, ))
@@ -50,13 +50,13 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         if battingLiveRating[batsmanId] is None:
             battingLiveRating[batsmanId] = defaultBattingRating[position-1]
             battingLastInningsId[batsmanId] = None
-            battingNumCareerInnings[batsmanId] = 0            
+            battingNumCareerInnings[batsmanId] = 0
         else:
             battingLastInningsId[batsmanId] = battingLiveRating[batsmanId][0]
-            battingLiveRating[batsmanId] = battingLiveRating[batsmanId][1]            
+            battingLiveRating[batsmanId] = battingLiveRating[batsmanId][1]
             battingNumCareerInnings[batsmanId] = len(c.fetchall())+1
         teamBattingRating += battingLiveRating[batsmanId] / numBatInns
-        
+
         dismissalInfo = battingInn[6]
         if 'b ' in dismissalInfo:
             bowlerIndex = dismissalInfo.index('b ')
@@ -65,11 +65,11 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
                 wktsRating[bowlerName] += battingLiveRating[batsmanId]
             else:
                 wktsRating[bowlerName] = battingLiveRating[batsmanId]
-    
+
     ###########################################################################################################################
     # store bowling live ratings data
     rating = {}
-    teamBowlingRating = 0.0;    
+    teamBowlingRating = 0.0;
     for bowlInn in bowlInnings:
         bowlerId = bowlInn[1]
         bowlerName = bowlInn[2]
@@ -87,12 +87,12 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
             bowlingNumCareerInnings = 0
             bowlingLastInningsId = None
         else:
-            bowlingLastInningsId = bowlingLiveRating[0] 
-            bowlingLiveRating = bowlingLiveRating[1] 
-            bowlingNumCareerInnings = len(c.fetchall())+1            
+            bowlingLastInningsId = bowlingLiveRating[0]
+            bowlingLiveRating = bowlingLiveRating[1]
+            bowlingNumCareerInnings = len(c.fetchall())+1
         totalBalls = 1 if totalBalls == 0 else totalBalls
         teamBowlingRating += bowlingLiveRating * ballsBowled / totalBalls
-        
+
         lastName = bowlerName.split()[len(bowlerName.split())-1]
         if lastName in wktsRating and wkts > 0:
             dismissalRating = wktsRating[lastName]
@@ -100,7 +100,7 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
             dismissalRating = wktsRating[bowlerName]
         else: #no wickets
             dismissalRating = 0.0
-            
+
         wktPct = float(wkts) * 100 / float(totalWktsMod)
         sigContrib = 12.5 if (math.pow(wkts, 2) / float(1 + runsConceded)) > 0.08 else (math.pow(wkts, 2) / float(1 + runsConceded)) * 156.25
         wktsPerRun = math.pow(wkts, 2) * 420 / float(30 + runsConceded)
@@ -108,7 +108,7 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         ballsPerRun = math.pow(ballsBowled / 6, 2) * 2 / float(30 + runsConceded)
         dismissalRatingMod = dismissalRating * 2.5 / float(30 + runsConceded) if wkts > 0 else 0
         battingRatingMod = teamBattingRating * sigContrib / 165
-        resultRating = resultNum * sigContrib * teamRating[teamBat] / 125
+        resultRating = resultNum * sigContrib * teamRating[teamBat] / 625
         homeAwayMod = homeAway * sigContrib
         milestone = 10 if wkts >= 5 else 0
         # points for significant contribution in winning 4th innings defense and coming back from behind on 3rd innings
@@ -130,7 +130,7 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
             elif resultNum == 2:
                 status = sigContrib * 6
 
-        closeMatchRating = 0.0        
+        closeMatchRating = 0.0
         if resultNum >= 1 and margin.find("inns &") == -1:
             runWktMargin = margin.split()[len(margin.split())-2]
             if margin.find(" runs") != -1:
@@ -140,10 +140,10 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
 
         # bowling innings rating
         rating = (wktsPerRun + wktsPerBall + ballsPerRun + dismissalRatingMod + battingRatingMod + resultRating + homeAwayMod + milestone + status + closeMatchRating) * 5.6
-        
+
         # for innings where <75 overs were bowled (with bowler bowling <15 overs), avoid unnecessarily penalizing by assuming a performance in line with the bowler's live rating if rating of performance is lower
         rating = bowlingLiveRating if (totalBalls < 450 and ballsBowled < 90 and bowlingLiveRating > rating) else rating
-        
+
         allRoundName['' + repr(bowlerId)] = bowlerName
         if ('' + repr(bowlerId)) in allRoundWkts:
             allRoundWkts['' + repr(bowlerId)]['2'] = wkts
@@ -158,11 +158,11 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         else:
             allRoundBowling['' + repr(bowlerId)] = {}
             allRoundBowling['' + repr(bowlerId)]['1'] = rating
-        
+
         inningsId = repr(int(testId)) + repr(inningsNum) + repr(bowlerId)
         c.execute('update bowlingTestInnings set battingRating=?,wktsRating=?,status=?,rating=? where inningsId=?', (battingRatingMod, dismissalRatingMod, status, rating, inningsId))
-        
-        # update next innings rating to measure prediction error        
+
+        # update next innings rating to measure prediction error
         c.execute('update bowlingTestLive set nextInningsRating=? where inningsId=?', (rating, bowlingLastInningsId))
 
         liveRating = rating
@@ -175,7 +175,7 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         c.execute('insert or ignore into bowlingTestLive(inningsId, startDate, playerId, testId, player, rating) values (?, ?, ?, ?, ?, ?)',
                     (inningsId, startDate, bowlerId, testId, bowlerName, liveRating))
         print(repr(inningsId)+",",repr(bowlerId)+", "+repr(inningsNum)+", "+bowlerName+", wkts: "+repr(wkts)+'/'+repr(runsConceded)+', current: '+repr(int(liveRating))+', innings: '+repr(int(rating))  )
-        
+
     print('\nBatting details:')
     ###########################################################################################################################
     # store batting live ratings data
@@ -190,9 +190,9 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         entryWkts = batInn[16]
         wktsAtCrease = batInn[17]
         homeAway = batInn[18]
-        resultNum = batInn[20]                
-        
-        sigContrib = 12.5 if float(runs) > 50 else float(runs) / 4
+        resultNum = batInn[20]
+
+        sigContrib = 12.5 if float(runs) > 62.5 else float(runs) / 5
         #runsMod = -0.0025 * float(runs)**2 + 2*float(runs) - 100 if runs > 200 else runs # reward runs linearly till 250, then diminishing returns for each extra run scored
         # diminishing returns for each extra run scored, with significant discounts past 200 runs
         if runs <= 40:
@@ -214,7 +214,7 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         for wp in range(entryWkts + 1, entryWkts + wktsAtCrease + 1):
             wktsAtCreaseEffVal += float(wktPosVal[wp])
         pointOfEntry = sigContrib * math.sqrt(entryWkts + wktsAtCreaseEffVal) * 50 / pointOfEntry
-        resultRating = resultNum * sigContrib * teamRating[teamBowl] / 125
+        resultRating = resultNum * sigContrib * teamRating[teamBowl] / 625
         bowlingRatingMod = teamBowlingRating * sigContrib / 75
         homeAwayMod = homeAway * sigContrib
         milestone = 0
@@ -225,7 +225,7 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         if float(runs) >= 300:
             milestone = 15
         # points for significant contribution in winning 4th innings chase and coming back from behind on 3rd innings
-        status = 0                        
+        status = 0
         if inningsNum == 3 and wktsAtCrease > 2 and totalPct > 25:
             if battingTeam[1] == teamBat and float(inningsRuns[1])/float(inningsRuns[2]) <= 0.7:
                 if resultNum == 1:
@@ -242,25 +242,25 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
                 status = sigContrib * 4.5
             elif resultNum == 2:
                 status = sigContrib * 6
-        
+
         supportPct = 0.0
         if totalPct == batHighInnPct[inningsNum]:
             supportPct = batSecHighInnPct[inningsNum]
         else:
             supportPct = batHighInnPct[inningsNum]
         supportRating = max(0, (totalPct - supportPct) * 3)
-        
+
         closeMatchRating = 0.0
         if resultNum >= 1 and margin.find("inns &") == -1:
             runWktMargin = margin.split()[len(margin.split())-2]
-            if margin.find(" runs") != -1:                
+            if margin.find(" runs") != -1:
                 closeMatchRating = sigContrib * 50 / max(10.0, float(runWktMargin))
             elif margin.find(" wicket") != -1:
-                closeMatchRating = sigContrib * 5 / float(runWktMargin)        
-        
+                closeMatchRating = sigContrib * 5 / float(runWktMargin)
+
         # batting innings rating
         rating = (runsMod + totalPctRating + supportRating + strikeRateMod + bowlingRatingMod + pointOfEntry + resultRating + homeAwayMod + milestone + status + closeMatchRating) * 4.86
-                 
+
         allRoundName['' + repr(batsmanId)] = batsmanName
         if ('' + repr(batsmanId)) in allRoundRuns:
             allRoundRuns['' + repr(batsmanId)]['2'] = runs
@@ -275,19 +275,19 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         else:
             allRoundBatting['' + repr(batsmanId)] = {}
             allRoundBatting['' + repr(batsmanId)]['1'] = rating
-                                
+
         # avoid penalizing not out innings unnecessarily, diminishing points for not outs thie higher the runs
         if notOut == 1:
             if battingLiveRating[batsmanId] > rating:
                 rating = battingLiveRating[batsmanId]
-            else: rating += 50 * math.exp(-float(runs)/150)                    
-        
+            else: rating += 50 * math.exp(-float(runs)/150)
+
         inningsId = repr(int(testId)) + repr(inningsNum) + repr(batsmanId)
         c.execute('update battingTestInnings set bowlingRating=?,status=?,rating=? where inningsId=?', (bowlingRatingMod, status, rating, inningsId))
-    
-        # update next innings rating to measure prediction error        
+
+        # update next innings rating to measure prediction error
         c.execute('update battingTestLive set nextInningsRating=? where inningsId=?', (rating, battingLastInningsId[batsmanId]))
-        
+
         liveRating = rating
         if battingNumCareerInnings[batsmanId] == 0: # discount live ratings for a player's first 20 innings to avoid them hitting top rankings prematurely
             liveRating = rating * 0.15
@@ -299,7 +299,7 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
                     (inningsId, startDate, batsmanId, testId, batsmanName, liveRating))
         print(repr(inningsId)+",",repr(batsmanId)+", "+repr(inningsNum)+", "+batsmanName+", runs: "+repr(int(runs))+', current: '+repr(int(liveRating))+', innings: '+repr(int(rating)))
     conn.commit()
-    
+
 # loop through test matches
 for x in range(startTest, len(testsInfo)):
     # load test info
@@ -310,14 +310,14 @@ for x in range(startTest, len(testsInfo)):
     team2  = testsInfo[x][4]
     result = testsInfo[x][8]
     margin = testsInfo[x][9]
-    
+
     teamRating = {}
-    c.execute('select rating from teamTestLive where team=? and startDate<? order by startDate desc', (team1, startDate))    
+    c.execute('select rating from teamTestLive where team=? and startDate<? order by startDate desc', (team1, startDate))
     res = c.fetchone()
-    teamRating[team1] = 100.0 if res is None else res[0]        
+    teamRating[team1] = 500.0 if res is None else res[0]
     c.execute('select rating from teamTestLive where team=? and startDate<? order by startDate desc', (team2, startDate))
     res = c.fetchone()
-    teamRating[team2] = 100.0 if res is None else res[0]        
+    teamRating[team2] = 500.0 if res is None else res[0]
 
     # Different new player penalties based on era
     ppI = 2
@@ -350,15 +350,15 @@ for x in range(startTest, len(testsInfo)):
     allRoundWkts = {}
     allRoundBowlRuns = {}
     allRoundBatting = {}
-    allRoundBowling = {}        
-    c.execute('select innings from detailsTestInnings where testId=?', (testId, ))    
+    allRoundBowling = {}
+    c.execute('select innings from detailsTestInnings where testId=?', (testId, ))
     for inn in c.fetchall():
-        innings = inn[0]        
-        c.execute('select * from detailsTestInnings where testId=? and innings=?', (testId, innings))        
-        detailInnings = c.fetchall()        
-        c.execute('select * from battingTestInnings where testId=? and innings=?', (testId, innings))        
-        batInnings = c.fetchall()        
-        c.execute('select * from bowlingTestInnings where testId=? and innings=?', (testId, innings))        
+        innings = inn[0]
+        c.execute('select * from detailsTestInnings where testId=? and innings=?', (testId, innings))
+        detailInnings = c.fetchall()
+        c.execute('select * from battingTestInnings where testId=? and innings=?', (testId, innings))
+        batInnings = c.fetchall()
+        c.execute('select * from bowlingTestInnings where testId=? and innings=?', (testId, innings))
         bowlInnings = c.fetchall()
         dumpInningsDetails(innings, detailInnings[0], batInnings, bowlInnings, teamRating, batHighInnPct, batSecHighInnPct, margin)
 
@@ -372,11 +372,11 @@ for x in range(startTest, len(testsInfo)):
             allRoundNumCareerTests = 0
             allRoundLastMatchId = None
         else:
-            allRoundLastMatchId = allRoundLiveRating[0] 
-            allRoundLiveRating = allRoundLiveRating[1] 
+            allRoundLastMatchId = allRoundLiveRating[0]
+            allRoundLiveRating = allRoundLiveRating[1]
             allRoundNumCareerTests = len(c.fetchall())+1
-        
-        matchRuns = 0        
+
+        matchRuns = 0
         if aRId in allRoundBatting:
             if '2' in allRoundBatting[aRId]:
                 battingRating = float(allRoundBatting[aRId]['1'] + allRoundBatting[aRId]['2'])
@@ -387,7 +387,7 @@ for x in range(startTest, len(testsInfo)):
                 allRoundBatting[aRId]['2'] = None
                 allRoundRuns[aRId]['2'] = None
                 allRoundNotOut[aRId]['2'] = None
-                
+
         else:
             battingRating = None
             matchRuns = None
@@ -400,7 +400,7 @@ for x in range(startTest, len(testsInfo)):
             allRoundBatting[aRId]['2'] = None
             allRoundRuns[aRId]['2'] = None
             allRoundNotOut[aRId]['2'] = None
-            
+
         matchWkts = 0
         if aRId in allRoundBowling:
             if '2' in allRoundBowling[aRId]:
@@ -433,16 +433,16 @@ for x in range(startTest, len(testsInfo)):
             rating = 2 * math.sqrt(battingRating * bowlingRating / 2) + milestone
         else:
             rating = allRoundLiveRating
-        
+
         matchId = repr(int(testId)) + repr(int(aRId))
         c.execute('''insert or ignore into allRoundTestMatch (matchId, playerId, player, testId, runs1, notOut1, runs2, notOut2, wkts1, bowlRuns1, wkts2, bowlRuns2, battingRating, bowlingRating, rating)
                 values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                 (matchId, aRId, allRoundName[aRId], testId, allRoundRuns[aRId]['1'], allRoundNotOut[aRId]['1'], allRoundRuns[aRId]['2'], allRoundNotOut[aRId]['2'],
                  allRoundWkts[aRId]['1'], allRoundBowlRuns[aRId]['1'], allRoundWkts[aRId]['2'], allRoundBowlRuns[aRId]['2'], battingRating, bowlingRating, rating))
 
-        # update next test rating to measure prediction error        
+        # update next test rating to measure prediction error
         c.execute('update allRoundTestLive set nextTestRating=? where matchId=?', (rating, allRoundLastMatchId))
-        
+
         liveRating = rating
         if allRoundNumCareerTests == 0: # discount live ratings for a player's first 10 matches to avoid them hitting top rankings prematurely
             liveRating = rating * 0.15
@@ -450,11 +450,11 @@ for x in range(startTest, len(testsInfo)):
             liveRating = expSmoothFactor * rating * (0.235 + newPlayerPenaltyFactor[0]*(allRoundNumCareerTests-1)) + (1 - expSmoothFactor) * allRoundLiveRating
         else:
             liveRating = expSmoothFactor * rating + (1 - expSmoothFactor) * allRoundLiveRating
-                        
+
         c.execute('insert or ignore into allRoundTestLive(matchId, startDate, playerId, testId, player, rating, nextTestRating) values (?, ?, ?, ?, ?, ?, ?)',
                     (matchId, startDate, aRId, testId, allRoundName[aRId], liveRating, None))
         print(repr(matchId)+",",repr(aRId)+", "+allRoundName[aRId] + ", batting: " + repr(matchRuns) + " bowling: " + repr(matchWkts)+", current: "+repr(int(liveRating))+', match: '+repr(int(rating)))
-    conn.commit()  
+    conn.commit()
 conn.close()
 elapsedSec = (time.clock() - start)
 elapsedMin =  elapsedSec / 60

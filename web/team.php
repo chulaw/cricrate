@@ -454,7 +454,7 @@ while($res = $result->fetchArray(SQLITE3_NUM)) {
     for ($j = 0; $j < $result->numColumns(); $j++) {
 	if ($j == 0) {
 	    $matchId = substr($res[0], 0, -1);
-	    $tableHtml .= "<td><a href=\"".$matchFormatLower."/scorecard.php?".$matchFormatLower."Id=".$matchId."\">".$matchId."</a></td>";
+	    $tableHtml .= "<td><a href=\"scorecard.php?matchFormat=".$matchFormat."&matchId=".$matchId."\">".$matchId."</a></td>";
 	} elseif ($j == 1) { # match date
 	    $dateMod = substr($res[1], 0, 4)."-".substr($res[1], 4, 2)."-".substr($res[1], 6, 2);
 	    $tableHtml .= "<td>".$dateMod."</td>";
