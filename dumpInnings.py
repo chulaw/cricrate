@@ -2,9 +2,11 @@
 import time
 import sqlite3
 import math
+import sys
 start = time.clock()
 
-startTest = int(input('Enter starting Test #: '))
+# startTest = int(input('Enter starting Test #: '))
+startTest = int(sys.argv[1])
 
 # connect to db
 conn = sqlite3.connect('ccr.db')
@@ -169,10 +171,10 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         if bowlingNumCareerInnings == 0: # discount live ratings for a player's first 20 innings to avoid them hitting top rankings prematurely
             liveRating = rating * 0.15
         elif bowlingNumCareerInnings < newPlayerPenaltyInns[ppI]:
-            liveRating = expSmoothFactor * rating * (0.235 + newPlayerPenaltyFactor[ppI]*(bowlingNumCareerInnings-1)) + (1 - expSmoothFactor) * bowlingLiveRating
+            liveRating = expSmoothFactor * rating * (0.2 + newPlayerPenaltyFactor[ppI]*(bowlingNumCareerInnings-1)) + (1 - expSmoothFactor) * bowlingLiveRating
         else:
             liveRating = expSmoothFactor * rating + (1 - expSmoothFactor) * bowlingLiveRating
-        c.execute('insert or ignore into bowlingTestLive(inningsId, startDate, playerId, testId, player, rating) values (?, ?, ?, ?, ?, ?)',
+        c.execute('insert or replace into bowlingTestLive(inningsId, startDate, playerId, testId, player, rating) values (?, ?, ?, ?, ?, ?)',
                     (inningsId, startDate, bowlerId, testId, bowlerName, liveRating))
         print(repr(inningsId)+",",repr(bowlerId)+", "+repr(inningsNum)+", "+bowlerName+", wkts: "+repr(wkts)+'/'+repr(runsConceded)+', current: '+repr(int(liveRating))+', innings: '+repr(int(rating))  )
 
@@ -292,10 +294,10 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         if battingNumCareerInnings[batsmanId] == 0: # discount live ratings for a player's first 20 innings to avoid them hitting top rankings prematurely
             liveRating = rating * 0.15
         elif battingNumCareerInnings[batsmanId] < newPlayerPenaltyInns[ppI]:
-            liveRating = expSmoothFactor * rating * (0.235 + newPlayerPenaltyFactor[ppI]*(battingNumCareerInnings[batsmanId]-1)) + (1 - expSmoothFactor) * battingLiveRating[batsmanId]
+            liveRating = expSmoothFactor * rating * (0.2 + newPlayerPenaltyFactor[ppI]*(battingNumCareerInnings[batsmanId]-1)) + (1 - expSmoothFactor) * battingLiveRating[batsmanId]
         else:
             liveRating = expSmoothFactor * rating + (1 - expSmoothFactor) * battingLiveRating[batsmanId]
-        c.execute('insert or ignore into battingTestLive(inningsId, startDate, playerId, testId, player, rating) values (?, ?, ?, ?, ?, ?)',
+        c.execute('insert or replace into battingTestLive(inningsId, startDate, playerId, testId, player, rating) values (?, ?, ?, ?, ?, ?)',
                     (inningsId, startDate, batsmanId, testId, batsmanName, liveRating))
         print(repr(inningsId)+",",repr(batsmanId)+", "+repr(inningsNum)+", "+batsmanName+", runs: "+repr(int(runs))+', current: '+repr(int(liveRating))+', innings: '+repr(int(rating)))
     conn.commit()
@@ -314,10 +316,10 @@ for x in range(startTest, len(testsInfo)):
     teamRating = {}
     c.execute('select rating from teamTestLive where team=? and startDate<? order by startDate desc', (team1, startDate))
     res = c.fetchone()
-    teamRating[team1] = 500.0 if res is None else res[0]
+    teamRating[team1] = 400.0 if res is None else res[0]
     c.execute('select rating from teamTestLive where team=? and startDate<? order by startDate desc', (team2, startDate))
     res = c.fetchone()
-    teamRating[team2] = 500.0 if res is None else res[0]
+    teamRating[team2] = 400.0 if res is None else res[0]
 
     # Different new player penalties based on era
     ppI = 2
@@ -435,7 +437,7 @@ for x in range(startTest, len(testsInfo)):
             rating = allRoundLiveRating
 
         matchId = repr(int(testId)) + repr(int(aRId))
-        c.execute('''insert or ignore into allRoundTestMatch (matchId, playerId, player, testId, runs1, notOut1, runs2, notOut2, wkts1, bowlRuns1, wkts2, bowlRuns2, battingRating, bowlingRating, rating)
+        c.execute('''insert or replace into allRoundTestMatch (matchId, playerId, player, testId, runs1, notOut1, runs2, notOut2, wkts1, bowlRuns1, wkts2, bowlRuns2, battingRating, bowlingRating, rating)
                 values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                 (matchId, aRId, allRoundName[aRId], testId, allRoundRuns[aRId]['1'], allRoundNotOut[aRId]['1'], allRoundRuns[aRId]['2'], allRoundNotOut[aRId]['2'],
                  allRoundWkts[aRId]['1'], allRoundBowlRuns[aRId]['1'], allRoundWkts[aRId]['2'], allRoundBowlRuns[aRId]['2'], battingRating, bowlingRating, rating))
@@ -447,11 +449,11 @@ for x in range(startTest, len(testsInfo)):
         if allRoundNumCareerTests == 0: # discount live ratings for a player's first 10 matches to avoid them hitting top rankings prematurely
             liveRating = rating * 0.15
         elif allRoundNumCareerTests < newPlayerPenaltyInns[0]:
-            liveRating = expSmoothFactor * rating * (0.235 + newPlayerPenaltyFactor[0]*(allRoundNumCareerTests-1)) + (1 - expSmoothFactor) * allRoundLiveRating
+            liveRating = expSmoothFactor * rating * (0.2 + newPlayerPenaltyFactor[0]*(allRoundNumCareerTests-1)) + (1 - expSmoothFactor) * allRoundLiveRating
         else:
             liveRating = expSmoothFactor * rating + (1 - expSmoothFactor) * allRoundLiveRating
 
-        c.execute('insert or ignore into allRoundTestLive(matchId, startDate, playerId, testId, player, rating, nextTestRating) values (?, ?, ?, ?, ?, ?, ?)',
+        c.execute('insert or replace into allRoundTestLive(matchId, startDate, playerId, testId, player, rating, nextTestRating) values (?, ?, ?, ?, ?, ?, ?)',
                     (matchId, startDate, aRId, testId, allRoundName[aRId], liveRating, None))
         print(repr(matchId)+",",repr(aRId)+", "+allRoundName[aRId] + ", batting: " + repr(matchRuns) + " bowling: " + repr(matchWkts)+", current: "+repr(int(liveRating))+', match: '+repr(int(rating)))
     conn.commit()

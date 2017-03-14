@@ -195,8 +195,8 @@ $player = getPlayerName($db, $playerId, $player);
 
     $(document).ready(function() {
 	$('#inningsTable').DataTable( {
-        "lengthChange":   false,
-	"pageLength": 18,
+        "lengthMenu": [[18, 25, 50, 100, -1], [18, 25, 50, 100, "All"]],
+	       "pageLength": 18,
     } );
     } );
 
@@ -1319,7 +1319,7 @@ if ($playerFound == 0) {
     <div id="fb-root"></div>
     <div class="navbar navbar-default navbar-fixed-bottom">
         <div class="container">
-            <p class="navbar-text">© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>
+            <p class="navbar-text">Â© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>
         </div>
     </div>
  <script>(function(d, s, id) {

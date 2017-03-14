@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <?php
 session_start();
 if(isset($_GET['matchFormat'])) {
@@ -274,14 +274,14 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
 
     $(document).ready(function() {
        $('#ratingsTable').DataTable( {
-       "lengthChange":   false,
-       "pageLength": 16,
+      "pageLength": 16,
+      "lengthMenu": [[16, 25, 50, 100, -1], [16, 25, 50, 100, "All"]],
        "order": [[ 0, "asc" ]],
    } );
 
       $('#ratingsTable2').DataTable( {
-       "lengthChange":   false,
        "pageLength": 16,
+       "lengthMenu": [[16, 25, 50, 100, -1], [16, 25, 50, 100, "All"]],
        "order": [[ 0, "asc" ]],
    } );
    } );
@@ -659,21 +659,21 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
     if ($matchFormat == "Test") {
 	if ($disc == "Batting") {
 	    if ($team == "All teams") {
-		$sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.tests, b.innings, b.notOuts, b.runs, b.average, b.strikeRate, b.fifties, b.hundreds, b.dblHundreds, b.tripleHundreds, b.rating from battingTestCareer b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." order by b.rating desc limit 500";
+		$sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.tests, b.innings, b.notOuts, b.runs, b.average, b.strikeRate, b.fifties, b.hundreds, b.dblHundreds, b.tripleHundreds, b.rating, b.confInt95 from battingTestCareer b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." order by b.rating desc limit 500";
 	    } else {
-		$sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.tests, b.innings, b.notOuts, b.runs, b.average, b.strikeRate, b.fifties, b.hundreds, b.dblHundreds, b.tripleHundreds, b.rating from battingTestCareer b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." and p.country='".$team."' order by b.rating desc limit 100";
+		$sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.tests, b.innings, b.notOuts, b.runs, b.average, b.strikeRate, b.fifties, b.hundreds, b.dblHundreds, b.tripleHundreds, b.rating, b.confInt95 from battingTestCareer b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." and p.country='".$team."' order by b.rating desc limit 100";
 	    }
 	} else if ($disc == "Bowling") {
 	    if ($team == "All teams") {
-		$sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.tests, b.innings, b.balls, b.runs, b.wickets, b.average, b.econRate, b.strikeRate, b.fiveWkts, b.tenWkts, b.rating from bowlingTestCareer b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." order by b.rating desc limit 500";
+		$sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.tests, b.innings, b.balls, b.runs, b.wickets, b.average, b.econRate, b.strikeRate, b.fiveWkts, b.tenWkts, b.rating, b.confInt95 from bowlingTestCareer b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." order by b.rating desc limit 500";
 	    } else {
-		$sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.tests, b.innings, b.balls, b.runs, b.wickets, b.average, b.econRate, b.strikeRate, b.fiveWkts, b.tenWkts, b.rating from bowlingTestCareer b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." and p.country='".$team."' order by b.rating desc limit 100";
+		$sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.tests, b.innings, b.balls, b.runs, b.wickets, b.average, b.econRate, b.strikeRate, b.fiveWkts, b.tenWkts, b.rating, b.confInt95 from bowlingTestCareer b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." and p.country='".$team."' order by b.rating desc limit 100";
 	    }
 	} else if ($disc == "All-Round") {
 	    if ($team == "All teams") {
-		$sql = "select a.playerId, a.player, p.country, a.startDate, a.endDate, a.tests, a.runs, a.battingAverage, a.hundreds, a.wickets, a.bowlingAverage, a.fiveWkts, a.hundredFiveWkts, a.rating from allRoundTestCareer a, playerInfo p where p.playerId=a.playerId and ((a.startDate+a.endDate)/2)>".$startSpan." and ((a.startDate+a.endDate)/2)<=".$endSpan." order by a.rating desc limit 500";
+		$sql = "select a.playerId, a.player, p.country, a.startDate, a.endDate, a.tests, a.runs, a.battingAverage, a.hundreds, a.wickets, a.bowlingAverage, a.fiveWkts, a.hundredFiveWkts, a.rating, a.confInt95 from allRoundTestCareer a, playerInfo p where p.playerId=a.playerId and ((a.startDate+a.endDate)/2)>".$startSpan." and ((a.startDate+a.endDate)/2)<=".$endSpan." order by a.rating desc limit 500";
 	    } else {
-		$sql = "select a.playerId, a.player, p.country, a.startDate, a.endDate, a.tests, a.runs, a.battingAverage, a.hundreds, a.wickets, a.bowlingAverage, a.fiveWkts, a.hundredFiveWkts, a.rating from allRoundTestCareer a, playerInfo p where p.playerId=a.playerId and ((a.startDate+a.endDate)/2)>".$startSpan." and ((a.startDate+a.endDate)/2)<=".$endSpan." and p.country='".$team."' order by a.rating desc limit 100";
+		$sql = "select a.playerId, a.player, p.country, a.startDate, a.endDate, a.tests, a.runs, a.battingAverage, a.hundreds, a.wickets, a.bowlingAverage, a.fiveWkts, a.hundredFiveWkts, a.rating, a.confInt95 from allRoundTestCareer a, playerInfo p where p.playerId=a.playerId and ((a.startDate+a.endDate)/2)>".$startSpan." and ((a.startDate+a.endDate)/2)<=".$endSpan." and p.country='".$team."' order by a.rating desc limit 100";
 	    }
 	} else if ($disc == "Fielding") {
 	    if ($team == "All teams") {
@@ -687,28 +687,28 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
     } else if ($matchFormat == "ODI" || $matchFormat == "T20I") {
 	if ($disc == "Batting") {
 	    if ($team == "All teams") {
-		$sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.innings, b.notOuts, b.runs, b.average, b.strikeRate, b.fifties, b.hundreds, b.rating from batting".$matchFormat."Career b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." order by b.rating desc limit 500";
+		$sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.innings, b.notOuts, b.runs, b.average, b.strikeRate, b.fifties, b.hundreds, b.rating, b.confInt95 from batting".$matchFormat."Career b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." order by b.rating desc limit 500";
 	    } else {
-		$sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.innings, b.notOuts, b.runs, b.average, b.strikeRate, b.fifties, b.hundreds, b.rating from batting".$matchFormat."Career b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." and p.country='".$team."' order by b.rating desc limit 100";
+		$sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.innings, b.notOuts, b.runs, b.average, b.strikeRate, b.fifties, b.hundreds, b.rating, b.confInt95 from batting".$matchFormat."Career b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." and p.country='".$team."' order by b.rating desc limit 100";
 	    }
 	} else if ($disc == "Bowling") {
 	    if ($team == "All teams") {
-		$sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.innings, b.balls, b.runs, b.wickets, b.average, b.econRate, b.strikeRate, b.threeWkts, b.fiveWkts, b.rating from bowling".$matchFormat."Career b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." order by b.rating desc limit 500";
+		$sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.innings, b.balls, b.runs, b.wickets, b.average, b.econRate, b.strikeRate, b.threeWkts, b.fiveWkts, b.rating, b.confInt95 from bowling".$matchFormat."Career b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." order by b.rating desc limit 500";
 	    } else {
-		$sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.innings, b.balls, b.runs, b.wickets, b.average, b.econRate, b.strikeRate, b.threeWkts, b.fiveWkts, b.rating from bowling".$matchFormat."Career b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." and p.country='".$team."' order by b.rating desc limit 100";
+		$sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.innings, b.balls, b.runs, b.wickets, b.average, b.econRate, b.strikeRate, b.threeWkts, b.fiveWkts, b.rating, b.confInt95 from bowling".$matchFormat."Career b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." and p.country='".$team."' order by b.rating desc limit 100";
 	    }
 	} else if ($disc == "All-Round") {
 	    if ($team == "All teams") {
 		if ($matchFormat == "ODI") {
-		    $sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.".$matchFormatLower."s, b.runs, b.battingAverage, b.fifties, b.wickets, b.bowlingAverage, b.threeWkts, b.fiftyThreeWkts, b.rating from allRound".$matchFormat."Career b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." order by b.rating desc limit 500";
+		    $sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.".$matchFormatLower."s, b.runs, b.battingAverage, b.fifties, b.wickets, b.bowlingAverage, b.threeWkts, b.fiftyThreeWkts, b.rating, b.confInt95 from allRound".$matchFormat."Career b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." order by b.rating desc limit 500";
 		} else {
-		    $sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.".$matchFormatLower."s, b.runs, b.battingAverage, b.fifties, b.wickets, b.bowlingAverage, b.threeWkts, b.thirtyTwoWkts, b.rating from allRound".$matchFormat."Career b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." order by b.rating desc limit 500";
+		    $sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.".$matchFormatLower."s, b.runs, b.battingAverage, b.fifties, b.wickets, b.bowlingAverage, b.threeWkts, b.thirtyTwoWkts, b.rating, b.confInt95 from allRound".$matchFormat."Career b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." order by b.rating desc limit 500";
 		}
 	    } else {
 		if ($matchFormat == "ODI") {
-		    $sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.".$matchFormatLower."s, b.runs, b.battingAverage, b.fifties, b.wickets, b.bowlingAverage, b.threeWkts, b.fiftyThreeWkts, b.rating from allRound".$matchFormat."Career b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." and p.country='".$team."' order by b.rating desc limit 100";
+		    $sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.".$matchFormatLower."s, b.runs, b.battingAverage, b.fifties, b.wickets, b.bowlingAverage, b.threeWkts, b.fiftyThreeWkts, b.rating, b.confInt95 from allRound".$matchFormat."Career b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." and p.country='".$team."' order by b.rating desc limit 100";
 		} else {
-		    $sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.".$matchFormatLower."s, b.runs, b.battingAverage, b.fifties, b.wickets, b.bowlingAverage, b.threeWkts, b.thirtyTwoWkts, b.rating from allRound".$matchFormat."Career b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." and p.country='".$team."' order by b.rating desc limit 100";
+		    $sql = "select b.playerId, b.player, p.country, b.startDate, b.endDate, b.".$matchFormatLower."s, b.runs, b.battingAverage, b.fifties, b.wickets, b.bowlingAverage, b.threeWkts, b.thirtyTwoWkts, b.rating, b.confInt95 from allRound".$matchFormat."Career b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>".$startSpan." and ((b.startDate+b.endDate)/2)<=".$endSpan." and p.country='".$team."' order by b.rating desc limit 100";
 		}
 	    }
 	} else if ($disc == "Fielding") {
@@ -933,9 +933,11 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
 				    echo "<td></td>";
 				}
 			    } elseif ($j == 15) { # rating
-				echo "<td><b>".round($res[$j], 0)."</b></td>";
+				echo "<td><b>".round($res[$j], 0)."</b> &plusmn; ".round($res[$j+1], 0)."</td>";
 			    } else {
-				echo "<td>$res[$j]</td>";
+            if ($j != 16) {
+                echo "<td>$res[$j]</td>";
+            }
 			    }
 			} else if ($disc == "Bowling") {
 			    if ($j == 10 || $j == 11) { # average and economy rate
@@ -943,17 +945,21 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
 			    } elseif ($j == 12) { # strike rate
 				echo "<td>".number_format(round($res[$j], 1), 1)."</td>";
 			    } elseif ($j == 15) { # rating
-				echo "<td><b>".round($res[$j], 0)."</b></td>";
+				echo "<td><b>".round($res[$j], 0)."</b> &plusmn; ".round($res[$j+1], 0)."</td>";
 			    } else {
-				echo "<td>$res[$j]</td>";
+            if ($j != 16) {
+                echo "<td>$res[$j]</td>";
+            }
 			    }
 			} else if ($disc == "All-Round") {
 			    if ($j == 7 || $j == 10) { # average
 				echo "<td>".number_format(round($res[$j], 2), 2)."</td>";
 			    } elseif ($j == 13) { # rating
-				echo "<td><b>".round($res[$j], 0)."</b></td>";
+				echo "<td><b>".round($res[$j], 0)."</b> &plusmn; ".round($res[$j+1], 0)."</td>";
 			    } else {
-				echo "<td>$res[$j]</td>";
+            if ($j != 14) {
+				       echo "<td>$res[$j]</td>";
+            }
 			    }
 			} else if ($disc == "Fielding") {
 			    if ($j == 8) { # drop rate %
@@ -969,7 +975,7 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
 			    } elseif ($j == 8) { # rating
 				echo "<td><b>".round($res[$j], 0)."</b></td>";
 			    } else {
-				echo "<td>$res[$j]</td>";
+              echo "<td>$res[$j]</td>";
 			    }
 			}
 		    }
@@ -994,9 +1000,11 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
 				    echo "<td></td>";
 				}
 			    } elseif ($j == 12) { # rating
-				echo "<td><b>".round($res[$j], 0)."</b></td>";
+				echo "<td><b>".round($res[$j], 0)."</b> &plusmn; ".round($res[$j+1], 0)."</td>";
 			    } else {
-				echo "<td>$res[$j]</td>";
+            if ($j != 13) {
+				          echo "<td>$res[$j]</td>";
+            }
 			    }
 			} else if ($disc == "Bowling") {
 			    if ($j == 9 || $j == 10) { # average and economy rate
@@ -1004,17 +1012,21 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
 			    } elseif ($j == 11) { # strike rate
 				echo "<td>".number_format(round($res[$j], 1), 1)."</td>";
 			    } elseif ($j == 14) { # rating
-				echo "<td><b>".round($res[$j], 0)."</b></td>";
+				echo "<td><b>".round($res[$j], 0)."</b> &plusmn; ".round($res[$j+1], 0)."</td>";
 			    } else {
-				echo "<td>$res[$j]</td>";
+             if ($j != 15) {
+				       echo "<td>$res[$j]</td>";
+             }
 			    }
 			} else if ($disc == "All-Round") {
 			    if ($j == 7 || $j == 10) { # average
 				echo "<td>".number_format(round($res[$j], 2), 2)."</td>";
 			    } elseif ($j == 13) { # rating
-				echo "<td><b>".round($res[$j], 0)."</b></td>";
+				echo "<td><b>".round($res[$j], 0)."</b> &plusmn; ".round($res[$j+1], 0)."</td>";
 			    } else {
-				echo "<td>$res[$j]</td>";
+            if ($j != 14) {
+				      echo "<td>$res[$j]</td>";
+            }
 			    }
 			} else if ($disc == "Fielding") {
 			    if ($j == 8) { # drop rate %
@@ -1395,7 +1407,7 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
 <div id="fb-root"></div>
 <div class="navbar navbar-default navbar-fixed-bottom">
     <div class="container">
-	<p class="navbar-text">� 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>
+	<p class="navbar-text">© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>
     </div>
 </div>
 <script>(function(d, s, id) {

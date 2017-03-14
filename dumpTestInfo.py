@@ -16,16 +16,16 @@ c.execute('drop table teamTestLive')
 c.execute('drop table teamTestOverall')
 #c.execute('''create table testInfo (testId integer unique, startDate text, location text, team1 text, team2 text, season text, ground text, ballsPerOver integer, result text, margin text, series text,
 #          seriesStatus text, scoreLink text)''')
-c.execute('create table teamTestLive (testTeamId integer unique, startDate text, team text, opposition integer, location text, result integer, scoreLink text, rating real)')
+c.execute('create table teamTestLive (testTeamId integer unique, startDate text, team text, opposition integer, location text, result integer, scoreLink text, homeRating real, awayRating real, rating real)')
 c.execute('create table teamTestOverall (teamSpan text unique, startDate text, endDate text, span text, team text, tests integer, wins integer, draws integer, losses integer, winPct real, rating real)')
 
 month2Num = {'Jan':'01', 'Feb':'02', 'Mar':'03', 'Apr':'04', 'May':'05', 'Jun':'06', 'Jul':'07', 'Aug':'08', 'Sep':'09', 'Oct':'10', 'Nov':'11', 'Dec':'12'}
 relativeURL = '/ci/engine/records/team/match_results.html?class=1;id=1877;type=year'
-defaultTeamRating = 500.0
-expSmoothFactor = 0.05
+defaultTeamRating = 400.0
+expSmoothFactor = 0.025
 
 # loop through test matches
-for x in range(0, 126):
+for x in range(0, 127):
     # load cricinfo annual match list
     yearURL = 'http://stats.espncricinfo.com' + relativeURL
     yearPage = requests.get(yearURL)
@@ -86,21 +86,29 @@ for x in range(0, 126):
             result = 'Draw'
             i = i + 4
 
-        team1LiveRating = {}
-        c.execute('select rating from teamTestLive where team=? order by testTeamId desc', (team1, ))
-        team1LiveRating = c.fetchone()
-        if team1LiveRating is None:
+        team1Ratings = {}
+        c.execute('select rating, homeRating, awayRating from teamTestLive where team=? order by testTeamId desc', (team1, ))
+        team1Ratings = c.fetchone()
+        if team1Ratings is None:
             team1LiveRating = defaultTeamRating
+            team1LiveHomeRating = defaultTeamRating
+            team1LiveAwayRating = defaultTeamRating
         else:
-            team1LiveRating = team1LiveRating[0]
+            team1LiveRating = team1Ratings[0]
+            team1LiveHomeRating = team1Ratings[1]
+            team1LiveAwayRating = team1Ratings[2]
 
-        team2LiveRating = {}
-        c.execute('select rating from teamTestLive where team=? order by testTeamId desc', (team2, ))
-        team2LiveRating = c.fetchone()
-        if team2LiveRating is None:
+        team2Ratings = {}
+        c.execute('select rating, homeRating, awayRating from teamTestLive where team=? order by testTeamId desc', (team2, ))
+        team2Ratings = c.fetchone()
+        if team2Ratings is None:
             team2LiveRating = defaultTeamRating
+            team2LiveHomeRating = defaultTeamRating
+            team2LiveAwayRating = defaultTeamRating
         else:
-            team2LiveRating = team2LiveRating[0]
+            team2LiveRating = team2Ratings[0]
+            team2LiveHomeRating = team2Ratings[1]
+            team2LiveAwayRating = team2Ratings[2]
 
         groundURL = 'http://www.espncricinfo.com' + groundLinks[k]
         groundPage = requests.get(groundURL)
@@ -127,23 +135,52 @@ for x in range(0, 126):
         if (result == team1):
             team1LiveRating = expSmoothFactor * (500 + (team2LiveRating / team1LiveRating) * 1000 * team1LocWin) + (1 - expSmoothFactor) * team1LiveRating
             team2LiveRating = expSmoothFactor * (500 - (team2LiveRating / team1LiveRating) * 1000 * team2LocLoss) + (1 - expSmoothFactor) * team2LiveRating
+            if location == team1:
+                team1LiveHomeRating = expSmoothFactor * (500 + (team2LiveAwayRating / team1LiveHomeRating) * 1000) + (1 - expSmoothFactor) * team1LiveHomeRating
+                team2LiveAwayRating = expSmoothFactor * (500 - (team2LiveAwayRating / team1LiveHomeRating) * 1000) + (1 - expSmoothFactor) * team2LiveAwayRating
+            elif location == team2:
+                team1LiveAwayRating = expSmoothFactor * (500 + (team2LiveHomeRating / team1LiveAwayRating) * 1000) + (1 - expSmoothFactor) * team1LiveAwayRating
+                team2LiveHomeRating = expSmoothFactor * (500 - (team2LiveHomeRating / team1LiveAwayRating) * 1000) + (1 - expSmoothFactor) * team2LiveHomeRating
         elif (result == team2):
             team1LiveRating = expSmoothFactor * (500 - (team1LiveRating / team2LiveRating) * 1000 * team1LocLoss) + (1 - expSmoothFactor) * team1LiveRating
             team2LiveRating = expSmoothFactor * (500 + (team1LiveRating / team2LiveRating) * 1000 * team2LocWin) + (1 - expSmoothFactor) * team2LiveRating
+            if location == team1:
+                team1LiveHomeRating = expSmoothFactor * (500 - (team1LiveHomeRating / team2LiveAwayRating) * 1000) + (1 - expSmoothFactor) * team1LiveHomeRating
+                team2LiveAwayRating = expSmoothFactor * (500 + (team1LiveHomeRating / team2LiveAwayRating) * 1000) + (1 - expSmoothFactor) * team2LiveAwayRating
+            elif location == team2:
+                team1LiveAwayRating = expSmoothFactor * (500 - (team1LiveAwayRating / team2LiveHomeRating) * 1000) + (1 - expSmoothFactor) * team1LiveAwayRating
+                team2LiveHomeRating = expSmoothFactor * (500 + (team1LiveAwayRating / team2LiveHomeRating) * 1000) + (1 - expSmoothFactor) * team2LiveHomeRating
         else:
             if (team1LiveRating > team2LiveRating):
                 team1LiveRating = expSmoothFactor * (500 - (team1LiveRating / team2LiveRating) * 500 * team1LocLoss) + (1 - expSmoothFactor) * team1LiveRating
                 team2LiveRating = expSmoothFactor * (500 + (team1LiveRating / team2LiveRating) * 500 * team2LocWin) + (1 - expSmoothFactor) * team2LiveRating
+                if location == team1:
+                    team1LiveHomeRating = expSmoothFactor * (500 - (team1LiveHomeRating / team2LiveAwayRating) * 500) + (1 - expSmoothFactor) * team1LiveHomeRating
+                    team2LiveAwayRating = expSmoothFactor * (500 + (team1LiveHomeRating / team2LiveAwayRating) * 500) + (1 - expSmoothFactor) * team2LiveAwayRating
+                elif location == team2:
+                    team1LiveAwayRating = expSmoothFactor * (500 - (team1LiveAwayRating / team2LiveHomeRating) * 500) + (1 - expSmoothFactor) * team1LiveAwayRating
+                    team2LiveHomeRating = expSmoothFactor * (500 + (team1LiveAwayRating / team2LiveHomeRating) * 500) + (1 - expSmoothFactor) * team2LiveHomeRating
             elif (team1LiveRating < team2LiveRating):
                 team1LiveRating = expSmoothFactor * (500 + (team2LiveRating / team1LiveRating) * 500 * team1LocWin) + (1 - expSmoothFactor) * team1LiveRating
                 team2LiveRating = expSmoothFactor * (500 - (team2LiveRating / team1LiveRating) * 500 * team2LocLoss) + (1 - expSmoothFactor) * team2LiveRating
+                if location == team1:
+                    team1LiveHomeRating = expSmoothFactor * (500 + (team2LiveAwayRating / team1LiveHomeRating) * 500) + (1 - expSmoothFactor) * team1LiveHomeRating
+                    team2LiveAwayRating = expSmoothFactor * (500 - (team2LiveAwayRating / team1LiveHomeRating) * 500) + (1 - expSmoothFactor) * team2LiveAwayRating
+                elif location == team2:
+                    team1LiveAwayRating = expSmoothFactor * (500 + (team2LiveHomeRating / team1LiveAwayRating) * 500) + (1 - expSmoothFactor) * team1LiveAwayRating
+                    team2LiveHomeRating = expSmoothFactor * (500 - (team2LiveHomeRating / team1LiveAwayRating) * 500) + (1 - expSmoothFactor) * team2LiveHomeRating
 
         testTeam1Id = repr(int(testId)) + '1'
         testTeam2Id = repr(int(testId)) + '2'
-        c.execute('insert or ignore into teamTestLive (testTeamId, team, opposition, result, rating) values (?, ?, ?, ?, ?)',
-                  (testTeam1Id, team1, team2, result, team1LiveRating))
-        c.execute('insert or ignore into teamTestLive (testTeamId, team, opposition, result, rating) values (?, ?, ?, ?, ?)',
-                  (testTeam2Id, team2, team1, result, team2LiveRating))
+        c.execute('insert or replace into teamTestLive (testTeamId, team, opposition, result, homeRating, awayRating, rating) values (?, ?, ?, ?, ?, ?, ?)',
+                  (testTeam1Id, team1, team2, result, team1LiveHomeRating, team1LiveAwayRating, team1LiveRating))
+        c.execute('insert or replace into teamTestLive (testTeamId, team, opposition, result, homeRating, awayRating, rating) values (?, ?, ?, ?, ?, ?, ?)',
+                  (testTeam2Id, team2, team1, result, team2LiveHomeRating, team2LiveAwayRating, team2LiveRating))
+        # print testId
+        # print team1
+        # print team2
+        # print team1LiveRating
+        # print team2LiveRating
         conn.commit()
 
     startDates = {}
@@ -214,7 +251,7 @@ for team in c.fetchall():
         if endDate != None: endDate = endDate[0]
         print(team[0] + ' ' + repr(startDate)+ ' ' + repr(endDate) + ' ' + span + ' ' + repr(tests) + ' ' + repr(wins) + ' ' + repr(draws) + ' ' + repr(losses) + ' ' + repr(winPct) + ' '+ repr(rating))
         teamSpan = team[0] + "_" + span
-        c.execute('''insert or ignore into teamTestOverall (teamSpan, startDate, endDate, span, team, tests, wins, draws, losses, winPct, rating)
+        c.execute('''insert or replace into teamTestOverall (teamSpan, startDate, endDate, span, team, tests, wins, draws, losses, winPct, rating)
                   values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                   (teamSpan, startDate, endDate, span, team[0], tests, wins, draws, losses, winPct, rating))
         conn.commit()

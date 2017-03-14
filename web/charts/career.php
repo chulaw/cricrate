@@ -1,4 +1,4 @@
-<?php    
+<?php
 
 $xVal = $_GET["xVal"];
 $yVal = $_GET["yVal"];
@@ -9,9 +9,9 @@ $span = $_GET["span"];
 $team = $_GET["team"];
 
 if ($matchFormat == "Test") {
-    $db = new SQLite3("../ccr.db");   
+    $db = new SQLite3("../ccr.db");
 } else {
-    $db = new SQLite3("../ccr".$matchFormat.".db");   
+    $db = new SQLite3("../ccr".$matchFormat.".db");
 }
 
 if ($matchFormat == "Test") {
@@ -38,13 +38,13 @@ if ($matchFormat == "Test") {
     } else if ($batBowl == "allRound") {
 	if ($matchFormat == "ODI") {
 	    $xValMod = array("battingAverage"=>"Batting Average", "bowlingAverage"=>"Bowling Average", "runs"=>"Runs", "wickets"=>"Wickets", "fifties"=>"Fifties", "threeWkts"=>"Three Wkts", "fiftyThreeWkts"=>"Fifty Runs + Three Wkts", "rating"=>"Rating", "odis"=>"ODIs");
-	    $yValMod = array("bowlingAverage"=>"Bowling Average", "battingAverage"=>"Batting Average", "runs"=>"Runs", "wickets"=>"Wickets", "fifties"=>"Fifties", "threeWkts"=>"Five Wkts", "fiftyThreeWkts"=>"Fifty Runs + Three Wkts", "rating"=>"Rating", "odis"=>"ODIs");   
+	    $yValMod = array("bowlingAverage"=>"Bowling Average", "battingAverage"=>"Batting Average", "runs"=>"Runs", "wickets"=>"Wickets", "fifties"=>"Fifties", "threeWkts"=>"Five Wkts", "fiftyThreeWkts"=>"Fifty Runs + Three Wkts", "rating"=>"Rating", "odis"=>"ODIs");
 	} else if ($matchFormat == "T20I") {
 	    $xValMod = array("battingAverage"=>"Batting Average", "bowlingAverage"=>"Bowling Average", "runs"=>"Runs", "wickets"=>"Wickets", "fifties"=>"Fifties", "threeWkts"=>"Three Wkts", "thirtyTwoWkts"=>"Thirty Runs + Two Wkts", "rating"=>"Rating", "t20is"=>"T20Is");
-	    $yValMod = array("bowlingAverage"=>"Bowling Average", "battingAverage"=>"Batting Average", "runs"=>"Runs", "wickets"=>"Wickets", "fifties"=>"Fifties", "threeWkts"=>"Five Wkts", "thirtyTwoWkts"=>"Thirty Runs + Two Wkts", "rating"=>"Rating", "t20is"=>"T20Is");   
+	    $yValMod = array("bowlingAverage"=>"Bowling Average", "battingAverage"=>"Batting Average", "runs"=>"Runs", "wickets"=>"Wickets", "fifties"=>"Fifties", "threeWkts"=>"Five Wkts", "thirtyTwoWkts"=>"Thirty Runs + Two Wkts", "rating"=>"Rating", "t20is"=>"T20Is");
 	} else if ($matchFormat == "FT20") {
 	    $xValMod = array("battingAverage"=>"Batting Average", "bowlingAverage"=>"Bowling Average", "runs"=>"Runs", "wickets"=>"Wickets", "fifties"=>"Fifties", "threeWkts"=>"Three Wkts", "thirtyTwoWkts"=>"Thirty Runs + Two Wkts", "rating"=>"Rating", "ft20s"=>"FT20s");
-	    $yValMod = array("bowlingAverage"=>"Bowling Average", "battingAverage"=>"Batting Average", "runs"=>"Runs", "wickets"=>"Wickets", "fifties"=>"Fifties", "threeWkts"=>"Five Wkts", "thirtyTwoWkts"=>"Thirty Runs + Two Wkts", "rating"=>"Rating", "ft20s"=>"FT20s");   
+	    $yValMod = array("bowlingAverage"=>"Bowling Average", "battingAverage"=>"Batting Average", "runs"=>"Runs", "wickets"=>"Wickets", "fifties"=>"Fifties", "threeWkts"=>"Five Wkts", "thirtyTwoWkts"=>"Thirty Runs + Two Wkts", "rating"=>"Rating", "ft20s"=>"FT20s");
 	}
     }  else if ($batBowl == "team") {
 	if ($matchFormat == "ODI") {
@@ -60,7 +60,7 @@ if ($matchFormat == "Test") {
     }
 }
 
-$spanDates = split("-", $span);
+$spanDates = explode("-", $span);
 $startSpan = $spanDates[0]."0000";
 $endSpan = $spanDates[1]."9999";
 if ($batBowl == "team") {
@@ -73,8 +73,8 @@ if ($batBowl == "team") {
             $sql = "select c.".$xVal.",c.".$yVal.",c.player,p.country,c.rating from ".$batBowl."".$matchFormat."Career c, playerInfo p where p.playerId=c.playerId and ((c.startDate+c.endDate)/2)>".$startSpan." and ((c.startDate+c.endDate)/2)<=".$endSpan." order by rating desc limit 500";
         } else {
             $sql = "select c.".$xVal.",c.".$yVal.",c.player,p.country,c.rating from ".$batBowl."".$matchFormat."Career c, playerInfo p where p.playerId=c.playerId and ((c.startDate+c.endDate)/2)>".$startSpan." and ((c.startDate+c.endDate)/2)<=".$endSpan." and p.country='".$team."' order by rating desc limit 100";
-        }      
-    }    
+        }
+    }
 }
 
 $result = $db->query($sql);
@@ -114,20 +114,20 @@ $table['cols'] = array(
                         array('id' => "", 'label' => $yValMod[$yVal], 'pattern' => "", 'type' => 'number'),
                         array('id' => "", 'label' => "Team", 'pattern' => "", 'type' => 'string'),
                         array('id' => "", 'label' => "Rating", 'pattern' => "", 'type' => 'number'),
-                      
+
                     );
 
 $rows = array();
 
-for ($i = 0; $i < count($xVals); $i++) {    
+for ($i = 0; $i < count($xVals); $i++) {
     $temp = array();
     $temp[] = array('v' => $players[$i]);
     $temp[] = array('v' => $xVals[$i]);
     $temp[] = array('v' => $yVals[$i]);
     $temp[] = array('v' => $teams[$i]);
-    $temp[] = array('v' => $ratings[$i]);    
-    $rows[] = array('c' => $temp);  
-} 
+    $temp[] = array('v' => $ratings[$i]);
+    $rows[] = array('c' => $temp);
+}
 
 $table['rows'] = $rows;
 $jsonTable = json_encode($table);

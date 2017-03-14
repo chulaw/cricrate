@@ -60,19 +60,24 @@ COMPLETED:
 - move navbar from left to top with drop downs
 - add date/match dropdown option for player/compare page
 - attribute 15% of caught wicket win shares to fielder when regulation catch (85% to bowler)
+- setup match update shell script for fast/easy updates with minimal/no manual code modification
+- update team ratings to take home/away into account
+- avoid penalizing all-rounders when they don't get a chance to bat
+- add wickets after point of entry to test match batting ratings
+- adjust team ratings to be less jumpy
+- option to see more per page for tables
 
 TODO:
-- avoid penalizing all-rounders when they don't get a chance to bat
+- add series status to rating
+- update team ratings to take series wins into account
+- fix t20i scorecard dismissals
+- best batting line-up/best bowling attack ratings
+
 - fix last over (non-50th) fielder wicket (runout non-direct hit) win shares being credited to bowler
 - parse fielder properly when he hasn't bowled or batted (check did not bat list) raina drop vs UAE WC
-- add wickets after point of entry to test match batting ratings
-- add series status to rating
 - display site update log on homepage
-- update team ratings to take series wins and home/away into account
 - fix franchise team assignment bug
-- best batting line-up/best bowling attack ratings
 - research adding logins, commenting articles, forums with social login support
-- setup match update shell script for fast/easy updates with minimal/no manual code modification
 
 ML:
 - plot fields

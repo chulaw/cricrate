@@ -132,8 +132,8 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
 
     $(document).ready(function() {
 	$('#matchTable').DataTable( {
-        "lengthChange":   false,
-	"pageLength": 18,
+        "lengthMenu": [[18, 25, 50, 100, -1], [18, 25, 50, 100, "All"]],
+	       "pageLength": 18,
     } );
     } );
 
@@ -412,7 +412,7 @@ echo "<th>Span</th>";
 echo "<th>Mat</th>";
 echo "<th>Wins</th>";
 if ($matchFormat == "Test") {
-    echo "<th>Draws</th>";
+    echo "<th>Draws/Ties/NR</th>";
 } else {
     echo "<th>Ties/NR</th>";
 }
@@ -430,9 +430,9 @@ echo "</table>";
 echo "</li>";
 
 if ($matchFormat == "FT20") {
-    $sql = "select ".$matchFormatLower."TeamId, startDate, rating, opposition, ground, result from team".$matchFormat."Live where team='".$team."'";
+    $sql = "select ".$matchFormatLower."TeamId, startDate, homeRating, awayRating, rating, opposition, ground, result from team".$matchFormat."Live where team='".$team."'";
 } else {
-    $sql = "select ".$matchFormatLower."TeamId, startDate, rating, opposition, location, result from team".$matchFormat."Live where team='".$team."'";
+    $sql = "select ".$matchFormatLower."TeamId, startDate, homeRating, awayRating, rating, opposition, location, result from team".$matchFormat."Live where team='".$team."'";
 }
 $result = $db->query($sql);
 if (!$result) die("Cannot execute query.");
@@ -441,6 +441,8 @@ $tableHtml .= "<table class=\"table table-hover table-condensed\" id=\"matchTabl
 $tableHtml .= "<thead><tr>";
 $tableHtml .= "<th>".$matchFormat." #</th>";
 $tableHtml .= "<th>Match Date</th>";
+$tableHtml .= "<th>LiveHomeRating</th>";
+$tableHtml .= "<th>LiveAwayRating</th>";
 $tableHtml .= "<th>LiveRating</th>";
 $tableHtml .= "<th>Opposition</th>";
 if ($matchFormat == "FT20") {
@@ -459,16 +461,19 @@ while($res = $result->fetchArray(SQLITE3_NUM)) {
 	    $dateMod = substr($res[1], 0, 4)."-".substr($res[1], 4, 2)."-".substr($res[1], 6, 2);
 	    $tableHtml .= "<td>".$dateMod."</td>";
 	} elseif ($j == 2) { # innings rating or live rating
-	    $tableHtml .= "<td><b>".round($res[2], 0)."</b></td>";
-	} elseif ($j == 4) { # location/ground
+      $tableHtml .= "<td>".round($res[2], 0)."</td>";
+      $tableHtml .= "<td>".round($res[3], 0)."</td>";
+	    $tableHtml .= "<td><b>".round($res[4], 0)."</b></td>";
+      $j = $j + 2;
+	} elseif ($j == 6) { # location/ground
 	    if ($matchFormat == "FT20") {
-		$tableHtml .= "<td>$res[4]</td>";
-	    } else {
-		if ($res[4] == $team) {
-		    $tableHtml .= "<td>Home</td>";
-		} else {
-		    $tableHtml .= "<td>Away</td>";
-		}
+    		$tableHtml .= "<td>$res[5]</td>";
+    	} else {
+    		if ($res[6] == $team) {
+    		    $tableHtml .= "<td>Home</td>";
+    		} else {
+    		    $tableHtml .= "<td>Away</td>";
+    		}
 	    }
 	} else {
 	    $tableHtml .= "<td>".$res[$j]."</td>";
@@ -511,7 +516,7 @@ echo "</div>";
 <div id="fb-root"></div>
     <div class="navbar navbar-default navbar-fixed-bottom">
         <div class="container">
-            <p class="navbar-text">© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>
+            <p class="navbar-text">Â© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>
         </div>
     </div>
  <script>(function(d, s, id) {

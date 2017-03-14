@@ -228,13 +228,13 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
 
     $(document).ready(function() {
        $('#ratingsTable').DataTable( {
-       "lengthChange":   false,
+       "lengthMenu": [[16, 25, 50, 100, -1], [16, 25, 50, 100, "All"]],
        "pageLength": 16,
        "order": [[ 0, "asc" ]],
    } );
 
       $('#ratingsTable2').DataTable( {
-       "lengthChange":   false,
+       "lengthMenu": [[16, 25, 50, 100, -1], [16, 25, 50, 100, "All"]],
        "pageLength": 16,
        "order": [[ 0, "asc" ]],
    } );
@@ -1184,7 +1184,7 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
 <div id="fb-root"></div>
 <div class="navbar navbar-default navbar-fixed-bottom">
     <div class="container">
-	<p class="navbar-text">© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>
+	<p class="navbar-text">Â© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>
     </div>
 </div>
 <script>(function(d, s, id) {

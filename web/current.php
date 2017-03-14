@@ -259,13 +259,13 @@ $db->close();
 
    $(document).ready(function() {
        $('#ratingsTable').DataTable( {
-       "lengthChange":   false,
+       "lengthMenu": [[15, 25, 50, 100, -1], [15, 25, 50, 100, "All"]],
        "pageLength": 15,
        "order": [[ 1, "asc" ]],
    } );
 
       $('#ratingsTable2').DataTable( {
-       "lengthChange":   false,
+       "lengthMenu": [[15, 25, 50, 100, -1], [15, 25, 50, 100, "All"]],
        "pageLength": 15,
        "order": [[ 1, "asc" ]],
    } );
@@ -575,7 +575,7 @@ $db->close();
 
    if ($disc == "Team") {
       if ($currSelect == 0) {
-	 $sql = "select team, rankDiff, rank, rating, team, bestCurrentRating from ".$disciplineLower.$matchFormat."Current order by rating desc";
+	 $sql = "select team, rankDiff, rank, homeRating, awayRating, rating, team, bestCurrentRating from ".$disciplineLower.$matchFormat."Current order by rating desc";
       } else {
 	 $sql = "select team, max(rating) as maxRating from ".$disciplineLower.$matchFormat."Live group by team order by maxRating desc";
       }
@@ -606,6 +606,10 @@ $db->close();
    echo "<thead><tr>";
    echo "<th>+/-</th>";
    echo "<th>Rank</th>";
+   if ($disc == "Team" && $currSelect == 0) {
+     echo "<th>HomeRating</th>";
+     echo "<th>AwayRating</th>";
+   }
    echo "<th>Rating</th>";
    if ($disc == "Team") {
       echo "<th>Team</th>";
@@ -654,22 +658,29 @@ $db->close();
 	       if ($disc == "Win Shares") {
 		  echo "<td><b>".round($res[$j], 3)."</b></td>";
 	       } else {
-		  echo "<td><b>".round($res[$j], 0)."</b></td>";
+           if ($disc == "Team") {
+             echo "<td>".round($res[$j], 0)."</td>";
+             echo "<td>".round($res[$j+1], 0)."</td>";
+             echo "<td><b>".round($res[$j+2], 0)."</b></td>";
+             $j = $j + 2;
+           } else {
+             echo "<td><b>".round($res[$j], 0)."</b></td>";
+           }
 	       }
-	   } elseif ($j == $startIndex+1) {
+	   } elseif ($j == $startIndex+1 || ($disc == "Team" && $j == $startIndex+3)) {
 	      if ($disc == "Team") {
-		 echo "<td><a href=\"team.php?team=".$res[0]."&matchFormat=$matchFormat\">".$res[$j]."</a></td>";
-		 if ($matchFormat != "FT20") {
-		     echo "<td><a href=\"team.php?team=".$res[0]."&matchFormat=$matchFormat\"><img src=\"images/".$res[0].".png\" alt=\"$res[0]\" style='border:1px solid #A9A9A9'/></a></td>";
-		 }
+		        echo "<td><a href=\"team.php?team=".$res[0]."&matchFormat=$matchFormat\">".$res[$j]."</a></td>";
+      		 if ($matchFormat != "FT20") {
+      		     echo "<td><a href=\"team.php?team=".$res[0]."&matchFormat=$matchFormat\"><img src=\"images/".$res[0].".png\" alt=\"$res[0]\" style='border:1px solid #A9A9A9'/></a></td>";
+      		 }
 	      } else {
-		 echo "<td><a href=\"player.php?playerId=".$res[0]."&matchFormat=$matchFormat&disc=$disc\">".str_replace("Sir ","",$res[$j])."</a></td>";
+		        echo "<td><a href=\"player.php?playerId=".$res[0]."&matchFormat=$matchFormat&disc=$disc\">".str_replace("Sir ","",$res[$j])."</a></td>";
 	      }
-	   } elseif ($j == $startIndex+2 && $matchFormat != "FT20") { # country
+	   } elseif (($j == $startIndex+2 && $matchFormat != "FT20") || ($disc == "Team" && $j == $startIndex+4 && $matchFormat != "FT20")) { # country
 	      if ($disc == "Team") {
-		 echo "<td>$res[$j]</td>";
+		        echo "<td>$res[$j]</td>";
 	      } else {
-		 echo "<td><a href=\"team.php?team=".$res[$j]."&matchFormat=$matchFormat\"><img src=\"images/".$res[$j].".png\" alt=\"$res[$j]\" style='border:1px solid #A9A9A9'/></a></td>";
+		        echo "<td><a href=\"team.php?team=".$res[$j]."&matchFormat=$matchFormat\"><img src=\"images/".$res[$j].".png\" alt=\"$res[$j]\" style='border:1px solid #A9A9A9'/></a></td>";
 	      }
 	   } else {
 	      echo "<td>$res[$j]</td>";
@@ -694,17 +705,17 @@ $db->close();
    if ($disc == "Fielding" || $disc == "Win Shares") {
       echo "<h3>Worst</h3>";
       if ($currSelect == 0) {
-	 if ($matchFormat == "FT20") {
-	    $sql = "select playerId, rankDiff, rank, rating, player, bestCurrentRating from ".$disciplineLower.$matchFormat."Current where playerId not in ($retiredPlayers) order by rating asc";
-	 } else {
-	    $sql = "select playerId, rankDiff, rank, rating, player, country, bestCurrentRating from ".$disciplineLower.$matchFormat."Current where playerId not in ($retiredPlayers) order by rating asc";
-	 }
+        	 if ($matchFormat == "FT20") {
+        	    $sql = "select playerId, rankDiff, rank, rating, player, bestCurrentRating from ".$disciplineLower.$matchFormat."Current where playerId not in ($retiredPlayers) order by rating asc";
+        	 } else {
+        	    $sql = "select playerId, rankDiff, rank, rating, player, country, bestCurrentRating from ".$disciplineLower.$matchFormat."Current where playerId not in ($retiredPlayers) order by rating asc";
+        	 }
       } else {
-	 if ($matchFormat == "FT20") {
-	    $sql = "select playerId, rank, rating, player, bestCurrentRating from ".$disciplineLower.$matchFormat."CurrentAllTime order by rating asc limit 500";
-	 } else {
-	    $sql = "select playerId, rank, rating, player, country, bestCurrentRating from ".$disciplineLower.$matchFormat."CurrentAllTime order by rating asc limit 500";
-	 }
+      	 if ($matchFormat == "FT20") {
+      	    $sql = "select playerId, rank, rating, player, bestCurrentRating from ".$disciplineLower.$matchFormat."CurrentAllTime order by rating asc limit 500";
+      	 } else {
+      	    $sql = "select playerId, rank, rating, player, country, bestCurrentRating from ".$disciplineLower.$matchFormat."CurrentAllTime order by rating asc limit 500";
+      	 }
       }
 
       $result = $db->query($sql);
@@ -717,7 +728,7 @@ $db->close();
       echo "<th>Rating</th>";
       echo "<th>Player</th>";
       if ($matchFormat != "FT20") {
-	 echo "<th>Country</th>";
+	       echo "<th>Country</th>";
       }
       echo "<th>Best Current Rating</th>";
       echo "</tr></thead>";
@@ -786,7 +797,7 @@ $db->close();
    <div id="fb-root"></div>
    <div class="navbar navbar-default navbar-fixed-bottom">
        <div class="container">
-	   <p class="navbar-text">© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>
+	   <p class="navbar-text">Â© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>
        </div>
    </div>
    <script>(function(d, s, id) {
