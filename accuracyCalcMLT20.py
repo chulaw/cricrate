@@ -9,10 +9,11 @@ overs = list(xrange(20))
 for inn in range(0, 2):
     #if inn == 1: continue
     for over in overs:
+        if inn == 1 and over == 19: continue
         t20Ids = []
         odds = []
         results = []
-        f = open("t20MLPred.csv","rb")
+        f = open("t20MLPred"+`(inn+1)`+"UnqRRHMLT.csv","rb")
         reader = csv.reader(f, delimiter=',')
         for row in reader:
             if row[0] == "Id": continue
@@ -59,7 +60,7 @@ for inn in range(0, 2):
 t20Ids = []
 odds = []
 results = []
-f = open("t20MLPred.csv","rb")
+f = open("t20MLPred"+`(inn+1)`+"UnqRRHMLT.csv","rb")
 reader = csv.reader(f, delimiter=',')
 for row in reader:
     if row[0] == "Id": continue

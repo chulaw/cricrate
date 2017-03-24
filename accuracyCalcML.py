@@ -13,7 +13,7 @@ for inn in range(0, 2):
         odiIds = []
         odds = []
         results = []
-        f = open("odiMLPred"+`(inn+1)`+".csv","rb")
+        f = open("odiMLPred"+`(inn+1)`+"UnqRRHML1000T.csv","rb")
         reader = csv.reader(f, delimiter=',')
         for row in reader:
             if row[0] == "Id": continue
@@ -52,7 +52,7 @@ for inn in range(0, 2):
             curModelDiff += cumWins[r] - randomModel[r]
             r += 1
         accuracyRatio = curModelDiff / perfModelDiff
-        fd = open('odiMLAccRat.csv','a')
+        fd = open('odiMLAccRatUnqRRHML1000T.csv','a')
         print `(inn + 1)` + " " + `(over + 1)` + " " + `round(accuracyRatio * 100, 2)`
         fd.write(`(inn + 1)` + "," + `(over + 1)` + "," + `round(accuracyRatio * 100, 2)` + "\n")
         fd.close()
@@ -61,7 +61,7 @@ odiIds = []
 odds = []
 results = []
 for inn in range(0, 2):
-    f = open("odiMLPred"+`(inn+1)`+".csv","rb")
+    f = open("odiMLPred"+`(inn+1)`+"UnqRRHML1000T.csv","rb")
     reader = csv.reader(f, delimiter=',')
     for row in reader:
         if row[0] == "Id": continue
@@ -98,7 +98,7 @@ for dO in descOrder:
     curModelDiff += cumWins[r] - randomModel[r]
     r += 1
 overallAccuracyRatio = curModelDiff / perfModelDiff
-fd = open('odiMLAccRat.csv','a')
+fd = open('odiMLAccRatUnqRRHML1000T.csv','a')
 print "Overall " + `round(overallAccuracyRatio * 100, 2)`
 fd.write("Overall,," + `round(overallAccuracyRatio * 100, 2)` + "\n")
 fd.close()

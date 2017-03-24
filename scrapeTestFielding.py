@@ -6,9 +6,11 @@ import lxml.html
 from lxml import html
 import requests
 import sqlite3
+import sys
 start = time.clock()
 
-startTest = int(input('Enter starting Test #: '))
+# startTest = int(input('Enter starting Test #: '))
+startTest = int(sys.argv[1])
 startTest = 1774 if startTest == 0 else startTest
 
 #set PYTHONIOENCTestNG=utf-8
@@ -547,7 +549,7 @@ for x in range(startTest, len(testsInfo)):
         if rating == 0: continue
         print fielderName[fielderId] + " " + `rating`
         matchId = repr(int(testId)) + repr(fielderId)
-        c.execute('insert or ignore into fieldingTestMatch (matchId, playerId, player, testId, keeper, catches, droppedCatches, misfields, stumpings, missedStumpings, greatCatches, directHits, greatSaves, runsSaved, '
+        c.execute('insert or replace into fieldingTestMatch (matchId, playerId, player, testId, keeper, catches, droppedCatches, misfields, stumpings, missedStumpings, greatCatches, directHits, greatSaves, runsSaved, '
                   'rating) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                  (matchId, fielderId, fielderName[fielderId], testId, (1 if fielderId in keeper else 0), fielderCatches[fielderId], fielderDroppedCatches[fielderId], fielderMisfield[fielderId], fielderStumpings[fielderId],
                   fielderMissedStumping[fielderId], fielderGreatCatch[fielderId], fielderDirectHit[fielderId], fielderGreatSave[fielderId], fielderRunsSaved[fielderId], rating))
@@ -567,7 +569,7 @@ for x in range(startTest, len(testsInfo)):
             liveRating = expSmoothFactor * rating * (0.66 + newPlayerPenaltyFactor*(fieldingNumCareerMatches[fielderId]-1)) + (1 - expSmoothFactor) * fieldingLiveRating[fielderId]
         else:
             liveRating = expSmoothFactor * rating + (1 - expSmoothFactor) * fieldingLiveRating[fielderId]
-        c.execute('insert or ignore into fieldingTestLive(matchId, startDate, playerId, testId, player, rating) values (?, ?, ?, ?, ?, ?)',
+        c.execute('insert or replace into fieldingTestLive(matchId, startDate, playerId, testId, player, rating) values (?, ?, ?, ?, ?, ?)',
                     (matchId, startDate, fielderId, testId, fielderName[fielderId], liveRating))
 
     conn.commit()

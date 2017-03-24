@@ -26,7 +26,7 @@ expSmoothFactor = 0.05
 c.execute('select * from testInfo')
 testsInfo = c.fetchall()
 
-def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamRating, batHighInnPct, batSecHighInnPct, margin):
+def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamRating, batHighInnPct, batSecHighInnPct, margin, seriesStatus):
     print('\nDumping details for innings #'+repr(inningsNum))
     print('Bowling details:')
 
@@ -42,11 +42,12 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
     totalBalls = detailInnings[7]
     totalWkts = detailInnings[9]
     totalWktsMod = 1 if totalWkts == 0 else totalWkts
-    numBatInns = totalWkts if totalWkts == 10 else totalWkts + 2
+    numBatInns = 11 if totalWkts == 10 else totalWkts + 2
 
     for battingInn in batInnings:
         batsmanId = battingInn[1]
         position = battingInn[5]
+        batRuns = battingInn[8]
         c.execute('select inningsId, rating from battingTestLive where playerId=? order by inningsId desc', (batsmanId, ))
         battingLiveRating[batsmanId] = c.fetchone()
         if battingLiveRating[batsmanId] is None:
@@ -64,14 +65,15 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
             bowlerIndex = dismissalInfo.index('b ')
             bowlerName = dismissalInfo[(bowlerIndex+2):]
             if bowlerName in wktsRating:
-                wktsRating[bowlerName] += battingLiveRating[batsmanId]
+                wktsRating[bowlerName] = wktsRating[bowlerName] + max(0, battingLiveRating[batsmanId] - batRuns * 15.444)
             else:
-                wktsRating[bowlerName] = battingLiveRating[batsmanId]
+                wktsRating[bowlerName] = max(0, battingLiveRating[batsmanId] - batRuns * 15.444)
 
     ###########################################################################################################################
     # store bowling live ratings data
     rating = {}
     teamBowlingRating = 0.0;
+    testBowlingFile = open("testBowlingInningsRatings.csv", "a")
     for bowlInn in bowlInnings:
         bowlerId = bowlInn[1]
         bowlerName = bowlInn[2]
@@ -106,31 +108,34 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         wktPct = float(wkts) * 100 / float(totalWktsMod)
         sigContrib = 12.5 if (math.pow(wkts, 2) / float(1 + runsConceded)) > 0.08 else (math.pow(wkts, 2) / float(1 + runsConceded)) * 156.25
         wktsPerRun = math.pow(wkts, 2) * 420 / float(30 + runsConceded)
-        wktsPerBall = math.pow(wkts, 2) * 210 / float(60 + ballsBowled)
-        ballsPerRun = math.pow(ballsBowled / 6, 2) * 2 / float(30 + runsConceded)
-        dismissalRatingMod = dismissalRating * 2.5 / float(30 + runsConceded) if wkts > 0 else 0
+        wktsPerBall = math.pow(wkts, 2) * 315 / float(60 + ballsBowled)
+        ballsPerRun = math.pow(ballsBowled / 6, 2) * 1.3333 / float(30 + runsConceded)
+
+        pitchQuality = sigContrib * (avg1stPitchRuns**2) / (200 * 323)
+        if inningsNum == 3:
+            pitchQuality = sigContrib * (252 * avg1stPitchRuns) / (200 * 323)
+        elif inningsNum == 4:
+            pitchQuality = sigContrib * (211 * avg1stPitchRuns) / (200 * 323)
+
+        dismissalRatingMod = dismissalRating * 3.75 / float(30 + runsConceded) if wkts > 0 else 0
         battingRatingMod = teamBattingRating * sigContrib / 165
         resultRating = resultNum * sigContrib * teamRating[teamBat] / 625
-        homeAwayMod = homeAway * sigContrib
-        milestone = 10 if wkts >= 5 else 0
+        homeAwayMod = 2 * homeAway * sigContrib
+        milestone = 5 if wkts >= 5 else 0
         # points for significant contribution in winning 4th innings defense and coming back from behind on 3rd innings
         status = 0
         if inningsNum == 3 and wktPct > 25:
-            if battingTeam[1] == teamBowl and float(inningsRuns[1])/float(inningsRuns[2]) <= 0.7:
+            if battingTeam[2] == teamBowl and float(inningsRuns[1])/float(inningsRuns[2]) <= 0.7:
                 if resultNum == 1:
-                    status = sigContrib * 3
+                    status = sigContrib * min(3, float(inningsRuns[2])/float(inningsRuns[1])) * 3
                 elif resultNum == 2:
-                    status = sigContrib * 4
-            elif battingTeam[2] == teamBowl and float(inningsRuns[2])/float(inningsRuns[1]) <= 0.7:
-                if resultNum == 1:
-                    status = sigContrib * 3
-                elif resultNum == 2:
-                    status = sigContrib * 4
+                    status = sigContrib * min(3, float(inningsRuns[2])/float(inningsRuns[1])) * 4
         if inningsNum == 4 and wktPct > 25:
+            runsToDefend = inningsRuns[1] + inningsRuns[3] - inningsRuns[2] if testId != 1483 else inningsRuns[1]
             if resultNum == 1:
-                status = sigContrib * 4.5
+                status = sigContrib * min(2, 211 / runsToDefend) * 4
             elif resultNum == 2:
-                status = sigContrib * 6
+                status = sigContrib * min(2, 211 / runsToDefend) * 6
 
         closeMatchRating = 0.0
         if resultNum >= 1 and margin.find("inns &") == -1:
@@ -140,11 +145,19 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
             elif margin.find(" wicket") != -1:
                 closeMatchRating = sigContrib * 5 / float(runWktMargin)
 
-        # bowling innings rating
-        rating = (wktsPerRun + wktsPerBall + ballsPerRun + dismissalRatingMod + battingRatingMod + resultRating + homeAwayMod + milestone + status + closeMatchRating) * 5.6
+        # adjustment for series status (Deciding game or dead rubber?)
+        seriesStatusAdj = 0
+        if seriesStatus == "Dead":
+            seriesStatusAdj = -4 * sigContrib
+        elif seriesStatus == "Decider":
+            seriesStatusAdj = 3 * sigContrib
 
-        # for innings where <75 overs were bowled (with bowler bowling <15 overs), avoid unnecessarily penalizing by assuming a performance in line with the bowler's live rating if rating of performance is lower
-        rating = bowlingLiveRating if (totalBalls < 450 and ballsBowled < 90 and bowlingLiveRating > rating) else rating
+        # bowling innings rating
+        rating = (wktsPerRun + wktsPerBall + ballsPerRun + pitchQuality + dismissalRatingMod + battingRatingMod + resultRating + homeAwayMod + milestone + status + closeMatchRating + seriesStatusAdj) * 4.9
+        if rating < 0: rating = 0
+
+        # for innings where <75 overs were bowled (with bowler bowling <15 overs and conceding < 50), avoid unnecessarily penalizing by assuming a performance in line with the bowler's live rating if rating of performance is lower
+        rating = bowlingLiveRating if (totalBalls < 450 and ballsBowled < 90 and bowlingLiveRating > rating and runsConceded < 50) else rating
 
         allRoundName['' + repr(bowlerId)] = bowlerName
         if ('' + repr(bowlerId)) in allRoundWkts:
@@ -162,6 +175,7 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
             allRoundBowling['' + repr(bowlerId)]['1'] = rating
 
         inningsId = repr(int(testId)) + repr(inningsNum) + repr(bowlerId)
+        testBowlingFile.write(str(inningsId) + "," + str(wktsPerRun) + "," + str(wktsPerBall) + "," + str(ballsPerRun) + "," + str(pitchQuality) + "," + str(dismissalRatingMod) + "," + str(battingRatingMod) + "," + str(resultRating) + "," + str(homeAwayMod) + "," + str(milestone) + "," + str(status) + "," + str(closeMatchRating) + "," + str(seriesStatusAdj) + "\n")
         c.execute('update bowlingTestInnings set battingRating=?,wktsRating=?,status=?,rating=? where inningsId=?', (battingRatingMod, dismissalRatingMod, status, rating, inningsId))
 
         # update next innings rating to measure prediction error
@@ -177,7 +191,9 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         c.execute('insert or replace into bowlingTestLive(inningsId, startDate, playerId, testId, player, rating) values (?, ?, ?, ?, ?, ?)',
                     (inningsId, startDate, bowlerId, testId, bowlerName, liveRating))
         print(repr(inningsId)+",",repr(bowlerId)+", "+repr(inningsNum)+", "+bowlerName+", wkts: "+repr(wkts)+'/'+repr(runsConceded)+', current: '+repr(int(liveRating))+', innings: '+repr(int(rating))  )
+    testBowlingFile.close()
 
+    testBattingFile = open("testBattingInningsRatings.csv", "a")
     print('\nBatting details:')
     ###########################################################################################################################
     # store batting live ratings data
@@ -195,7 +211,7 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         resultNum = batInn[20]
 
         sigContrib = 12.5 if float(runs) > 62.5 else float(runs) / 5
-        #runsMod = -0.0025 * float(runs)**2 + 2*float(runs) - 100 if runs > 200 else runs # reward runs linearly till 250, then diminishing returns for each extra run scored
+        #runsMod = -0.0025 * float(runs)**2 + 2*float(runs) - 100 if runs > 200 else runs # reward runs linearly till 40, then diminishing returns for each extra run scored
         # diminishing returns for each extra run scored, with significant discounts past 200 runs
         if runs <= 40:
             runsMod = runs
@@ -203,11 +219,18 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
             runsMod = -0.0011 * float(runs)**2 + 0.9961*float(runs) + 2.0026
         else:
             runsMod = -0.0021 * float(runs)**2 + 1.5822*float(runs) - 73.771
-        totalPctRating = totalPct * float(runs) / 100 if runs < 200 else totalPct * 1.5
+        runsMod = runsMod * 0.85
+        totalPctRating = totalPct * float(runs) / 100 if runs < 200 else totalPct
+        pitchQuality = float(runs) * 80 * 323 / (avg1stPitchRuns**2) if runs < 200 else 5168000 / float(avg1stPitchRuns**2)
+        if inningsNum == 3:
+            pitchQuality = float(runs) * 80 * 323 / (252 * avg1stPitchRuns) if runs < 200 else 5168000 / float(252 * avg1stPitchRuns) # avg 3rd innings score = 252
+        elif inningsNum == 4:
+            pitchQuality = float(runs) * 80 * 323 / (211 * avg1stPitchRuns) if runs < 200 else 5168000 / float(211 * avg1stPitchRuns) # avg 4th innings score = 211
+
         if balls != None:
             strikeRate = float(runs) / float(balls) if balls > 0 else 0
         else: strikeRate = 0.425 # assume 42.5 strike rate for innings with no ball data
-        strikeRateMod = float(strikeRate) * float(runsMod) / 15
+        strikeRateMod = float(strikeRate) * float(runsMod) / 7.5
         entryRunsMod = 1 if entryRuns == 0 else entryRuns
         pointOfEntry = 20 if entryWkts == 0 else entryRunsMod * pointOfEntryRatio[entryWkts]/entryWkts
         pointOfEntry = 10 if pointOfEntry < 10 else pointOfEntry
@@ -215,10 +238,10 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         wktsAtCreaseEffVal = 0.0
         for wp in range(entryWkts + 1, entryWkts + wktsAtCrease + 1):
             wktsAtCreaseEffVal += float(wktPosVal[wp])
-        pointOfEntry = sigContrib * math.sqrt(entryWkts + wktsAtCreaseEffVal) * 50 / pointOfEntry
+        pointOfEntry = (2 * sigContrib - 12.5) * math.sqrt(entryWkts + wktsAtCreaseEffVal) * 40 / pointOfEntry if sigContrib > 6.25 else 0
         resultRating = resultNum * sigContrib * teamRating[teamBowl] / 625
         bowlingRatingMod = teamBowlingRating * sigContrib / 75
-        homeAwayMod = homeAway * sigContrib
+        homeAwayMod = 2 * homeAway * sigContrib
         milestone = 0
         if float(runs) >= 100:
             milestone = 5
@@ -226,31 +249,27 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
             milestone = 10
         if float(runs) >= 300:
             milestone = 15
+
         # points for significant contribution in winning 4th innings chase and coming back from behind on 3rd innings
         status = 0
-        if inningsNum == 3 and wktsAtCrease > 2 and totalPct > 25:
+        if inningsNum == 3 and wktsAtCrease > 2 and totalPct > 25 and resultNum >= 1:
             if battingTeam[1] == teamBat and float(inningsRuns[1])/float(inningsRuns[2]) <= 0.7:
-                if resultNum == 1:
-                    status = sigContrib * 3
-                elif resultNum == 2:
-                    status = sigContrib * 4
+                status = sigContrib * min(3, float(inningsRuns[2])/float(inningsRuns[1])) * 3
             elif battingTeam[2] == teamBat and float(inningsRuns[2])/float(inningsRuns[1]) <= 0.7:
-                if resultNum == 1:
-                    status = sigContrib * 3
-                elif resultNum == 2:
-                    status = sigContrib * 2.5
+                status = sigContrib * min(3, float(inningsRuns[1])/float(inningsRuns[2])) * 3
         if inningsNum == 4 and wktsAtCrease > 2 and totalPct > 25:
+            runsToChase = inningsRuns[1] + inningsRuns[3] - inningsRuns[2] + 1 if testId != 1483 else inningsRuns[1] + 1
             if resultNum == 1:
-                status = sigContrib * 4.5
+                status = sigContrib * min(2, runsToChase / 211) * 3
             elif resultNum == 2:
-                status = sigContrib * 6
+                status = sigContrib * min(2, runsToChase / 211) * 7.5
 
         supportPct = 0.0
         if totalPct == batHighInnPct[inningsNum]:
             supportPct = batSecHighInnPct[inningsNum]
         else:
             supportPct = batHighInnPct[inningsNum]
-        supportRating = max(0, (totalPct - supportPct) * 3)
+        supportRating = max(0, (totalPct - supportPct) * 2.5) if inningsWkts[inningsNum] >= 8 else 0
 
         closeMatchRating = 0.0
         if resultNum >= 1 and margin.find("inns &") == -1:
@@ -260,8 +279,16 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
             elif margin.find(" wicket") != -1:
                 closeMatchRating = sigContrib * 5 / float(runWktMargin)
 
+        # adjustment for series status (Deciding game or dead rubber?)
+        seriesStatusAdj = 0
+        if seriesStatus == "Dead":
+            seriesStatusAdj = -4 * sigContrib
+        elif seriesStatus == "Decider":
+            seriesStatusAdj = 3 * sigContrib
+
         # batting innings rating
-        rating = (runsMod + totalPctRating + supportRating + strikeRateMod + bowlingRatingMod + pointOfEntry + resultRating + homeAwayMod + milestone + status + closeMatchRating) * 4.86
+        rating = (runsMod + totalPctRating + pitchQuality + supportRating + strikeRateMod + bowlingRatingMod + pointOfEntry + resultRating + homeAwayMod + milestone + status + closeMatchRating + seriesStatusAdj) * 5
+        if rating < 0: rating = 0
 
         allRoundName['' + repr(batsmanId)] = batsmanName
         if ('' + repr(batsmanId)) in allRoundRuns:
@@ -285,6 +312,7 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
             else: rating += 50 * math.exp(-float(runs)/150)
 
         inningsId = repr(int(testId)) + repr(inningsNum) + repr(batsmanId)
+        testBattingFile.write(str(inningsId) + "," + str(runsMod) + "," + str(totalPctRating) + "," + str(pitchQuality) + "," + str(supportRating) + "," + str(strikeRateMod) + "," + str(bowlingRatingMod) + "," + str(pointOfEntry) + "," + str(resultRating) + "," + str(homeAwayMod) + "," + str(milestone) + "," + str(status) + "," + str(closeMatchRating)+ "," + str(seriesStatusAdj) + "\n")
         c.execute('update battingTestInnings set bowlingRating=?,status=?,rating=? where inningsId=?', (bowlingRatingMod, status, rating, inningsId))
 
         # update next innings rating to measure prediction error
@@ -300,6 +328,7 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         c.execute('insert or replace into battingTestLive(inningsId, startDate, playerId, testId, player, rating) values (?, ?, ?, ?, ?, ?)',
                     (inningsId, startDate, batsmanId, testId, batsmanName, liveRating))
         print(repr(inningsId)+",",repr(batsmanId)+", "+repr(inningsNum)+", "+batsmanName+", runs: "+repr(int(runs))+', current: '+repr(int(liveRating))+', innings: '+repr(int(rating)))
+    testBattingFile.close()
     conn.commit()
 
 # loop through test matches
@@ -312,6 +341,7 @@ for x in range(startTest, len(testsInfo)):
     team2  = testsInfo[x][4]
     result = testsInfo[x][8]
     margin = testsInfo[x][9]
+    seriesStatus = testsInfo[x][11]
 
     teamRating = {}
     c.execute('select rating from teamTestLive where team=? and startDate<? order by startDate desc', (team1, startDate))
@@ -330,22 +360,32 @@ for x in range(startTest, len(testsInfo)):
 
     print('\nDumping innings ratings for test #'+repr(int(testId)))
     inningsRuns = {}
+    inningsWkts = {}
     battingTeam = {}
     bowlingTeam = {}
     batHighInnPct = {}
     batSecHighInnPct = {}
-    c.execute('select innings, batTeam, bowlTeam, runs, batHighInnPct, batSecHighInnPct from detailsTestInnings where testId=?', (testId, ))
+    pitchRuns = 0
+    pitchInns = 0
+    c.execute('select innings, batTeam, bowlTeam, runs, wickets, batHighInnPct, batSecHighInnPct from detailsTestInnings where testId=?', (testId, ))
     for inn in c.fetchall():
         innings = inn[0]
         batTeam = inn[1]
         bowlTeam = inn[2]
         runs = inn[3]
-        batHighInnPct[innings] = inn[4]
-        batSecHighInnPct[innings] = inn[5]
+        wkts = inn[4]
+        batHighInnPct[innings] = inn[5]
+        batSecHighInnPct[innings] = inn[6]
         inningsRuns[innings] = runs
+        inningsWkts[innings] = wkts
         battingTeam[innings] = batTeam
         bowlingTeam[innings] = bowlTeam
+        if innings <= 2 and (wkts >= 7 or runs >= 400):
+            pitchRuns += runs
+            pitchInns += 1
 
+    avg1stPitchRuns = pitchRuns / float(pitchInns) if pitchInns >= 1 else 323 # average first innings score
+    avg1stPitchRuns = 150 if avg1stPitchRuns < 150 else avg1stPitchRuns # to handle edge cases
     allRoundName = {}
     allRoundRuns = {}
     allRoundNotOut = {}
@@ -362,7 +402,7 @@ for x in range(startTest, len(testsInfo)):
         batInnings = c.fetchall()
         c.execute('select * from bowlingTestInnings where testId=? and innings=?', (testId, innings))
         bowlInnings = c.fetchall()
-        dumpInningsDetails(innings, detailInnings[0], batInnings, bowlInnings, teamRating, batHighInnPct, batSecHighInnPct, margin)
+        dumpInningsDetails(innings, detailInnings[0], batInnings, bowlInnings, teamRating, batHighInnPct, batSecHighInnPct, margin, seriesStatus)
 
     print('\nAll-Round details:')
     for aRId in allRoundName.keys():
@@ -415,7 +455,7 @@ for x in range(startTest, len(testsInfo)):
                 allRoundWkts[aRId]['2'] = None
                 allRoundBowlRuns[aRId]['2'] = None
         else:
-            bowlingRating = 0
+            bowlingRating = None
             matchWkts = 0
             allRoundBowling[aRId] = {}
             allRoundWkts[aRId] = {}
@@ -427,10 +467,10 @@ for x in range(startTest, len(testsInfo)):
             allRoundWkts[aRId]['2'] = None
             allRoundBowlRuns[aRId]['2'] = None
 
-        milestone = 50 if matchRuns >= 100 and matchWkts >= 5 else 0
+        milestone = 75 if matchRuns >= 100 and matchWkts >= 5 else 0
 
-        # avoid penalizing for not having a chance to bat
-        if battingRating != None:
+        # avoid penalizing for not having a chance to bat or bowl
+        if battingRating != None and bowlingRating != None:
             # square root of half of the product of batting and bowling ratings to get all-round rating, with bonus for 100 runs + 5 wkts in match
             rating = 2 * math.sqrt(battingRating * bowlingRating / 2) + milestone
         else:

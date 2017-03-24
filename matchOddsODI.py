@@ -19,7 +19,6 @@ for x in range(0, len(result)):
     oddsOdds = []
     oddsResult = []
     odiId = result[x][0]
-    if odiId < 3315: continue
     c.execute('select startDate from odiInfo where odiId=?',(odiId,))
     odiDate = c.fetchone()
     odiDate = odiDate[0]
@@ -147,9 +146,9 @@ for x in range(0, len(result)):
         wkts = overComp[i][3]
         matchResult = overComp[i][4]
         if runs == 0:
-            c.execute('select result, odiId from overComparisonODI where odiId<'+`odiId`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runs<=1 and wkts>='+`(wkts-1)`+' and wkts<='+`(wkts+1)`)
+            c.execute('select avg(result), odiId from overComparisonODI where odiId<'+`odiId`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runs<=1 and wkts>='+`(wkts-1)`+' and wkts<='+`(wkts+1)`+' group by odiId')
         else:
-            c.execute('select result, odiId from overComparisonODI where odiId<'+`odiId`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runs<='+`(runs*1.1)`+' and runs>'+`(runs*0.9)`+' and wkts>='+`(wkts-1)`+' and wkts<='+`(wkts+1)`)
+            c.execute('select avg(result), odiId from overComparisonODI where odiId<'+`odiId`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runs<='+`(runs*1.1)`+' and runs>'+`(runs*0.9)`+' and wkts>='+`(wkts-1)`+' and wkts<='+`(wkts+1)`+' group by odiId')
 
         comp = c.fetchall()
         similarCount = len(comp)
@@ -255,13 +254,13 @@ for x in range(0, len(result)):
         runsReq = overComp[i][4]
         ballsRem = overComp[i][5]
         matchResult = overComp[i][6]
-        c.execute('select result, odiId from overComparisonODI where odiId<'+`odiId`+' and innings=2 and wkts>='+`(wkts-1)`+' and wkts<='+`(wkts+1)`+' and runsReq>='+`(runsReq*0.9)`+' and runsReq<'+`(runsReq*1.1)`+' and ballsRem<='+`(ballsRem*1.1)`+' and ballsRem>'+`(ballsRem*0.9)`)
+        c.execute('select avg(result), odiId from overComparisonODI where odiId<'+`odiId`+' and innings=2 and wkts>='+`(wkts-1)`+' and wkts<='+`(wkts+1)`+' and runsReq>='+`(runsReq*0.9)`+' and runsReq<'+`(runsReq*1.1)`+' and ballsRem<='+`(ballsRem*1.1)`+' and ballsRem>'+`(ballsRem*0.9)`+' group by odiId')
 
         comp = c.fetchall()
         similarCount = len(comp)
 
         if ballsRem < 60 and similarCount < 10:
-            c.execute('select result, odiId from overComparisonODI where odiId<'+`odiId`+' and innings=2 and wkts>='+`(wkts-1)`+' and wkts<='+`(wkts+1)`+' and runsReq>='+`(runsReq*0.75)`+' and runsReq<'+`(runsReq*1.25)`+' and ballsRem<='+`(ballsRem*1.25)`+' and ballsRem>'+`(ballsRem*0.75)`)
+            c.execute('select avg(result), odiId from overComparisonODI where odiId<'+`odiId`+' and innings=2 and wkts>='+`(wkts-1)`+' and wkts<='+`(wkts+1)`+' and runsReq>='+`(runsReq*0.75)`+' and runsReq<'+`(runsReq*1.25)`+' and ballsRem<='+`(ballsRem*1.25)`+' and ballsRem>'+`(ballsRem*0.75)`+' group by odiId')
             comp = c.fetchall()
             similarCount = len(comp)
 

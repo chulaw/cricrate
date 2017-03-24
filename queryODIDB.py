@@ -12,14 +12,14 @@ c = conn.cursor()
 #        print row
 # for row in c.execute('delete FROM bowlingODIInnings where odiId>3481'):
 #        print row
-# for row in c.execute('delete FROM allRoundODIMatch where odiId>0'):
-#      print row
-# for row in c.execute('delete FROM battingODILive where odiId>0'):
-#      print row
-# for row in c.execute('delete FROM bowlingODILive where odiId>0'):
-#      print row
-# for row in c.execute('delete FROM allRoundODILive where odiId>0'):
-#     print row
+for row in c.execute('delete FROM allRoundODIMatch where odiId>3777'):
+     print row
+for row in c.execute('delete FROM battingODILive where odiId>3777'):
+     print row
+for row in c.execute('delete FROM bowlingODILive where odiId>3777'):
+     print row
+for row in c.execute('delete FROM allRoundODILive where odiId>3777'):
+    print row
 #for row in c.execute('delete FROM odiInfo where odiId=3598'):
 #     print row
 # for row in c.execute('delete FROM fieldingEventODI where odiId>3644'):
@@ -28,12 +28,14 @@ c = conn.cursor()
 #      print row
 # for row in c.execute('delete FROM fieldingODILive where odiId>3644'):
 #      print row
-for row in c.execute('delete FROM winSharesODIMatch where odiId>0'):
-       print row
-for row in c.execute('delete FROM winSharesODILive where odiId>0'):
-        print row
+# for row in c.execute('delete FROM winSharesODIMatch where odiId>0'):
+#        print row
+# for row in c.execute('delete FROM winSharesODILive where odiId>0'):
+#         print row
 # for row in c.execute('select max(odiId) FROM overComparisonODI'):
-#          print row
+#           print row
+# for row in c.execute('select overs, wkts FROM overComparisonODI where odiId=1952 and innings=1'):
+#           print row
 #for row in c.execute('SELECT avg(runs) from detailsTestInnings where testId in (1133, 1236, 1313, 1388, 1469, 1571, 1771, 1847, 1947, 2021, 2067) and innings=1 and wickets=10'):
 #     print(row)
 #for row in c.execute('SELECT distinct ground from odiInfo'):
@@ -52,8 +54,12 @@ for row in c.execute('delete FROM winSharesODILive where odiId>0'):
 # c.execute('update odiInfo set result=? where odiId=3598', ("New Zealand",))
 # for row in c.execute('select count(commentary) FROM fieldingEventODI where droppedCatch>0'):
 #            print row
-# for row in c.execute('select * FROM fieldingEventODI where odiId=3209'):
-#             print row
+# for row in c.execute('select result, odiId from overComparisonODI where odiId<3000 and innings=1 and overs>=10 and overs<12 and runs<=80 and runs>70 and wkts>=1 and wkts<=3'):
+#               print row
+
+# for row in c.execute('select avg(result), teamBat, odiId from overComparisonODI where odiId<3000 and innings=1 and overs>=10 and overs<12 and runs<=80 and runs>70 and wkts>=1 and wkts<=3 group by odiId'):
+#              print row
+
 # for row in c.execute('select batsman, bowler, fielder, droppedCatch, commentary FROM fieldingEventODI where droppedCatch=1 and fielder=?',("Suresh Raina",)):
 #                    print row
 # for row in c.execute('select rankDiff, rank, rating, player, country, bestCurrentRating from fieldingODICurrent order by rating desc limit 100'):
@@ -93,7 +99,7 @@ for row in c.execute('delete FROM winSharesODILive where odiId>0'):
 # for row in c.execute('SELECT * FROM batsmanFieldingODICareer where droppedCatches>0 order by droppedCatches desc '):
 #        print row
 #for row in c.execute("select b.playerId, b.player, b.balls, t.ballsPerOver, b.runs, b.wkts, b.rating, p.country, t.team1, t.team2, t.startDate, t.testId, t.scoreLink from bowlingODIInnings b, testInfo t, playerInfo p where b.testId=t.testId and b.playerId=p.playerId and b.rating > 1000 order by b.rating desc"):
-#    print row    
+#    print row
 #for row in c.execute('SELECT * FROM bowlingODIInnings'):
 #    print row
 #for row in c.execute('SELECT * FROM battingODILive where player=?',('Brian Lara',)):
@@ -123,7 +129,7 @@ for row in c.execute('delete FROM winSharesODILive where odiId>0'):
 #c.execute('update odiInfo set team2=?,result=? where odiId=3541', ("Papua New Guinea", "Papua New Guinea"))
 #c.execute('update odiInfo set team2=?,result=? where odiId=3542', ("Papua New Guinea", "Papua New Guinea"))
 #for row in c.execute('select * from odiInfo where odiId=3541'):
-#    print row    
+#    print row
 #c.execute('''create table odiInfo (odiId integer unique, startDate text, location text, team1 text, team2 text, season text, ground text, ballsPerOver integer, result text, margin text, series text,
 #          seriesStatus text, scoreLink text)''')
 #for row in c.execute('SELECT max(odiId) FROM odiInfo'):

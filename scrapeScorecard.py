@@ -4,9 +4,11 @@ import lxml.html
 from lxml import html
 import requests
 import sqlite3
+import sys
 start = time.clock()
 
-startTest = int(input('Enter starting Test #: '))
+# startTest = int(input('Enter starting Test #: '))
+startTest = int(sys.argv[1])
 
 # connect to db
 conn = sqlite3.connect('ccr.db')

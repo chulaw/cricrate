@@ -6,7 +6,7 @@ import csv
 start = time.clock()
 
 for inn in range(0, 2):
-    f = open("t20MLPred.csv","rb")
+    f = open("t20MLPred"+`(inn+1)`+"UnqRRHMLT.csv","rb")
     reader = csv.reader(f, delimiter=',')
     sumWins = {0:0, 10:0, 20:0, 30:0, 40:0, 50:0, 60:0, 70:0, 80:0, 90:0, 100:0}
     countNum = {0:0, 10:0, 20:0, 30:0, 40:0, 50:0, 60:0, 70:0, 80:0, 90:0, 100:0}

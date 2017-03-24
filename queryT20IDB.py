@@ -31,7 +31,7 @@ for row in c.execute('delete FROM bowlingT20ILive where t20iId>0'):
 #for row in c.execute('SELECT * FROM battingT20IInnings where player=?',('Ricky Ponting',)):
 #    print row
 #for row in c.execute("select b.playerId, b.player, b.balls, t.ballsPerOver, b.runs, b.wkts, b.rating, p.country, t.team1, t.team2, t.startDate, t.testId, t.scoreLink from bowlingT20IInnings b, testInfo t, playerInfo p where b.testId=t.testId and b.playerId=p.playerId and b.rating > 1000 order by b.rating desc"):
-#    print row    
+#    print row
 #for row in c.execute('SELECT * FROM bowlingT20IInnings'):
 #    print row
 #for row in c.execute('SELECT * FROM battingT20ILive where player=?',('Brian Lara',)):

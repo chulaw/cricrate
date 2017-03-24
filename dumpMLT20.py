@@ -45,11 +45,11 @@ conn.close()
 t20Info = sorted(t20Info, key=t20Info.get)
 startDates = sorted(startDates, key=int)
 
-fd1 = open('t20ML1.csv','a')
+fd1 = open('t20ML1UnqRRHMLT.csv','a')
 fd1.write("Id,T20I,Overs,Runs,Wkts,Team1Rating,Team2Rating,BattingRating,BowlingRating,HomeAway,Momentum,MatchOdds,MatchOddsAdj,Result\n")
 fd1.close()
 
-fd2 = open('t20ML2.csv','a')
+fd2 = open('t20ML2UnqRRHMLT.csv','a')
 fd2.write("Id,T20I,Overs,Runs,Wkts,RunsReq,BallsRem,Team1Rating,Team2Rating,BattingRating,BowlingRating,HomeAway,Momentum,MatchOdds,MatchOddsAdj,Result\n")
 fd2.close()
 t20NumId = 1
@@ -89,15 +89,15 @@ for startDate in startDates:
                 if len(team1Rating) > 0:
                     team1Rating = team1Rating[len(team1Rating)-1][0]
                 else:
-                    team1Rating = 100.0
+                    team1Rating = 500.0
 
                 c.execute('select rating from teamFT20Live where team=? and startDate<?',(team2, matchDate))
                 team2Rating = c.fetchall()
                 if len(team2Rating) > 0:
                     team2Rating = team2Rating[len(team2Rating)-1][0]
                 else:
-                    team2Rating = 100.0
-                    
+                    team2Rating = 500.0
+
                 d = datetime.datetime(int(matchDate[0:4]), int(matchDate[4:-2]), int(matchDate[6:]))
                 date2yAgo = d + datetime.timedelta(days=-720)
                 date2yAgo = date2yAgo.strftime('%Y%m%d')
@@ -125,7 +125,6 @@ for startDate in startDates:
                     for b in range(0, 7):
                         team1BattingRating += battingRating[b]
                     team1BattingRating = team1BattingRating / 7 * 5
-                print team1BattingRating
 
                 c.execute('select b.playerId, b.ft20Id from bowlingFT20Live b, playerInfo p where p.playerId=b.playerId and p.teams like ? and b.startDate>? and b.startDate<?', ('%'+team2+'%', date2yAgo, matchDate))
                 playerFT20s = c.fetchall()
@@ -149,7 +148,6 @@ for startDate in startDates:
                 if len(bowlingRating) >= 5:
                     for b in range(0, 5):
                         team2BowlingRating += bowlingRating[b]
-                print team2BowlingRating
 
                 c.execute('select b.playerId, b.ft20Id from battingFT20Live b, playerInfo p where p.playerId=b.playerId and p.teams like ? and b.startDate>? and b.startDate<?', ('%'+team2+'%', date2yAgo, matchDate))
                 playerFT20s = c.fetchall()
@@ -174,7 +172,6 @@ for startDate in startDates:
                     for b in range(0, 7):
                         team2BattingRating += battingRating[b]
                     team2BattingRating = team2BattingRating / 7 * 5
-                print team2BattingRating
 
                 c.execute('select b.playerId, b.ft20Id from bowlingFT20Live b, playerInfo p where p.playerId=b.playerId and p.teams like ? and b.startDate>? and b.startDate<?', ('%'+team1+'%', date2yAgo, matchDate))
                 playerFT20s = c.fetchall()
@@ -198,8 +195,7 @@ for startDate in startDates:
                 if len(bowlingRating) >= 5:
                     for b in range(0, 5):
                         team1BowlingRating += bowlingRating[b]
-                print team1BowlingRating
-                    
+
             conn.close()
         else:
             conn = sqlite3.connect('ccrT20I.db')
@@ -259,7 +255,6 @@ for startDate in startDates:
                     for b in range(0, 7):
                         team1BattingRating += battingRating[b]
                     team1BattingRating = team1BattingRating / 7 * 5
-                print team1BattingRating
 
                 c.execute('select b.playerId, b.t20iId from bowlingT20ILive b, playerInfo p where p.playerId=b.playerId and p.country=? and b.startDate>? and b.startDate<?', (team2, date2yAgo, matchDate))
                 playerT20Is = c.fetchall()
@@ -283,7 +278,6 @@ for startDate in startDates:
                 if len(bowlingRating) >= 5:
                     for b in range(0, 5):
                         team2BowlingRating += bowlingRating[b]
-                print team2BowlingRating
 
                 c.execute('select b.playerId, b.t20iId from battingT20ILive b, playerInfo p where p.playerId=b.playerId and p.country=? and b.startDate>? and b.startDate<?', (team2, date2yAgo, matchDate))
                 playerT20Is = c.fetchall()
@@ -308,7 +302,6 @@ for startDate in startDates:
                     for b in range(0, 7):
                         team2BattingRating += battingRating[b]
                     team2BattingRating = team2BattingRating / 7 * 5
-                print team2BattingRating
 
                 c.execute('select b.playerId, b.t20iId from bowlingT20ILive b, playerInfo p where p.playerId=b.playerId and p.country=? and b.startDate>? and b.startDate<?', (team1, date2yAgo, matchDate))
                 playerT20Is = c.fetchall()
@@ -332,7 +325,6 @@ for startDate in startDates:
                 if len(bowlingRating) >= 5:
                     for b in range(0, 5):
                         team1BowlingRating += bowlingRating[b]
-                print team1BowlingRating
 
             # Check if match is home/away/neutral
             c.execute('select location from t20iInfo where t20iId=?',(matchId,))
@@ -352,10 +344,10 @@ for startDate in startDates:
         team1StartingOdds = team1Rating / (team1Rating + team2Rating)
         team2StartingOdds = 1 - team1StartingOdds
 
-        c.execute('select ocId, overs, runs, wkts, result from overComparison where t20Id=? and innings=1', (t20NumId, ))
+        c.execute('select ocId, overs, runs, wkts, result, runRate from overComparison where t20Id=? and innings=1', (t20NumId, ))
         conn.commit()
         overComp = c.fetchall();
-        fd1 = open('t20ML1.csv','a')
+        fd1 = open('t20ML1UnqRRHMLT.csv','a')
         last3OversOdds = []
         for i in range(0, len(overComp)):
             ocId = overComp[i][0]
@@ -363,11 +355,18 @@ for startDate in startDates:
             runs = overComp[i][2]
             wkts = overComp[i][3]
             matchResult = overComp[i][4]
+            runRate = overComp[i][5]
+            try:
+                float(runRate)
+            except ValueError:
+                runRate = float(runRate.replace("*",""))
 
             if runs == 0:
-                c.execute('select result from overComparison where t20Id<'+`t20NumId`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runs<=1 and wkts>='+`(wkts-1)`+' and wkts<='+`(wkts+1)`)
+                c.execute('select avg(result), t20Id from overComparison where t20Id<'+`t20NumId`+' and t20Id>='+`(t20NumId - 600)`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runs<=1 and wkts>='+`(wkts-1)`+' and wkts<='+`(wkts+1)` + ' group by t20Id ')
             else:
-                c.execute('select result from overComparison where t20Id<'+`t20NumId`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runs<='+`(runs*1.1)`+' and runs>'+`(runs*0.9)`+' and wkts>='+`(wkts-1)`+' and wkts<='+`(wkts+1)`)
+                c.execute('select avg(result), t20Id from overComparison where t20Id<'+`t20NumId`+' and t20Id>='+`(t20NumId - 600)`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runRate<='+`(runRate*1.1)`+' and runRate>'+`(runRate*0.9)`+' and wkts='+`wkts` + ' group by t20Id union '\
+                'select avg(result), t20Id from overComparison where t20Id<'+`t20NumId`+' and t20Id>='+`(t20NumId - 600)`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runRate<='+`(runRate*1.05)`+' and runRate>'+`(runRate*0.85)`+' and wkts='+`(wkts+1)` + ' group by t20Id union '\
+                'select avg(result), t20Id from overComparison where t20Id<'+`t20NumId`+' and t20Id>='+`(t20NumId - 600)`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runRate<='+`(runRate*1.15)`+' and runRate>'+`(runRate*0.95)`+' and wkts='+`(wkts-1)` + ' group by t20Id')
 
             comp = c.fetchall()
             similarCount = len(comp)
@@ -439,10 +438,10 @@ for startDate in startDates:
             fd1.write(`t20NumId` + ","  + `t20Type` + ","  + `overs` + "," + `runs` + "," + `wkts` + "," + `team1Rating` + "," + `team2Rating` + "," + `battingRating` + "," + `bowlingRating` + "," + `team1Home` + "," + `momentum` + "," + `matchOdds` + "," + `matchOddsAdj` + "," + `matchResult/2` + "\n")
         fd1.close()
 
-        c.execute('select ocId, overs, runs, wkts, runsReq, ballsRem, result from overComparison where t20Id=? and innings=2', (t20NumId, ))
+        c.execute('select ocId, overs, runs, wkts, runsReq, ballsRem, result, reqRate from overComparison where t20Id=? and innings=2', (t20NumId, ))
         conn.commit()
         overComp = c.fetchall();
-        fd2 = open('t20ML2.csv','a')
+        fd2 = open('t20ML2UnqRRHMLT.csv','a')
         last3OversOdds = []
         for i in range(0, len(overComp)):
             ocId = overComp[i][0]
@@ -452,11 +451,16 @@ for startDate in startDates:
             runsReq = overComp[i][4]
             ballsRem = overComp[i][5]
             matchResult = overComp[i][6]
+            reqRate = overComp[i][7]
+            if runsReq == 0 or overs == 20 or reqRate == "-" or reqRate == "-*": continue
+            try:
+                float(reqRate)
+            except ValueError:
+                reqRate = float(reqRate.replace("*",""))
 
-            if ballsRem < 30:
-                c.execute('select result from overComparison where t20Id<'+`t20NumId`+' and innings=2 and wkts>='+`(wkts-1)`+' and wkts<='+`(wkts+1)`+' and runsReq>='+`(runsReq*0.75)`+' and runsReq<'+`(runsReq*1.25)`+' and ballsRem<='+`(ballsRem*1.25)`+' and ballsRem>'+`(ballsRem*0.75)`)
-            else:
-                c.execute('select result from overComparison where t20Id<'+`t20NumId`+' and innings=2 and wkts>='+`(wkts-1)`+' and wkts<='+`(wkts+1)`+' and runsReq>='+`(runsReq*0.9)`+' and runsReq<'+`(runsReq*1.1)`+' and ballsRem<='+`(ballsRem*1.1)`+' and ballsRem>'+`(ballsRem*0.9)`)
+            c.execute('select avg(result), t20Id from overComparison where t20Id<'+`t20NumId`+' and t20Id>='+`(t20NumId - 600)`+' and innings=2 and wkts='+`wkts`+' and reqRate>='+`(reqRate*0.9)`+' and reqRate<'+`(reqRate*1.1)`+' and ballsRem<='+`(ballsRem*1.1)`+' and ballsRem>'+`(ballsRem*0.9)` + ' group by t20Id union '\
+            'select avg(result), t20Id from overComparison where t20Id<'+`t20NumId`+' and t20Id>='+`(t20NumId - 600)`+' and innings=2 and wkts='+`(wkts-1)`+' and reqRate>='+`(reqRate*0.95)`+' and reqRate<'+`(reqRate*1.15)`+' and ballsRem<='+`(ballsRem*1.1)`+' and ballsRem>'+`(ballsRem*0.9)` + ' group by t20Id  union '\
+            'select avg(result), t20Id from overComparison where t20Id<'+`t20NumId`+' and t20Id>='+`(t20NumId - 600)`+' and innings=2 and wkts='+`(wkts+1)`+' and reqRate>='+`(reqRate*0.85)`+' and reqRate<'+`(reqRate*1.05)`+' and ballsRem<='+`(ballsRem*1.1)`+' and ballsRem>'+`(ballsRem*0.9)` + ' group by t20Id')
 
             comp = c.fetchall()
             similarCount = len(comp)

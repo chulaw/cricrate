@@ -16,16 +16,17 @@ c.execute('drop table teamODILive')
 c.execute('drop table teamODIOverall')
 #c.execute('''create table odiInfo (odiId integer unique, startDate text, location text, team1 text, team2 text, season text, ground text, ballsPerOver integer, result text, margin text, series text,
 #          seriesStatus text, scoreLink text)''')
-c.execute('create table teamODILive (odiTeamId integer unique, startDate text, team text, opposition integer, location text, result integer, scoreLink text, rating real)')
+c.execute('create table teamODILive (odiTeamId integer unique, startDate text, team text, opposition integer, location text, result integer, scoreLink text, homeRating real, awayRating real, rating real)')
 c.execute('create table teamODIOverall (teamSpan text unique, startDate text, endDate text, span text, team text, odis integer, wins integer, ties integer, losses integer, winPct real, rating real)')
 
 month2Num = {'Jan':'01', 'Feb':'02', 'Mar':'03', 'Apr':'04', 'May':'05', 'Jun':'06', 'Jul':'07', 'Aug':'08', 'Sep':'09', 'Oct':'10', 'Nov':'11', 'Dec':'12'}
 relativeURL = '/ci/engine/records/team/match_results.html?class=2;id=1971;type=year'
-defaultTeamRating = 100.0
+defaultTeamRating = 350.0
+expSmoothFactor = 0.025
 
 # loop through odi matches
-for x in range(0, 46):
-    # load cricinfo annual match list    
+for x in range(0, 47):
+    # load cricinfo annual match list
     yearURL = 'http://stats.espncricinfo.com' + relativeURL
     yearPage = requests.get(yearURL)
     yearTree = html.fromstring(yearPage.text)
@@ -33,7 +34,7 @@ for x in range(0, 46):
     data1 = yearTree.xpath('//a[@class="data-link"]/text()')
     data2 = yearTree.xpath('//td[@nowrap="nowrap"]/text()')
     links = yearTree.xpath('//a[@class="data-link"]/@href')
-    
+
     modD2 = []
     # handle forfeits, incomplete matches
     if '1978' in relativeURL or '1987' in relativeURL or '1988' in relativeURL or '1996' in relativeURL or '2001' in relativeURL:
@@ -41,31 +42,33 @@ for x in range(0, 46):
             if 'Nov 3, 1978' in data2[k] or 'Mar 20, 1987' in data2[k] or 'Oct 14, 1988' in data2[k] or 'Mar 13, 1996' in data2[k] or 'Jun 17, 2001' in data2[k]:
                 modD2.append('forfeit')
                 modD2.append(data2[k])
-            else:            
+            else:
                 modD2.append(data2[k])
         data2 = modD2
-        
+
     relativeURL = yearTree.xpath('//a[@class="QuoteSummary"]/@href')
-    relativeURL = relativeURL[len(relativeURL)-1]    
-    
+    relativeURL = relativeURL[len(relativeURL)-1]
+
     groundLinks = []
     scoreLinks = []
     for j in range(0, len(links)):
         if 'match' in links[j]: scoreLinks.append(links[j])
         if 'ground' in links[j]: groundLinks.append(links[j])
     odiNum = int(len(data2) / 2)
-    
+
     i = 0
+    k = 0
     teams1 = []
     teams2 = []
     grounds = []
     results = []
-    odiIds = []    
+    odiIds = []
+    locations = {}
     while (i < len(data1)):
         team1 = data1[i]
         team2 = data1[i+1]
         teams1.append(team1)
-        teams2.append(team2)                
+        teams2.append(team2)
         odiId = None
         if team1 in data1[i+2] or team2 in data1[i+2]:
             results.append(data1[i+2])
@@ -81,45 +84,99 @@ for x in range(0, 46):
             odiIds.append(data1[i+3].split()[2])
             odiId = data1[i+3].split()[2]
             i = i + 4
-
-        team1LiveRating = {}
-        c.execute('select rating from teamODILive where team=? order by odiTeamId desc', (team1, ))
-        team1LiveRating = c.fetchone()
-        if team1LiveRating is None:
-            team1LiveRating = defaultTeamRating
-        else:
-            team1LiveRating = team1LiveRating[0]
-            
-        team2LiveRating = {}        
-        c.execute('select rating from teamODILive where team=? order by odiTeamId desc', (team2, ))
-        team2LiveRating = c.fetchone()
-        if team2LiveRating is None:
-            team2LiveRating = defaultTeamRating
-        else:
-            team2LiveRating = team2LiveRating[0]
         
+        team1Ratings = {}
+        c.execute('select rating, homeRating, awayRating from teamODILive where team=? order by odiTeamId desc', (team1, ))
+        team1Ratings = c.fetchone()
+        if team1Ratings is None:
+            team1LiveRating = defaultTeamRating
+            team1LiveHomeRating = defaultTeamRating
+            team1LiveAwayRating = defaultTeamRating
+        else:
+            team1LiveRating = team1Ratings[0]
+            team1LiveHomeRating = team1Ratings[1]
+            team1LiveAwayRating = team1Ratings[2]
+
+        team2Ratings = {}
+        c.execute('select rating, homeRating, awayRating from teamODILive where team=? order by odiTeamId desc', (team2, ))
+        team2Ratings = c.fetchone()
+        if team2Ratings is None:
+            team2LiveRating = defaultTeamRating
+            team2LiveHomeRating = defaultTeamRating
+            team2LiveAwayRating = defaultTeamRating
+        else:
+            team2LiveRating = team2Ratings[0]
+            team2LiveHomeRating = team2Ratings[1]
+            team2LiveAwayRating = team2Ratings[2]
+
+        groundURL = 'http://www.espncricinfo.com' + groundLinks[k]
+        groundPage = requests.get(groundURL)
+        groundTree = html.fromstring(groundPage.text)
+        location = groundTree.xpath('(//span[@class="SubnavSubsection"]/text())')[0]
+        locations[odiId] = location
+        k += 1
+
+        team1LocWin = 1
+        team2LocWin = 1
+        team1LocLoss = 1
+        team2LocLoss = 1
+        if location == team1:
+            team1LocWin = 0.75
+            team2LocWin = 1.25
+            team1LocLoss = 1.25
+            team2LocLoss = 0.75
+        elif location == team2:
+            team1LocWin = 1.25
+            team2LocWin = 0.75
+            team1LocLoss = 0.75
+            team2LocLoss = 1.25
+
         if (result == team1):
-            team1LiveRating = team1LiveRating + (team2LiveRating / team1LiveRating) * 2
-            team2LiveRating = team2LiveRating - (team2LiveRating / team1LiveRating) * 2
+            team1LiveRating = expSmoothFactor * (500 + (team2LiveRating / team1LiveRating) * 1000 * team1LocWin) + (1 - expSmoothFactor) * team1LiveRating
+            team2LiveRating = expSmoothFactor * (500 - (team2LiveRating / team1LiveRating) * 1000 * team2LocLoss) + (1 - expSmoothFactor) * team2LiveRating
+            if location == team1:
+                team1LiveHomeRating = expSmoothFactor * (500 + (team2LiveAwayRating / team1LiveHomeRating) * 1000) + (1 - expSmoothFactor) * team1LiveHomeRating
+                team2LiveAwayRating = expSmoothFactor * (500 - (team2LiveAwayRating / team1LiveHomeRating) * 1000) + (1 - expSmoothFactor) * team2LiveAwayRating
+            elif location == team2:
+                team1LiveAwayRating = expSmoothFactor * (500 + (team2LiveHomeRating / team1LiveAwayRating) * 1000) + (1 - expSmoothFactor) * team1LiveAwayRating
+                team2LiveHomeRating = expSmoothFactor * (500 - (team2LiveHomeRating / team1LiveAwayRating) * 1000) + (1 - expSmoothFactor) * team2LiveHomeRating
         elif (result == team2):
-            team1LiveRating = team1LiveRating - (team1LiveRating / team2LiveRating) * 2
-            team2LiveRating = team2LiveRating + (team1LiveRating / team2LiveRating) * 2
+            team1LiveRating = expSmoothFactor * (500 - (team1LiveRating / team2LiveRating) * 1000 * team1LocLoss) + (1 - expSmoothFactor) * team1LiveRating
+            team2LiveRating = expSmoothFactor * (500 + (team1LiveRating / team2LiveRating) * 1000 * team2LocWin) + (1 - expSmoothFactor) * team2LiveRating
+            if location == team1:
+                team1LiveHomeRating = expSmoothFactor * (500 - (team1LiveHomeRating / team2LiveAwayRating) * 1000) + (1 - expSmoothFactor) * team1LiveHomeRating
+                team2LiveAwayRating = expSmoothFactor * (500 + (team1LiveHomeRating / team2LiveAwayRating) * 1000) + (1 - expSmoothFactor) * team2LiveAwayRating
+            elif location == team2:
+                team1LiveAwayRating = expSmoothFactor * (500 - (team1LiveAwayRating / team2LiveHomeRating) * 1000) + (1 - expSmoothFactor) * team1LiveAwayRating
+                team2LiveHomeRating = expSmoothFactor * (500 + (team1LiveAwayRating / team2LiveHomeRating) * 1000) + (1 - expSmoothFactor) * team2LiveHomeRating
         else:
             if (team1LiveRating > team2LiveRating):
-                team1LiveRating = team1LiveRating - (team1LiveRating / team2LiveRating)
-                team2LiveRating = team2LiveRating + (team1LiveRating / team2LiveRating)
+                team1LiveRating = expSmoothFactor * (500 - (team1LiveRating / team2LiveRating) * 500 * team1LocLoss) + (1 - expSmoothFactor) * team1LiveRating
+                team2LiveRating = expSmoothFactor * (500 + (team1LiveRating / team2LiveRating) * 500 * team2LocWin) + (1 - expSmoothFactor) * team2LiveRating
+                if location == team1:
+                    team1LiveHomeRating = expSmoothFactor * (500 - (team1LiveHomeRating / team2LiveAwayRating) * 500) + (1 - expSmoothFactor) * team1LiveHomeRating
+                    team2LiveAwayRating = expSmoothFactor * (500 + (team1LiveHomeRating / team2LiveAwayRating) * 500) + (1 - expSmoothFactor) * team2LiveAwayRating
+                elif location == team2:
+                    team1LiveAwayRating = expSmoothFactor * (500 - (team1LiveAwayRating / team2LiveHomeRating) * 500) + (1 - expSmoothFactor) * team1LiveAwayRating
+                    team2LiveHomeRating = expSmoothFactor * (500 + (team1LiveAwayRating / team2LiveHomeRating) * 500) + (1 - expSmoothFactor) * team2LiveHomeRating
             elif (team1LiveRating < team2LiveRating):
-                team1LiveRating = team1LiveRating + (team2LiveRating / team1LiveRating)
-                team2LiveRating = team2LiveRating - (team2LiveRating / team1LiveRating)          
-        
+                team1LiveRating = expSmoothFactor * (500 + (team2LiveRating / team1LiveRating) * 500 * team1LocWin) + (1 - expSmoothFactor) * team1LiveRating
+                team2LiveRating = expSmoothFactor * (500 - (team2LiveRating / team1LiveRating) * 500 * team2LocLoss) + (1 - expSmoothFactor) * team2LiveRating
+                if location == team1:
+                    team1LiveHomeRating = expSmoothFactor * (500 + (team2LiveAwayRating / team1LiveHomeRating) * 500) + (1 - expSmoothFactor) * team1LiveHomeRating
+                    team2LiveAwayRating = expSmoothFactor * (500 - (team2LiveAwayRating / team1LiveHomeRating) * 500) + (1 - expSmoothFactor) * team2LiveAwayRating
+                elif location == team2:
+                    team1LiveAwayRating = expSmoothFactor * (500 + (team2LiveHomeRating / team1LiveAwayRating) * 500) + (1 - expSmoothFactor) * team1LiveAwayRating
+                    team2LiveHomeRating = expSmoothFactor * (500 - (team2LiveHomeRating / team1LiveAwayRating) * 500) + (1 - expSmoothFactor) * team2LiveHomeRating
+
         odiTeam1Id = repr(int(odiId)) + '1'
         odiTeam2Id = repr(int(odiId)) + '2'
-        c.execute('insert or ignore into teamODILive (odiTeamId, team, opposition, result, rating) values (?, ?, ?, ?, ?)',
-                  (odiTeam1Id, team1, team2, result, team1LiveRating))
-        c.execute('insert or ignore into teamODILive (odiTeamId, team, opposition, result, rating) values (?, ?, ?, ?, ?)',
-                  (odiTeam2Id, team2, team1, result, team2LiveRating))
+        c.execute('insert or ignore into teamODILive (odiTeamId, team, opposition, result, homeRating, awayRating, rating) values (?, ?, ?, ?, ?, ?, ?)',
+                  (odiTeam1Id, team1, team2, result, team1LiveHomeRating, team1LiveAwayRating, team1LiveRating))
+        c.execute('insert or ignore into teamODILive (odiTeamId, team, opposition, result, homeRating, awayRating, rating) values (?, ?, ?, ?, ?, ?, ?)',
+                  (odiTeam2Id, team2, team1, result, team2LiveHomeRating, team2LiveAwayRating, team2LiveRating))
         conn.commit()
- 
+
     startDates = {}
     locations = {}
     for i in range(0, odiNum):
@@ -129,24 +186,19 @@ for x in range(0, 46):
         year = startDate.split()[len(startDate.split())-1]
         day = startDate.split()[1].split('-')[0]
         day = day.split(',')[0]
-        day = '0' + day if int(day) < 10 else day    
+        day = '0' + day if int(day) < 10 else day
         startDate = year + month2Num[month] + day
         startDates[odiIds[i]] = startDate
-        groundURL = 'http://www.espncricinfo.com' + groundLinks[i]
-        groundPage = requests.get(groundURL)
-        groundTree = html.fromstring(groundPage.text)
-        location = groundTree.xpath('(//span[@class="SubnavSubsection"]/text())')[0]
-        locations[odiIds[i]] = location
         print('Dumping details for odi #'+repr(odiIds[i])+' '+teams1[i]+' vs '+teams2[i]+', startDate: '+startDate+', result: '+results[i]+', margin: '+margin+', scoreLink: '+scoreLinks[i]+', ground: '+grounds[i]+', location: '+location)
         c.execute('insert or ignore into odiInfo (odiId, startDate, location, team1, team2, ground, result, margin, scoreLink) values (?, ?, ?, ?, ?, ?, ?, ?, ?)',
                   (odiIds[i], startDate, location, teams1[i], teams2[i], grounds[i], results[i], margin, scoreLinks[i]))
         conn.commit()
-    
+
     for i in range(0, odiNum):
        odiTeam1Id = repr(int(odiIds[i])) + '1'
        odiTeam2Id = repr(int(odiIds[i])) + '2'
-       c.execute('update teamODILive set startDate=?,location=?,scoreLink=? where odiTeamId=?', (startDates[odiIds[i]], locations[odiIds[i]], scoreLinks[i], odiTeam1Id))
-       c.execute('update teamODILive set startDate=?,location=?,scoreLink=? where odiTeamId=?', (startDates[odiIds[i]], locations[odiIds[i]], scoreLinks[i], odiTeam2Id))
+       c.execute('update teamODILive set startDate=?,location=?,scoreLink=? where odiTeamId=?', (startDates[odiIds[i]], location, scoreLinks[i], odiTeam1Id))
+       c.execute('update teamODILive set startDate=?,location=?,scoreLink=? where odiTeamId=?', (startDates[odiIds[i]], location, scoreLinks[i], odiTeam2Id))
        conn.commit()
 
 spans = ['1971-2099', '1971-1984', '1985-1989', '1990-1994', '1995-1999', '2000-2004', '2005-2009', '2010-2014']
@@ -167,7 +219,7 @@ for team in c.fetchall():
             odiId = int((repr(teamMatch[0]))[0:-1])
             if odiId < firstODI: firstODI = odiId
             if odiId > lastODI: lastODI = odiId
-            odis += 1        
+            odis += 1
             if teamMatch[1] == team[0]:
                 wins += 1
             elif teamMatch[1] == "Tie/NR":
@@ -183,7 +235,7 @@ for team in c.fetchall():
         if odis < 25 and odis >= 10 and rating != None: rating = rating * math.exp(-float(25-odis)/25)
         if odis < 10 and rating != None: rating = rating * math.exp(-float(10-odis)/10)
         if rating != None: rating = rating + rating * odis / 20000
-        
+
         c.execute('select startDate from odiInfo where odiId=?',(firstODI, ))
         startDate = c.fetchone()
         if startDate != None: startDate = startDate[0]

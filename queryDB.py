@@ -4,12 +4,57 @@ start = time.clock()
 import sqlite3
 conn = sqlite3.connect('ccr.db')
 c = conn.cursor()
+
+# pitch1Runs = 0
+# pitch1Inns = 0
+# pitch2Runs = 0
+# pitch2Inns = 0
+# pitch3Runs = 0
+# pitch3Inns = 0
+# pitch4Runs = 0
+# pitch4Inns = 0
+# c.execute('select innings, runs, wickets from detailsTestInnings')
+# for inn in c.fetchall():
+#     innings = inn[0]
+#     runs = inn[1]
+#     wkts = inn[2]
+#     if wkts >= 8 or runs >= 450:
+#         if innings == 1:
+#             pitch1Runs += runs
+#             pitch1Inns += 1
+#         elif innings == 2:
+#             pitch2Runs += runs
+#             pitch2Inns += 1
+#         elif innings == 3:
+#             pitch3Runs += runs
+#             pitch3Inns += 1
+#         elif innings == 4:
+#             pitch4Runs += runs
+#             pitch4Inns += 1
+#
+# print "1st: " + `int(pitch1Runs / float(pitch1Inns))`
+# print "2nd: " + `int(pitch2Runs / float(pitch2Inns))`
+# print "3rd: " + `int(pitch3Runs / float(pitch3Inns))`
+# print "4th: " + `int(pitch4Runs / float(pitch4Inns))`
+
+# tossFile = open("runsRatingTest.csv", "w")
+# for row in c.execute('select runs, rating from battingTestInnings where notOut=0'):
+#     tossFile.write(str(row[0]) + "," + str(row[1]) + "\n")
+#     print(row)
+# tossFile.close()
+# tossFile = open("pontingTest.csv", "w")
+# for row in c.execute('select inningsId from battingTestInnings where player=?',("Ricky Ponting",)):
+#     tossFile.write(str(row[0]) + "\n")
+#     print row
+# tossFile.close()
 # for row in c.execute('select b.playerId, b.player, b.notOut, b.runs, b.balls, b.rating, p.country, t.team1, t.team2, t.ground, t.startDate, t.testId from battingTestInnings b, testInfo t, playerInfo p where b.testId=t.testId and b.playerId=p.playerId and b.rating > 1000 order by b.rating desc limit 107'):
 #     print(row)
-#for row in c.execute("select startDate, rating, opposition, location, result from teamTestLive where team='Australia'"):    
+#for row in c.execute("select startDate, rating, opposition, location, result from teamTestLive where team='Australia'"):
 #    print row
-# for row in c.execute('DELETE FROM testInfo where testId>2213'):
-#       print(row)
+# for row in c.execute('DELETE FROM testInfo where testId>2251'):
+#        print(row)
+# for row in c.execute('DELETE FROM teamTestLive where startDate>=20161103'):
+#        print(row)
 #for row in c.execute('select count(testId) FROM testInfo where startDate>=20100101'):
 #      print(row)
 #for row in c.execute('select ocId, overs, runs, wkts, runsReq, ballsRem, result from overComparisonTest'):
@@ -31,14 +76,14 @@ c = conn.cursor()
 # for row in c.execute('SELECT wkts, result from bowlingTestInnings'):
 #     csvF.write(str(row[0]) +"," + str(row[1]) + "\n")
 # csvF.close()
-# for row in c.execute('delete FROM allRoundTestMatch'):
-#      print row
-# for row in c.execute('delete FROM battingTestLive'):
-#      print row
-# for row in c.execute('delete FROM bowlingTestLive'):
-#      print row
-# for row in c.execute('delete FROM allRoundTestLive'):
-#      print row
+for row in c.execute('delete FROM allRoundTestMatch'):
+     print row
+for row in c.execute('delete FROM battingTestLive'):
+     print row
+for row in c.execute('delete FROM bowlingTestLive'):
+     print row
+for row in c.execute('delete FROM allRoundTestLive'):
+     print row
 #for row in c.execute('select count(commentary) FROM fieldingEventTest where directHit>0'):
 #            print row
 #for row in c.execute('select commentary FROM fieldingEventTest where droppedCatch=1 and fielder=?',("Rahul Dravid",)):
@@ -72,7 +117,7 @@ c = conn.cursor()
 #for row in c.execute('select commentary FROM commentaryEventTest where commentary like \"%accurate with the throw%\"'):
 #            print row
 #for row in c.execute("select b.playerId, b.player, b.balls, t.ballsPerOver, b.runs, b.wkts, b.rating, p.country, t.team1, t.team2, t.startDate, t.testId, t.scoreLink from bowlingTestInnings b, testInfo t, playerInfo p where b.testId=t.testId and b.playerId=p.playerId and b.rating > 1000 order by b.rating desc"):
-#    print row    
+#    print row
 #for row in c.execute('SELECT * FROM bowlingTestInnings order by rating asc'):
 #    print row
 #for row in c.execute('SELECT * FROM battingTestLive where player=?',('Brian Lara',)):
@@ -101,7 +146,7 @@ c = conn.cursor()
 #for row in c.execute("select b.playerId, b.player, t.startDate, p.country, t.team1, t.team2, b.rating from battingTestLive b, playerInfo p, testInfo t inner join (select playerId, max(rating) maxRating from battingTestLive group by playerId) as bb on bb.playerId=b.playerId and bb.maxRating=b.rating and p.playerId=b.playerId and t.testId=b.testId order by b.rating asc"):
 #    print row
 #for row in c.execute("select b.playerId, b.player, p.country, b.startDate, b.endDate, b.tests, b.innings, b.notOuts, b.runs, b.average, b.fifties, b.hundreds, b.dblHundreds, b.tripleHundreds, b.rating from battingTestCareer b, playerInfo p where p.playerId=b.playerId and ((b.startDate+b.endDate)/2)>20000101  and ((b.startDate+b.endDate)/2)<20091231 order by b.rating desc limit 100"):
-#    print row    
+#    print row
 #for row in c.execute('SELECT * FROM battingTestCareer where runs>1000 order by strikeRate asc'):
     #print row
 #for row in c.execute('SELECT * FROM allRoundTestCareer order by rating asc'):
@@ -122,10 +167,13 @@ c = conn.cursor()
 ##for row in c.execute('select * from detailsTestInnings where testId=?',(1,)):
 ##for row in c.execute('select t.team, t.startDate, t.rating from teamTestLive t inner join (select team, max(rating) maxRating from teamTestLive group by team) as tt on tt.team=t.team and tt.maxRating=t.rating order by t.rating desc'):
     #print row
+# for row in c.execute('select * from teamTestLive where team="Australia" order by rating asc'):
+#     print row
+
 #for row in c.execute('SELECT * FROM teamTestMatch where team=?',('England',)):
 #for row in c.execute('SELECT * FROM teamTestMatch where team=? order by rating asc',('Pakistan',)):
     #print row
-c.execute('insert into retiredPlayers values (12069)')
+# c.execute('insert into retiredPlayers values (75477)')
 # for row in c.execute('SELECT * FROM retiredPlayers'):
 #     print row
 
@@ -144,6 +192,10 @@ c.execute('insert into retiredPlayers values (12069)')
 #     #tossFile.write(",,," +str(row[1]) + "\n")
 #     tossFile.write(str(row[1]) + "," +str(row[2]) + "," +str(row[3]) + "\n")
 # tossFile.close()
+# c.execute('insert into retiredPlayers values (16241)')
+# c.execute('update testInfo set seriesStatus=? where testId=?', ("Decider", 2254))
+# c.execute('update testInfo set seriesStatus=? where testId=?', ("All-to-Play-for", 2255))
+# c.execute('update testInfo set seriesStatus=? where testId=?', ("All-to-Play-for", 2256))
 conn.commit()
 conn.close()
 elapsed = (time.clock() - start)

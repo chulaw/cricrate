@@ -5,8 +5,8 @@ import os
 testId = int(sys.argv[1])
 # print "Dumping test info"
 # os.system("python dumpTestInfo.py")
-print "Scraping test scorecards"
-os.system("python scrapeScorecard.py " + `testId`)
+# print "Scraping test scorecards"
+# os.system("python scrapeScorecard.py " + `testId`)
 print "Dumping test innings"
 os.system("python dumpInnings.py " + `testId`)
 print "Scraping test fielding"

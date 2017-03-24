@@ -4,9 +4,11 @@ import lxml.html
 from lxml import html
 import requests
 import sqlite3
+import sys
 start = time.clock()
 
-startODI = int(input('Enter starting ODI #: '))
+# startODI = int(input('Enter starting ODI #: '))
+startODI = int(sys.argv[1])
 
 # connect to db
 conn = sqlite3.connect('ccrODI.db')
@@ -32,16 +34,16 @@ def dumpInningsDetails(inningsNum, teamBat, teamBowl, playerLinksBat, playersBat
     if '.' in totalBalls:
         totalBalls = int(totalBalls.split('.')[0]) * ballsPerOver + int(totalBalls.split('.')[1])
     else:
-        totalBalls = int(totalBalls) * ballsPerOver    
+        totalBalls = int(totalBalls) * ballsPerOver
     if len(totalWktsOvers) == 3:
         totalMinutes = totalWktsOvers[2].replace(')','').split()[0]
     else: totalMinutes = 0
-    extras = runsBat[len(runsBat)-1]    
-    
+    extras = runsBat[len(runsBat)-1]
+
     inningsId = repr(int(odiId)) + repr(inningsNum)
     c.execute('''insert or ignore into detailsODIInnings (inningsId, odiId, innings, batTeam, bowlTeam, extras, runs, balls, minutes, wickets, inningsEndDetail) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
             (inningsId, odiId, inningsNum, teamBat, teamBowl, extras, totalBat, totalBalls, totalMinutes, totalWkts, inningsEndDetail))
-      
+
     # store bowling innings
     modDetailsBowl1 = []
     for ii in detailsBowl:
@@ -52,15 +54,15 @@ def dumpInningsDetails(inningsNum, teamBat, teamBowl, playerLinksBat, playersBat
         bowlerId = int(playerLinksBowl[j].split('/')[4].split('.')[0])
         bowlerURL = 'http://www.espncricinfo.com' + playerLinksBowl[j]
         bowlerPage = requests.get(bowlerURL)
-        bowlerTree = html.fromstring(bowlerPage.text)    
+        bowlerTree = html.fromstring(bowlerPage.text)
         bowlerName = bowlerTree.xpath('(//div[@class="ciPlayernametxt"]/div/h1/text())')[0]
-        bowlerFullName = bowlerTree.xpath('(//p[@class="ciPlayerinformationtxt"]/span/text())')[0]        
+        bowlerFullName = bowlerTree.xpath('(//p[@class="ciPlayerinformationtxt"]/span/text())')[0]
 
         c.execute('select playerId from playerInfo where cid=?', (bowlerId,))
-        playerId = c.fetchone()        
-        if playerId is None:            
+        playerId = c.fetchone()
+        if playerId is None:
             playerId = bowlerId * 2 + 3 # change id
-            c.execute('insert or ignore into playerInfo (playerId, player, fullName, country, cid) values (?, ?, ?, ?, ?)', (playerId, bowlerName, bowlerFullName, teamBowl, bowlerId))                
+            c.execute('insert or ignore into playerInfo (playerId, player, fullName, country, cid) values (?, ?, ?, ?, ?)', (playerId, bowlerName, bowlerFullName, teamBowl, bowlerId))
         else: playerId = playerId[0]
         if odiId == 2725 and inningsNum == 1 and bugFixed == 0: # handle odi #2725 sami faridi case
             detailsBowl.insert(37, '0')
@@ -76,7 +78,8 @@ def dumpInningsDetails(inningsNum, teamBat, teamBowl, playerLinksBat, playersBat
                                           3022, 3023, 3024, 3027, 3028, 3029, 3033, 3034, 3035, 3036, 3041, 3042, 3048, 3049, 3050, 3051, 3052, 3053, 3055, 3092, 3096, 3099, 3157, 3158, 3164, 3166, 3171, 3172, 3173, 3174, 3185, 3192, 3193, 3196, 3197,
                                           3230, 3232, 3234, 3242, 3245, 3270, 3271, 3282, 3287, 3306, 3307, 3335, 3336, 3337, 3338, 3339, 3341, 3342, 3344, 3345, 3356, 3357, 3358, 3359, 3379, 3381, 3384, 3386, 3405, 3407, 3410, 3411, 3413, 3417, 3418,
                                           3423, 3426, 3429, 3459, 3460, 3464, 3466, 3468, 3472, 3487, 3488, 3489, 3491, 3492, 3503, 3504, 3505, 3506, 3527, 3528, 3529, 3541, 3542, 3556, 3558, 3560, 3562, 3572, 3573, 3575, 3576, 3581, 3679, 3688, 3690,
-                                          3691, 3693, 3694, 3696, 3697, 3699, 3709, 3711, 3729, 3748, 3749, 3759, 3760, 3761, 3762, 3763, 3764, 3765, 3766, 3767): # cricinfo scorecards display 0s, 4s and 6s scored off bowler
+                                          3691, 3693, 3694, 3696, 3697, 3699, 3709, 3711, 3729, 3748, 3749, 3759, 3760, 3761, 3762, 3763, 3764, 3765, 3766, 3767, 3778, 3779, 3780, 3781, 3782, 3783, 3786, 3801, 3802, 3803, 3823, 3825, 3827, 3835, 3837,
+                                          3838, 3840, 3842, 3844, 3847): # cricinfo scorecards display 0s, 4s and 6s scored off bowler
             if odiId == 3482 and j == 2 and inningsNum == 1: # rehman 0-0-8-0
                 detailsBowl.insert(19, 0)
             maidens = int(detailsBowl[1+j*8])
@@ -101,18 +104,18 @@ def dumpInningsDetails(inningsNum, teamBat, teamBowl, playerLinksBat, playersBat
             resultNum = 1
         else:
             resultNum = 0
-            
+
         if teamBowl == location:
             homeAway = 0
         else:
-            homeAway = 1                                            
-        
+            homeAway = 1
+
         inningsId = repr(int(odiId)) + repr(inningsNum) + repr(playerId)
         c.execute('''insert or ignore into bowlingODIInnings (inningsId, playerId, player, odiId, innings, position, wkts, balls, maidens, runs, homeAway, result) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                 (inningsId, playerId, bowlerName, odiId, inningsNum, (j+1), wkts, ballsBowled, maidens, runsConceded, homeAway, resultNum))
-               
+
         print(repr(inningsId)+",",repr(playerId)+", "+repr(inningsNum)+", "+bowlerName+", wkts: "+repr(wkts)+'/'+repr(runsConceded))
-        
+
     # parse batsmen fall of wicket order
     for k in range(len(fow)):
         batsmenFoW = fow[k].split('(')[1].replace(')','')
@@ -120,7 +123,7 @@ def dumpInningsDetails(inningsNum, teamBat, teamBowl, playerLinksBat, playersBat
         if 'retired not out' in batsmenFoW:
             retiredNotOut[player] = 1
         wktOrder[player] = k
-        
+
         overs = batsmenFoW.split(',')
         if len(overs) == 2:
             overs = overs[1].split()[0]
@@ -133,12 +136,12 @@ def dumpInningsDetails(inningsNum, teamBat, teamBowl, playerLinksBat, playersBat
                     balls = int(overs) * ballsPerOver
         else: balls = None
         wicket = fow[k].split('(')[0].strip().split('-')[0]
-        runs = fow[k].split('(')[0].strip().split('-')[1]        
-        
+        runs = fow[k].split('(')[0].strip().split('-')[1]
+
         fowId = repr(int(odiId)) + repr(inningsNum) + repr((k+1))
         c.execute('''insert or ignore into fowODIInnings (fowId, odiId, innings, runs, wicket, player, balls) values (?, ?, ?, ?, ?, ?, ?)''',
                 (fowId, odiId, inningsNum, runs, wicket, player, balls))
-        
+
     print('\nBatting details:')
     ###########################################################################################################################
     # store batting innings and live ratings data
@@ -150,13 +153,13 @@ def dumpInningsDetails(inningsNum, teamBat, teamBowl, playerLinksBat, playersBat
         batsmanName = batsmanTree.xpath('(//div[@class="ciPlayernametxt"]/div/h1/text())')[0]
         batsmanFullName = batsmanTree.xpath('(//p[@class="ciPlayerinformationtxt"]/span/text())')[0]
 
-        c.execute('select playerId from playerInfo where cid=?', (batsmanId,))    
-        playerId = c.fetchone()        
+        c.execute('select playerId from playerInfo where cid=?', (batsmanId,))
+        playerId = c.fetchone()
         if playerId is None:
             playerId = batsmanId * 2 + 3 # change id
             c.execute('insert or ignore into playerInfo (playerId, player, fullName, country, cid) values (?, ?, ?, ?, ?)', (playerId, batsmanName, batsmanFullName, teamBat, batsmanId))
         else: playerId = playerId[0]
-        
+
         dismissalInfo = dismissalsBat[i].strip()
         if dismissalInfo == 'not out':
             notOut = 1
@@ -164,19 +167,19 @@ def dumpInningsDetails(inningsNum, teamBat, teamBowl, playerLinksBat, playersBat
             notOut = 0
         if runsBat[i] == '-': continue
         totalPct = float(runsBat[i]) * 100 / float(totalBat) if float(totalBat) > 0 else 0.0
-        
+
         minutes = minutesBat[i]
         balls = ballsBat[i]
         fours = foursBat[i]
         sixes = sixesBat[i]
-        
+
         if i < 2 :
             entryRuns = 0
             entryWkts = 0
         else:
             entryRuns = int(fow[i-2].split('-')[1].split()[0].replace('*',''))
             entryWkts = int(fow[i-2].split('-')[0])
-        
+
         lastName = playersBat[i] if len(playersBat[i].split()) == 1 else playersBat[i].split()[1]
         if lastName in wktOrder:
             wktsAtCrease = wktOrder[lastName] - entryWkts
@@ -184,8 +187,8 @@ def dumpInningsDetails(inningsNum, teamBat, teamBowl, playerLinksBat, playersBat
             wktsAtCrease = wktOrder[playersBat[i]] - entryWkts
         else: #not out
             wktsAtCrease = totalWkts - entryWkts
-                        
-        if (playersBat[i] not in wktOrder and (lastName in retiredNotOut) or (playersBat[i] in retiredNotOut)): notOut = 1 
+
+        if (playersBat[i] not in wktOrder and (lastName in retiredNotOut) or (playersBat[i] in retiredNotOut)): notOut = 1
         if teamBat == location:
             homeAway = 0
         else:
@@ -195,16 +198,16 @@ def dumpInningsDetails(inningsNum, teamBat, teamBowl, playerLinksBat, playersBat
         elif result == 'Tie/NR':
             resultNum = 1
         else:
-            resultNum = 0    
-        
+            resultNum = 0
+
         inningsId = repr(int(odiId)) + repr(inningsNum) + repr(playerId)
         c.execute('''insert or ignore into battingODIInnings (inningsId, playerId, player, odiId, innings, position, dismissalInfo, notOut, runs, minutes, balls, fours, sixes, totalPct, entryRuns, entryWkts,
                   wicketsAtCrease, homeAway, result) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                 (inningsId, playerId, batsmanName, odiId, inningsNum, (i+1), dismissalInfo, notOut, int(runsBat[i]), minutes, balls, fours, sixes, totalPct, entryRuns, entryWkts, wktsAtCrease, homeAway, resultNum))
-       
+
         print(repr(inningsId)+",",repr(playerId)+", "+repr(inningsNum)+", "+batsmanName+", runs: "+repr(int(runsBat[i])))
     conn.commit()
-    
+
 # loop through odi matches
 for x in range(startODI, len(odisInfo)):
     # load cricinfo scorecard html
@@ -212,12 +215,12 @@ for x in range(startODI, len(odisInfo)):
     startDate = odisInfo[x][1]
     location = odisInfo[x][2]
     result = odisInfo[x][8]
-    
+
     scorecardURL = 'http://www.espncricinfo.com' + odisInfo[x][12]
     scorecardPage = requests.get(scorecardURL)
     scoreTree = html.fromstring(scorecardPage.text)
-    
-    # parse all relevant fields from scorecard    
+
+    # parse all relevant fields from scorecard
     series = scoreTree.xpath('(//a[@class="headLink"]/text())')[0]
     seriesODI = scoreTree.xpath('(//div[@class="space-top-bottom-5"]/text())')
     seriesODI = "" if not seriesODI else seriesODI[0]
@@ -250,7 +253,7 @@ for x in range(startODI, len(odisInfo)):
         detailsBowl1 = [x for x in detailsBowl1 if x.replace('.','',1).isdigit()]
         detailsHeadBat1 = [y.text for y in scoreTree.xpath('(//table[@class="batting-table innings"])[1]/tr[@class="tr-heading"]/th[@scope="col"]')]
         detailsBat1 = [y.text for y in scoreTree.xpath('(//table[@class="batting-table innings"])[1]/tr/td[@class=""]')]
-        
+
         del detailsHeadBat1[0]
         del detailsHeadBat1[0]
         i = 0
@@ -278,7 +281,7 @@ for x in range(startODI, len(odisInfo)):
                 sixIndex = detailsHeadBat1.index('6s')
                 sixesBat1.append(detailsBat1[sixIndex+i])
             except ValueError:
-                sixesBat1.append(None)                
+                sixesBat1.append(None)
             i += len(detailsHeadBat1)
     if len(batInn2) != 0 and 'forfeit' not in batInn2[0] and 'innings' in batInn2[0]:
         teamBat2 = batInn2[0]
@@ -297,7 +300,7 @@ for x in range(startODI, len(odisInfo)):
         detailsBowl2 = [x for x in detailsBowl2 if x.replace('.','',1).isdigit()]
         detailsHeadBat2 = [y.text for y in scoreTree.xpath('(//table[@class="batting-table innings"])[2]/tr[@class="tr-heading"]/th[@scope="col"]')]
         detailsBat2 = [y.text for y in scoreTree.xpath('(//table[@class="batting-table innings"])[2]/tr/td[@class=""]')]
-        
+
         del detailsHeadBat2[0]
         del detailsHeadBat2[0]
         i = 0
@@ -325,9 +328,9 @@ for x in range(startODI, len(odisInfo)):
                 sixIndex = detailsHeadBat2.index('6s')
                 sixesBat2.append(detailsBat2[sixIndex+i])
             except ValueError:
-                sixesBat2.append(None)                
+                sixesBat2.append(None)
             i += len(detailsHeadBat2)
-        
+
     print('\nDumping details for odi #'+repr(int(odiId)))
     c.execute('update odiInfo set series=?,season=?,ballsPerOver=? where odiId=?', (series, season, ballsPerOver, odiId))
 

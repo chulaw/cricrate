@@ -32,8 +32,6 @@ fd = open('testML4.csv','a')
 fd.write("Id,Overs,Runs,Wkts,RunsReq,OversRem,Team1Rating,Team2Rating,HomeAway,WinOdds,DrawOdds,WinResult,DrawResult\n")
 fd.close()
 
-
-
 def inningsOdds(testId, innNum):
     conn = sqlite3.connect('ccr.db')
     c = conn.cursor()
@@ -48,8 +46,8 @@ def inningsOdds(testId, innNum):
         runsReq = overComp[i][4]
         ballsRem = overComp[i][5]
         matchResult = overComp[i][6]
-        if innNum == 4:            
-            if int(runsReq) < 0:            
+        if innNum == 4:
+            if int(runsReq) < 0:
                 c.execute('''select runs, wkts, runsReq, ballsRem, result, testId from overComparisonTest where testId<? and innings=? and wkts>=? and wkts<=? and runsReq>=? and runsReq<? and ballsRem<=? and ballsRem>?''',
                         (testId, innNum, wkts-1, wkts+1, runsReq*1.1, runsReq*0.9, ballsRem*1.1, ballsRem*0.9))
             else:
@@ -60,14 +58,14 @@ def inningsOdds(testId, innNum):
                     c.execute('''select runs, wkts, runsReq, ballsRem, result, testId from overComparisonTest where testId<? and innings=? and wkts>=? and wkts<=? and runsReq>=? and runsReq<? and ballsRem<=? and ballsRem>?''',
                             (testId, innNum, wkts-1, wkts+1, runsReq*0.9, runsReq*1.1, ballsRem*1.1, ballsRem*0.9))
         else:
-            if int(runsReq) < 0:            
+            if int(runsReq) < 0:
                 c.execute('''select runs, wkts, runsReq, ballsRem, result, testId from overComparisonTest where testId<? and innings=? and ballsRem>? and ballsRem<=? and wkts>=? and wkts<=? and runsReq>=? and runsReq<?''',
                         (testId, innNum, ballsRem*0.9, ballsRem*1.1, wkts-1, wkts+1, runsReq*1.1, runsReq*0.9))
             else:
                 c.execute('''select runs, wkts, runsReq, ballsRem, result, testId from overComparisonTest where testId<? and innings=? and ballsRem>? and ballsRem<=? and wkts>=? and wkts<=? and runsReq>=? and runsReq<?''',
                         (testId, innNum, ballsRem*0.9, ballsRem*1.1, wkts-1, wkts+1, runsReq*0.9, runsReq*1.1))
         comp = c.fetchall()
-        similarCount = len(comp)        
+        similarCount = len(comp)
         winCount = 0.0
         drawCount = 0.0
         for j in range(0, len(comp)):
@@ -181,14 +179,14 @@ for x in range(0, len(result)):
         if len(team1Rating) > 0:
             team1Rating = team1Rating[len(team1Rating)-1][0]
         else:
-            team1Rating = 100.0
+            team1Rating = 500.0
 
         c.execute('select rating from teamTestLive where team=? and startDate<?',(team2, testDate))
         team2Rating = c.fetchall()
         if len(team2Rating) > 0:
             team2Rating = team2Rating[len(team2Rating)-1][0]
         else:
-            team2Rating = 100.0
+            team2Rating = 500.0
 
         team1StartingOddsUnAdj = team1Rating / (team1Rating + team2Rating)
         team2StartingOddsUnAdj = 1 - team1StartingOddsUnAdj
@@ -233,7 +231,7 @@ for x in range(0, len(result)):
         ocId = overComp[i][0]
         overs = overComp[i][1]
         runs = overComp[i][2]
-        wkts = overComp[i][3]        
+        wkts = overComp[i][3]
         matchResult = overComp[i][4]
         ballsRem = overComp[i][5]
         if runs == 0:
@@ -243,7 +241,7 @@ for x in range(0, len(result)):
             c.execute('''select runs, wkts, result, testId from overComparisonTest where testId<? and innings=1 and ballsRem>? and ballsRem<=? and runs<=? and runs>? and wkts>=? and wkts<=?''',
                       (testId, ballsRem*0.9, ballsRem*1.1, runs*1.1, runs*0.9, wkts-1, wkts+1))
         comp = c.fetchall()
-        similarCount = len(comp)        
+        similarCount = len(comp)
         winCount = 0.0
         drawCount = 0.0
         for j in range(0, len(comp)):
@@ -290,12 +288,12 @@ for x in range(0, len(result)):
 
     inningsOdds(testId, 2)
     conn.close()
-    
+
     inningsOdds(testId, 3)
     conn.close()
-    
+
     inningsOdds(testId, 4)
-    conn.close()    
+    conn.close()
 elapsedSec = (time.clock() - start)
 elapsedMin =  elapsedSec / 60
 print 'Time elapsed: ' + `elapsedMin` + 'min'

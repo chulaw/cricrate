@@ -94,8 +94,9 @@ for player in c.fetchall():
         startD = date(int(startDate[:4]), int(startDate[4:-2]), int(startDate[6:]))
         endD = date(int(endDate[:4]), int(endDate[4:-2]), int(endDate[6:]))
         careerDays = endD - startD
-        longevity = (careerDays.days - noTestYears * 365 * 0.5) * (float(tests)/float(teamTests)) / 15000
+        longevity = (careerDays.days - noTestYears * 365 * 0.5) * (float(tests)/float(teamTests)) / 16500
     if rating != None: rating = (rating + rating * longevity) * 0.97
+    if rating != None: battingCareerRating = rating
     if ci95 != None and mean != 0: ci95 = ci95 * rating / mean
 
     c.execute('''insert or ignore into battingTestCareer (startDate, endDate, playerId, player, tests, innings, notOuts, runs, average, strikeRate, fifties, hundreds, dblHundreds, tripleHundreds, rating, confInt95)
@@ -173,8 +174,9 @@ for player in c.fetchall():
         startD = date(int(startDate[:4]), int(startDate[4:-2]), int(startDate[6:]))
         endD = date(int(endDate[:4]), int(endDate[4:-2]), int(endDate[6:]))
         careerDays = endD - startD
-        longevity = (careerDays.days - noTestYears * 365 * 0.5) * (float(tests)/float(teamTests)) / 18500
-    if rating != None: rating = (rating + rating * longevity) * 0.97
+        longevity = (careerDays.days - noTestYears * 365 * 0.5) * (float(tests)/float(teamTests)) / 20000
+    if rating != None: rating = (rating + rating * longevity) * 1.02
+    if rating != None: bowlingCareerRating = rating
     if ci95 != None and mean != 0: ci95 = ci95 * rating / mean
 
     c.execute('''insert or ignore into bowlingTestCareer (startDate, endDate, playerId, player, tests, innings, balls, runs, wickets, average, strikeRate, econRate, fiveWkts, tenWkts, rating, confInt95)
@@ -243,13 +245,9 @@ for player in c.fetchall():
         startD = date(int(startDate[:4]), int(startDate[4:-2]), int(startDate[6:]))
         endD = date(int(endDate[:4]), int(endDate[4:-2]), int(endDate[6:]))
         careerDays = endD - startD
-        longevity = (careerDays.days - noTestYears * 365 * 0.5) * (float(tests)/float(teamTests)) / 15000
-    if rating != None: rating = (rating + rating * longevity) * 0.774
-
-    if rating != None and battingAverage != None and bowlingAverage != None:
-        battingAverageMod = 100.0 if float(battingAverage) > 100.0 else float(battingAverage)
-        bowlingAverageMod = 10.0 if float(bowlingAverage) < 10.0 else float(bowlingAverage)
-        rating = rating + float(battingAverageMod) * 50 /float(bowlingAverageMod) # add battingAvg/bowlingAvg bonus
+        longevity = (careerDays.days - noTestYears * 365 * 0.5) * (float(tests)/float(teamTests)) / 15500
+    if rating != None: rating = (rating + rating * longevity) * 0.76
+    if rating != None and battingCareerRating != None and bowlingCareerRating != None: rating = rating + float(battingCareerRating) * float(bowlingCareerRating) / 5000
     if ci95 != None and mean != 0: ci95 = ci95 * rating / mean
 
     c.execute('''insert or ignore into allRoundTestCareer (startDate, endDate, playerId, player, tests, runs, battingAverage, hundreds, wickets, bowlingAverage, fiveWkts, hundredFiveWkts, rating, confInt95)

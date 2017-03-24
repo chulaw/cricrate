@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import time
@@ -7,9 +7,11 @@ from lxml import html
 import requests
 import sqlite3
 import re
+import sys
 start = time.clock()
 
-startODI = int(input('Enter starting ODI #: '))
+# startODI = int(input('Enter starting ODI #: '))
+startODI = int(sys.argv[1])
 startODI = 1780 if startODI == 0 else startODI
 
 #set PYTHONIOENCODING=utf-8
@@ -22,7 +24,7 @@ odisInfo = c.fetchall()
 ignoreDL = (1782, 1783, 1784, 1785, 1786, 1787, 1788, 1790, 1792, 1793, 1794, 1795, 1796, 1797, 1798, 1799, 1800, 1801, 1802, 1803, 1804, 1806, 1807, 1808, 1810, 1812, 1813, 1814, 1815, 1816,
             1818, 1819, 1820, 1821, 1822, 1823, 1824, 1825, 1826, 1827, 1828, 1829, 1830, 1831, 1832, 1834, 1835, 1836, 1837, 1838, 1839, 1840, 1841, 1842, 1843, 1844, 1846, 1847, 1848, 1849,
             1850, 1851, 1852, 1853, 1854, 1855, 1856, 1857, 1858, 1859, 1860, 1861, 1862, 1863, 1864, 1865, 1866, 1867, 1868, 1869, 1870, 1871, 1872, 1873, 1874, 1875, 1876, 1877, 1878, 1879,
-            1880, 1881, 1882, 1883, 1884, 1885, 1886, 1887, 1888, 1889, 1890)
+            1880, 1881, 1882, 1883, 1884, 1885, 1886, 1887, 1888, 1889, 1890, 3823)
 newPlayerPenaltyFactor = 0.0425
 expSmoothFactor = 0.05
 
@@ -93,6 +95,7 @@ for x in range(startODI, len(odisInfo)):
     detailedCommentaryCount = 0
     for inn in range(1, 3):
         fieldingURL = 'http://www.espncricinfo.com' + odisInfo[x][2] + '?innings=' + `inn` + ';view=commentary'
+        print fieldingURL
         fieldingPage = requests.get(fieldingURL)
         fieldingTree = html.fromstring(fieldingPage.text)
 

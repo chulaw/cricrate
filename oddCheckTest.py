@@ -6,21 +6,21 @@ import csv
 start = time.clock()
 
 for inn in range(0, 4):
-    f = open("testOdds2.csv","rb")
+    f = open("testMLPred.csv","rb")
     reader = csv.reader(f, delimiter=',')
     sumWins = {0:0, 10:0, 20:0, 30:0, 40:0, 50:0, 60:0, 70:0, 80:0, 90:0, 100:0}
     winCountNum = {0:0, 10:0, 20:0, 30:0, 40:0, 50:0, 60:0, 70:0, 80:0, 90:0, 100:0}
     sumDraws = {0:0, 10:0, 20:0, 30:0, 40:0, 50:0, 60:0, 70:0, 80:0, 90:0, 100:0}
     drawCountNum = {0:0, 10:0, 20:0, 30:0, 40:0, 50:0, 60:0, 70:0, 80:0, 90:0, 100:0}
     for row in reader:
-        if row[4] == "None" or row[5] == "None": continue
-        if int(row[0]) < 1600: continue
+        if row[5] == "None" or row[6] == "None" or row[6] == "DrawResult": continue
+        # if int(row[0]) < 1600: continue
         if int(row[1]) == (inn + 1):
-            winOdds = float(row[4])
-            drawOdds = float(row[5])
+            winOdds = float(row[3])
+            drawOdds = float(row[4])
             roundWinOdds = round(winOdds, -1)
             roundDrawOdds = round(drawOdds, -1)
-            winCount = float(row[6])/2 if int(row[6]) == 2 else 0.0
+            winCount = float(row[5])/2 if int(row[5]) == 2 else 0.0
             drawCount = float(row[6]) if int(row[6]) == 1 else 0.0
             sumWins[int(roundWinOdds)] += winCount
             sumDraws[int(roundDrawOdds)] += drawCount
@@ -28,7 +28,7 @@ for inn in range(0, 4):
             drawCountNum[int(roundDrawOdds)] += 1
     f.close()
 
-    fd = open('oddCheckTest2.csv','a')
+    fd = open('oddCheckMLTest.csv','a')
     winOddsDiffWeightedSum = 0
     drawOddsDiffWeightedSum = 0
     winCountCases = 0

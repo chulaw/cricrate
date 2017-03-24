@@ -6,7 +6,7 @@ import csv
 start = time.clock()
 
 for inn in range(0, 2):
-    f = open("odiMLPred"+`(inn+1)`+".csv","rb")
+    f = open("odiMLPred"+`(inn+1)`+"UnqRRHML1000T.csv","rb")
     reader = csv.reader(f, delimiter=',')
     sumWins = {0:0, 10:0, 20:0, 30:0, 40:0, 50:0, 60:0, 70:0, 80:0, 90:0, 100:0}
     countNum = {0:0, 10:0, 20:0, 30:0, 40:0, 50:0, 60:0, 70:0, 80:0, 90:0, 100:0}
@@ -21,7 +21,7 @@ for inn in range(0, 2):
             countNum[int(roundOdds)] += 1
     f.close()
 
-    fd = open('odiMLOddCheck.csv','a')
+    fd = open('odiMLOddCheckUnqRRHML1000T.csv','a')
     oddsDiffWeightedSum = 0
     countCases = 0
     for pct in sorted(sumWins):

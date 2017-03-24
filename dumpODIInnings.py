@@ -2,9 +2,11 @@
 import time
 import sqlite3
 import math
+import sys
 start = time.clock()
 
-startODI = int(input('Enter starting ODI #: '))
+# startODI = int(input('Enter starting ODI #: '))
+startODI = int(sys.argv[1])
 
 # connect to db
 conn = sqlite3.connect('ccrODI.db')
@@ -38,10 +40,10 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
     teamBowl = detailInnings[4]
     totalRuns = detailInnings[6]
     totalBalls = detailInnings[7]
-    totalWkts = detailInnings[9]    
+    totalWkts = detailInnings[9]
     numBatInns = totalWkts if totalWkts == 10 else totalWkts + 2
-    
-    for battingInn in batInnings:   
+
+    for battingInn in batInnings:
         batsmanId = battingInn[1]
         position = battingInn[5]
         c.execute('select inningsId, rating from battingODILive where playerId=? order by inningsId desc', (batsmanId, ))
@@ -49,13 +51,13 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         if battingLiveRating[batsmanId] is None:
             battingLiveRating[batsmanId] = defaultBattingRating[position-1]
             battingLastInningsId[batsmanId] = None
-            battingNumCareerInnings[batsmanId] = 0            
+            battingNumCareerInnings[batsmanId] = 0
         else:
             battingLastInningsId[batsmanId] = battingLiveRating[batsmanId][0]
-            battingLiveRating[batsmanId] = battingLiveRating[batsmanId][1]            
+            battingLiveRating[batsmanId] = battingLiveRating[batsmanId][1]
             battingNumCareerInnings[batsmanId] = len(c.fetchall())+1
         teamBattingRating += battingLiveRating[batsmanId] / numBatInns
-        
+
         dismissalInfo = battingInn[6]
         if 'b ' in dismissalInfo:
             bowlerIndex = dismissalInfo.index('b ')
@@ -64,9 +66,9 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
                 wktsRating[bowlerName] += battingLiveRating[batsmanId]
             else:
                 wktsRating[bowlerName] = battingLiveRating[batsmanId]
-    
+
     ###########################################################################################################################
-    # store bowling live ratings data    
+    # store bowling live ratings data
     teamBowlingRating = 0.0;
     for bowlInn in bowlInnings:
         bowlerId = bowlInn[1]
@@ -108,17 +110,17 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
             econRate = 6
         else:
             econRate = 6 / float(ballsBowled)
-        
+
         sigContrib = 12.5 if (math.pow(wkts, 2) / float(1 + runsConceded) * teamEcon / econRate) > 0.08 else (math.pow(wkts, 2) / float(1 + runsConceded) * teamEcon / econRate) * 156.25
         wktsPerRun = math.pow(wkts, 2) * 225 / float(15 + runsConceded)
         economy = 2.1 * (float(teamEcon / econRate) * 1.1 + 45 / math.pow((econRate + 3), 2)) * math.pow(float(ballsBowled), 2) / float(totalBalls)
         wktsPerBall = math.pow(wkts, 2) * 125 / float(30 + ballsBowled)
         dismissalRatingMod = dismissalRating * 5 / float(15 + runsConceded) if wkts > 0 else 0
         battingRatingMod = teamBattingRating * sigContrib / 75
-        resultRating = resultNum * sigContrib * teamRating[teamBat] / 125
+        resultRating = resultNum * sigContrib * teamRating[teamBat] / 625
         homeAwayMod = homeAway * sigContrib
         milestone = 15 if wkts >= 5 else 0
-        
+
         # points for significant contribution in winning significant matches (finals, world cup knock-out matches)
         status = 0
         if "final" in series.lower():
@@ -126,7 +128,7 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
                 status = 8 * sigContrib
             else:
                 status = 4 * sigContrib
-        
+
         # bowling innings rating
         rating = (wktsPerRun + economy + wktsPerBall + dismissalRatingMod + battingRatingMod + resultRating + homeAwayMod + milestone + status) * 3.7
 
@@ -141,20 +143,20 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         elif int(startDate) >= 20121030:
             rating = rating / 0.925
 
-        allRoundName[bowlerId] = bowlerName        
-        allRoundWkts[bowlerId] = wkts            
+        allRoundName[bowlerId] = bowlerName
+        allRoundWkts[bowlerId] = wkts
         allRoundBowlRuns[bowlerId] = runsConceded
         allRoundBowling[bowlerId] = rating
-        
+
         inningsId = repr(int(odiId)) + repr(inningsNum) + repr(bowlerId)
-        c.execute('update bowlingODIInnings set battingRating=?,wktsRating=?,status=?,rating=? where inningsId=?', (battingRatingMod, dismissalRatingMod, status, rating, inningsId))    
-        
-        # update next innings rating to measure prediction error        
+        c.execute('update bowlingODIInnings set battingRating=?,wktsRating=?,status=?,rating=? where inningsId=?', (battingRatingMod, dismissalRatingMod, status, rating, inningsId))
+
+        # update next innings rating to measure prediction error
         c.execute('update bowlingODILive set nextInningsRating=? where inningsId=?', (rating, bowlingLastInningsId))
-        
+
         liveRating = rating
         if bowlingNumCareerInnings == 0: # discount live ratings for a player's first 20 innings to avoid them hitting top rankings prematurely
-            liveRating = rating * 0.15            
+            liveRating = rating * 0.15
         elif bowlingNumCareerInnings < 20:
             liveRating = expSmoothFactor * rating * (0.235 + newPlayerPenaltyFactor*(bowlingNumCareerInnings-1)) + (1 - expSmoothFactor) * bowlingLiveRating
         else:
@@ -162,7 +164,7 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         c.execute('insert or ignore into bowlingODILive(inningsId, startDate, playerId, odiId, player, rating) values (?, ?, ?, ?, ?, ?)',
                     (inningsId, startDate, bowlerId, odiId, bowlerName, liveRating))
         print(repr(inningsId)+",",repr(bowlerId)+", "+repr(inningsNum)+", "+bowlerName+", wkts: "+repr(wkts)+'/'+repr(runsConceded)+', econ: '+repr(int(econRate * 100 / teamEcon))+', current: '+repr(int(liveRating))+', innings: '+repr(int(rating)))
-        
+
     print('\nBatting details:')
     ###########################################################################################################################
     # store batting live ratings data
@@ -190,7 +192,7 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         for wp in range(entryWkts+1, entryWkts+wktsAtCrease+1):
             wktsAtCreaseEffVal += float(wktPosVal[wp])
         pointOfEntry = sigContrib * math.sqrt(entryWkts + wktsAtCreaseEffVal) * 40 / pointOfEntry
-        resultRating = resultNum * sigContrib * teamRating[teamBowl] / 125
+        resultRating = resultNum * sigContrib * teamRating[teamBowl] / 625
         bowlingRatingMod = teamBowlingRating * sigContrib / 65
         homeAwayMod = homeAway * sigContrib
         if float(runs) >= 100: milestone = 15
@@ -220,26 +222,26 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         elif int(startDate) >= 20121030:
             rating = rating * 0.925
 
-        allRoundName[batsmanId] = batsmanName       
+        allRoundName[batsmanId] = batsmanName
         allRoundRuns[batsmanId] = runs
-        allRoundNotOut[batsmanId] = notOut                    
+        allRoundNotOut[batsmanId] = notOut
         allRoundBatting[batsmanId] = rating
-                        
+
         # avoid penalizing not out innings unnecessarily, diminishing points for not outs the higher the runs
         if notOut == 1:
             if battingLiveRating[batsmanId] > rating:
                 rating = battingLiveRating[batsmanId]
             else: rating += 30 * math.exp(-float(runs)/100)
-        
+
         inningsId = repr(int(odiId)) + repr(inningsNum) + repr(batsmanId)
         c.execute('update battingODIInnings set bowlingRating=?,status=?,rating=? where inningsId=?', (bowlingRatingMod, status, rating, inningsId))
-        
-        # update next innings rating to measure prediction error        
+
+        # update next innings rating to measure prediction error
         c.execute('update battingODILive set nextInningsRating=? where inningsId=?', (rating, battingLastInningsId[batsmanId]))
-        
+
         liveRating = rating
         if battingNumCareerInnings[batsmanId] == 0: # discount live ratings for a player's first 20 innings to avoid them hitting top rankings prematurely
-            liveRating = rating * 0.15            
+            liveRating = rating * 0.15
         elif battingNumCareerInnings[batsmanId] < 20:
             liveRating = expSmoothFactor * rating * (0.235 + newPlayerPenaltyFactor*(battingNumCareerInnings[batsmanId]-1)) + (1 - expSmoothFactor) * battingLiveRating[batsmanId]
         else:
@@ -248,7 +250,7 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
                     (inningsId, startDate, batsmanId, odiId, batsmanName, liveRating))
         print(repr(inningsId)+",",repr(batsmanId)+", "+repr(inningsNum)+", "+batsmanName+", runs: "+repr(int(runs))+", sr: "+repr(int(strikeRate))+', current: '+repr(int(liveRating))+', innings: '+repr(int(rating)))
     conn.commit()
-    
+
 # loop through odi matches
 for x in range(startODI, len(odisInfo)):
 #for x in range(startODI, (startODI+1)):
@@ -260,19 +262,19 @@ for x in range(startODI, len(odisInfo)):
     team2  = odisInfo[x][4]
     result = odisInfo[x][8]
     series = odisInfo[x][10]
-    
+
     teamRating = {}
-    c.execute('select rating from teamODILive where team=? and startDate<? order by startDate desc', (team1, startDate))    
+    c.execute('select rating from teamODILive where team=? and startDate<? order by startDate desc', (team1, startDate))
     res = c.fetchone()
-    teamRating[team1] = 100.0 if res is None else res[0]
+    teamRating[team1] = 500.0 if res is None else res[0]
     if team1 in teamMod:
         teamRating[teamMod[team1]] = teamRating[team1]
     c.execute('select rating from teamODILive where team=? and startDate<? order by startDate desc', (team2, startDate))
     res = c.fetchone()
-    teamRating[team2] = 100.0 if res is None else res[0]
+    teamRating[team2] = 500.0 if res is None else res[0]
     if team2 in teamMod:
-        teamRating[teamMod[team2]] = teamRating[team2]    
-    
+        teamRating[teamMod[team2]] = teamRating[team2]
+
     print('\nDumping innings ratings for odi #'+repr(int(odiId)))
     allRoundName = {}
     allRoundRuns = {}
@@ -281,17 +283,17 @@ for x in range(startODI, len(odisInfo)):
     allRoundBowlRuns = {}
     allRoundBatting = {}
     allRoundBowling = {}
-    c.execute('select innings from detailsODIInnings where odiId=?', (odiId, ))    
+    c.execute('select innings from detailsODIInnings where odiId=?', (odiId, ))
     for inn in c.fetchall():
-        innings = inn[0]        
-        c.execute('select * from detailsODIInnings where odiId=? and innings=?', (odiId, innings))        
-        detailInnings = c.fetchall()        
-        c.execute('select * from battingODIInnings where odiId=? and innings=?', (odiId, innings))        
-        batInnings = c.fetchall()        
-        c.execute('select * from bowlingODIInnings where odiId=? and innings=?', (odiId, innings))        
-        bowlInnings = c.fetchall()        
+        innings = inn[0]
+        c.execute('select * from detailsODIInnings where odiId=? and innings=?', (odiId, innings))
+        detailInnings = c.fetchall()
+        c.execute('select * from battingODIInnings where odiId=? and innings=?', (odiId, innings))
+        batInnings = c.fetchall()
+        c.execute('select * from bowlingODIInnings where odiId=? and innings=?', (odiId, innings))
+        bowlInnings = c.fetchall()
         dumpInningsDetails(innings, detailInnings[0], batInnings, bowlInnings, teamRating)
-        
+
     print('\nAll-Round details:')
     for aRId in allRoundName.keys():
         allRoundLiveRating = {}
@@ -306,12 +308,12 @@ for x in range(startODI, len(odisInfo)):
             allRoundLastMatchId = allRoundLiveRating[0]
             allRoundLiveRating = allRoundLiveRating[1]
             allRoundNumCareerODIs = len(c.fetchall())+1
-          
+
         if aRId not in allRoundBatting:
             allRoundBatting[aRId] = None
             allRoundRuns[aRId] = None
             allRoundNotOut[aRId] = None
-            
+
         if aRId not in allRoundBowling:
             allRoundBowling[aRId] = 0
             allRoundWkts[aRId] = None
@@ -331,9 +333,9 @@ for x in range(startODI, len(odisInfo)):
                 values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                 (matchId, aRId, allRoundName[aRId], odiId, allRoundRuns[aRId], allRoundNotOut[aRId], allRoundWkts[aRId], allRoundBowlRuns[aRId], allRoundBatting[aRId], allRoundBowling[aRId], rating))
 
-        # update next odi rating to measure prediction error        
-        c.execute('update allRoundODILive set nextODIRating=? where matchId=?', (rating, allRoundLastMatchId))        
-        
+        # update next odi rating to measure prediction error
+        c.execute('update allRoundODILive set nextODIRating=? where matchId=?', (rating, allRoundLastMatchId))
+
         liveRating = rating
         if allRoundNumCareerODIs == 0: # discount live ratings for a player's first 20 innings to avoid them hitting top rankings prematurely
             liveRating = rating * 0.15
@@ -341,7 +343,7 @@ for x in range(startODI, len(odisInfo)):
             liveRating = expSmoothFactor * rating * (0.235 + newPlayerPenaltyFactor*(allRoundNumCareerODIs-1)) + (1 - expSmoothFactor) * allRoundLiveRating
         else:
             liveRating = expSmoothFactor * rating + (1 - expSmoothFactor) * allRoundLiveRating
-                        
+
         c.execute('insert or ignore into allRoundODILive(matchId, startDate, playerId, odiId, player, rating, nextODIRating) values (?, ?, ?, ?, ?, ?, ?)',
                     (matchId, startDate, aRId, odiId, allRoundName[aRId], liveRating, None))
         if allRoundBatting[aRId] == None:

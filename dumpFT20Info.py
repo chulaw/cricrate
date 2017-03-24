@@ -46,12 +46,13 @@ relativeURLs = ['/indian-premier-league-2014/engine/records/team/match_results.h
                 '/indian-premier-league-2016/engine/records/team/match_results.html?id=2016;trophy=117;type=season',
                 '/caribbean-premier-league-2016/engine/records/team/match_results.html?id=2016;trophy=118;type=season']
 
-defaultTeamRating = 100.0
+defaultTeamRating = 350.0
+expSmoothFactor = 0.05
 ft20MatchNum = 0 #661
 
 # loop through ft20 matches
 for x in range(len(relativeURLs)):
-    # load cricinfo annual match list    
+    # load cricinfo annual match list
     yearURL = 'http://stats.espncricinfo.com' + relativeURLs[x]
     yearPage = requests.get(yearURL)
     yearTree = html.fromstring(yearPage.text)
@@ -59,7 +60,7 @@ for x in range(len(relativeURLs)):
     data1 = yearTree.xpath('//a[@class="data-link"]/text()')
     data2 = yearTree.xpath('//td[@nowrap="nowrap"]/text()')
     links = yearTree.xpath('//a[@class="data-link"]/@href')
-        
+
     scoreLinks = []
     for j in range(0, len(links)):
         if 'match' in links[j]: scoreLinks.append(links[j])
@@ -75,13 +76,13 @@ for x in range(len(relativeURLs)):
         team1 = data1[i]
         team2 = data1[i+1]
         team1 = teamNameChange[team1] if team1 in teamNameChange.keys() else team1
-        team2 = teamNameChange[team2] if team2 in teamNameChange.keys() else team2    
+        team2 = teamNameChange[team2] if team2 in teamNameChange.keys() else team2
         teams1.append(team1)
-        teams2.append(team2)        
+        teams2.append(team2)
         if data1[i] in data1[i+2] or data1[i+1] in data1[i+2]:
             result = data1[i+2]
             result = teamNameChange[result] if result in teamNameChange.keys() else result
-            results.append(result)            
+            results.append(result)
             grounds.append(data1[i+3])
             i = i + 5
         else:
@@ -89,7 +90,7 @@ for x in range(len(relativeURLs)):
             result = 'Tie/NR'
             grounds.append(data1[i+2])
             i = i + 4
-        
+
         team1LiveRating = {}
         c.execute('select rating from teamFT20Live where team=? order by ft20TeamId desc', (team1, ))
         team1LiveRating = c.fetchone()
@@ -97,29 +98,29 @@ for x in range(len(relativeURLs)):
             team1LiveRating = defaultTeamRating
         else:
             team1LiveRating = team1LiveRating[0]
-            
-        team2LiveRating = {}        
+
+        team2LiveRating = {}
         c.execute('select rating from teamFT20Live where team=? order by ft20TeamId desc', (team2, ))
         team2LiveRating = c.fetchone()
         if team2LiveRating is None:
             team2LiveRating = defaultTeamRating
         else:
             team2LiveRating = team2LiveRating[0]
-        
+
         if (result == team1):
-            team1LiveRating = team1LiveRating + (team2LiveRating / team1LiveRating) * 3
-            team2LiveRating = team2LiveRating - (team2LiveRating / team1LiveRating) * 3
+            team1LiveRating = expSmoothFactor * (500 + (team2LiveRating / team1LiveRating) * 1000) + (1 - expSmoothFactor) * team1LiveRating
+            team2LiveRating = expSmoothFactor * (500 - (team2LiveRating / team1LiveRating) * 1000) + (1 - expSmoothFactor) * team2LiveRating
         elif (result == team2):
-            team1LiveRating = team1LiveRating - (team1LiveRating / team2LiveRating) * 3
-            team2LiveRating = team2LiveRating + (team1LiveRating / team2LiveRating) * 3
+            team1LiveRating = expSmoothFactor * (500 - (team1LiveRating / team2LiveRating) * 1000) + (1 - expSmoothFactor) * team1LiveRating
+            team2LiveRating = expSmoothFactor * (500 + (team1LiveRating / team2LiveRating) * 1000) + (1 - expSmoothFactor) * team2LiveRating
         else:
             if (team1LiveRating > team2LiveRating):
-                team1LiveRating = team1LiveRating - (team1LiveRating / team2LiveRating) * 1.5
-                team2LiveRating = team2LiveRating + (team1LiveRating / team2LiveRating) * 1.5
+                team1LiveRating = expSmoothFactor * (500 - (team1LiveRating / team2LiveRating) * 500) + (1 - expSmoothFactor) * team1LiveRating
+                team2LiveRating = expSmoothFactor * (500 + (team1LiveRating / team2LiveRating) * 500) + (1 - expSmoothFactor) * team2LiveRating
             elif (team1LiveRating < team2LiveRating):
-                team1LiveRating = team1LiveRating + (team2LiveRating / team1LiveRating) * 1.5
-                team2LiveRating = team2LiveRating - (team2LiveRating / team1LiveRating) * 1.5         
-        
+                team1LiveRating = expSmoothFactor * (500 + (team2LiveRating / team1LiveRating) * 500) + (1 - expSmoothFactor) * team1LiveRating
+                team2LiveRating = expSmoothFactor * (500 - (team2LiveRating / team1LiveRating) * 500) + (1 - expSmoothFactor) * team2LiveRating
+
         ft20MatchId = ft20MatchNum + (matchCount+1)
         ft20Team1Id = `ft20MatchId` + '1'
         ft20Team2Id = `ft20MatchId` + '2'
@@ -129,7 +130,7 @@ for x in range(len(relativeURLs)):
                   (ft20Team2Id, None, team2, team1, None, result, None, team2LiveRating))
         conn.commit()
         matchCount = matchCount + 1
- 
+
     startDates = {}
     for i in range(0, ft20Num):
         margin = data2[2*i]
@@ -138,7 +139,7 @@ for x in range(len(relativeURLs)):
         year = startDate.split()[len(startDate.split())-1]
         day = startDate.split()[1].split('-')[0]
         day = day.split(',')[0]
-        day = '0' + day if int(day) < 10 else day    
+        day = '0' + day if int(day) < 10 else day
         startDate = year + month2Num[month] + day
         startDates[i] = startDate
         ft20MatchId = ft20MatchNum + (i+1)
@@ -146,7 +147,7 @@ for x in range(len(relativeURLs)):
         c.execute('insert or ignore into ft20Info (ft20Id, startDate, team1, team2, ground, result, margin, scoreLink) values (?, ?, ?, ?, ?, ?, ?, ?)',
                   (ft20MatchId, startDate, teams1[i], teams2[i], grounds[i], results[i], margin, scoreLinks[i]))
         conn.commit()
-        
+
     for i in range(0, ft20Num):
        ft20MatchId = ft20MatchNum + (i+1)
        ft20Team1Id = `ft20MatchId` + '1'
@@ -154,8 +155,8 @@ for x in range(len(relativeURLs)):
        c.execute('update teamFT20Live set startDate=?,ground=?,scoreLink=? where ft20TeamId=?', (startDates[i], grounds[i], scoreLinks[i], ft20Team1Id))
        c.execute('update teamFT20Live set startDate=?,ground=?,scoreLink=? where ft20TeamId=?', (startDates[i], grounds[i], scoreLinks[i], ft20Team2Id))
        conn.commit()
-    ft20MatchNum = ft20MatchNum + ft20Num    
-       
+    ft20MatchNum = ft20MatchNum + ft20Num
+
 spans = ['2008-2099', '2008-2010', '2011-2014']
 c.execute('select distinct team from teamFT20Live')
 for team in c.fetchall():
@@ -188,8 +189,8 @@ for team in c.fetchall():
         # discount rating for those that have played <20 ft20s
         if ft20s < 20 and ft20s >= 10 and rating != None: rating = rating * math.exp(-float(20-ft20s)/100)
         if ft20s < 10 and ft20s >= 5  and rating != None: rating = rating * math.exp(-float(10-ft20s)/50)
-        if ft20s < 5 and rating != None: rating = rating * math.exp(-float(5-ft20s)/25)            
-        
+        if ft20s < 5 and rating != None: rating = rating * math.exp(-float(5-ft20s)/25)
+
         c.execute('select startDate from ft20Info where ft20Id=?',(firstFT20, ))
         startDate = c.fetchone()
         if startDate != None: startDate = startDate[0]

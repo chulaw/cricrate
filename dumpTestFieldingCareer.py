@@ -106,7 +106,7 @@ for player in c.fetchall():
     if rating != None and rating > 0: rating = (rating + rating * longevity)
     keeper = 1 if keepRate > 0.5 else 0
     # drop rate bonus:
-    rating = rating + (1 - dropRate) * 200 if not dropRate == None else rating
+    rating = rating * 0.75 + (1 - dropRate) * 200 if not dropRate == None else rating
 
     c.execute('''insert or ignore into fieldingTestCareer (startDate, endDate, playerId, player, tests, keeper, catches, droppedCatches, misfields, stumpings, missedStumpings, greatCatches, directHits, greatFieldings,
                 runsSaved, matPerCatch, matPerDrop, dropRate, matPerRunSaved, matPerMisfield, stumpRate, matPerGreatCatch, matPerDirectHit, matPerGreatFielding, rating)

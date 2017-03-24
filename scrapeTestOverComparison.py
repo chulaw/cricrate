@@ -20,20 +20,21 @@ ignoreError = (1560, 1571, 1573, 1615, 1625, 1664, 1678, 1705, 1718, 1719, 1725,
 # loop through test matches
 for x in range(0, len(testsInfo)):
     testId = testsInfo[x][0]
-    if testId < 2170: continue
+    if testId < 2212: continue
     if testId in ignoreError:
         continue
     result = testsInfo[x][8]
-    
+
     overComparisonURL = 'http://www.espncricinfo.com' + testsInfo[x][12] + '?view=comparison'
     overComparisonPage = requests.get(overComparisonURL)
     scoreTree = html.fromstring(overComparisonPage.text)
-    
+
     # parse all relevant fields from overComparison
     rows = scoreTree.xpath('(//div[@id="stats-container"]/div/table/tbody/tr)')
     dataTable = scoreTree.xpath('(//div[@id="stats-container"]/div/table/tbody/tr/td/text())')
 
     scorecardComparisonURL = 'http://www.espncricinfo.com' + testsInfo[x][12]
+    print scorecardComparisonURL
     scorecardComparisonPage = requests.get(scorecardComparisonURL)
     scorecardTree = html.fromstring(scorecardComparisonPage.text)
     dayTable = scorecardTree.xpath('(//ul[@class="close-of-play"]/li/span[@class="normal"]/text())')
@@ -53,7 +54,7 @@ for x in range(0, len(testsInfo)):
                 team = None
                 innings = None
                 score = None
-                noPlayDays.append(day)                
+                noPlayDays.append(day)
             else:
                 numLoc = re.search("\d", innState)
                 team = innState[:(numLoc.start()-1)].strip()
@@ -64,7 +65,7 @@ for x in range(0, len(testsInfo)):
             closeTeamInn.append(innings)
             closeScore.append(score)
 
-    overDay = 1    
+    overDay = 1
     for oversData in oversTable:
         if overDay in noPlayDays:
             closeOvers.append(None)
@@ -82,7 +83,11 @@ for x in range(0, len(testsInfo)):
         if testId == 2170 and "ov" not in oversData and overDay not in noPlayDays:
             closeOvers.append(71)
         overDay = overDay + 1
-    
+
+    if testId == 2191:
+        closeOvers.insert(1, 50)
+    if testId == 2212:
+        closeOvers.insert(2, 0)
     print closeDay
     print closeTeam
     print closeTeamInn
@@ -127,7 +132,7 @@ for x in range(0, len(testsInfo)):
             totalBalls4 = inningsData[4]
             totalOvers4 = totalBalls4 / 6;
             if totalBalls4 % 6 > 0 : totalOvers4 = totalOvers4 + 1
-            totalWkts4 = inningsData[5]        
+            totalWkts4 = inningsData[5]
     result1 = 0
     result2 = 0
     result3 = 0
@@ -145,7 +150,7 @@ for x in range(0, len(testsInfo)):
         result2 = 1
         result3 = 1
         result4 = 1
-        
+
     allOutDec1 = 0
     allOutDec2 = 0
     allOutDec3 = 0
@@ -167,7 +172,7 @@ for x in range(0, len(testsInfo)):
             if overs == totalOvers1 and runs1 == totalRuns1 and wkts1 == totalWkts1 : allOutDec1 = 1
             j = j + 3
             ocId = `testId` + `1` + `int(overs)`
-            
+
             for i in range(len(closeDay)):
                 if teamBat1 == closeTeam[i]:
                     if closeTeamInn[i] == 1:
@@ -175,12 +180,12 @@ for x in range(0, len(testsInfo)):
                             day = closeDay[i]
                         else:
                             day = closeDay[i] + 1
-            
-            if day == 0: day = 1                
+
+            if day == 0: day = 1
             dayBalls = (450 - 90*(day-1)) * 6
             if dayBalls < ballsRem1:
                 ballsRem1 = dayBalls
-            
+
             print `ocId` + ' ' + `testId` + ' ' +  teamBat1 + ' ' + `runs1` + '/' + `wkts1` + ' ' + `day` + ' ' + `result1`
             c.execute('''insert or ignore into overComparisonTest (ocId, testId, innings, teamBat, overs, runs, wkts, runsReq, ballsRem, day, winOdds, drawOdds, adjWinOdds, adjDrawOdds, result)
                       values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
@@ -188,7 +193,7 @@ for x in range(0, len(testsInfo)):
             if j >= len(dataTable) : continue
             if dataTable[j] == str(i+1):
                 j = j + 1
-                continue                
+                continue
         if allOutDec2 == 0:
             score2 = dataTable[j]
             if score2.find("/") == -1:
@@ -204,7 +209,7 @@ for x in range(0, len(testsInfo)):
             if testId == 1913 and overs == totalOvers2 and runs2 == totalRuns2 : allOutDec2 = 1
             j = j + 3
             ocId = `testId` + `2` + `int(overs)`
-            
+
             for i in range(len(closeDay)):
                 if teamBat2 == closeTeam[i]:
                     if closeTeamInn[i] == 1:
@@ -212,20 +217,20 @@ for x in range(0, len(testsInfo)):
                             day = closeDay[i]
                         else:
                             day = closeDay[i] + 1
-            
+
             dayBalls = (450 - 90*(day-1)) * 6
             if dayBalls < ballsRem2:
                 ballsRem2 = dayBalls
-            
+
             print `ocId` + ' ' + `testId` + ' ' +  teamBat2 + ' ' + `runs2` + '/' + `wkts2` + ' ' + `day` + ' ' + `result2`
             c.execute('''insert or ignore into overComparisonTest (ocId, testId, innings, teamBat, overs, runs, wkts, runsReq, ballsRem, day, winOdds, drawOdds, adjWinOdds, adjDrawOdds, result)
                       values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                       (ocId, testId, 2, teamBat2, overs, runs2, wkts2, runsReq2, ballsRem2, day, None, None, None, None, result2))
             if j >= len(dataTable) : continue
             if dataTable[j] == str(i+1):
-                j = j + 1                
+                j = j + 1
                 continue
-        if allOutDec3 == 0:    
+        if allOutDec3 == 0:
             score3 = dataTable[j]
             if score3.find("/") == -1:
                 j = j + 1
@@ -244,7 +249,7 @@ for x in range(0, len(testsInfo)):
             if testId == 2067 and overs == totalOvers3 and runs3 == totalRuns3 : allOutDec3 = 1
             j = j + 3
             ocId = `testId` + `3` + `int(overs)`
-            
+
             for i in range(len(closeDay)):
                 if teamBat3 == closeTeam[i]:
                     if closeTeamInn[i] == 2:
@@ -252,15 +257,15 @@ for x in range(0, len(testsInfo)):
                             day = closeDay[i]
                         else:
                             day = closeDay[i] + 1
-            
+
             dayBalls = (450 - 90*(day-1)) * 6
             if dayBalls < ballsRem3:
                 ballsRem3 = dayBalls
-            
+
             print `ocId` + ' ' + `testId` + ' ' +  teamBat3 + ' ' + `runs3` + '/' + `wkts3` + ' ' + `day` + ' ' + `result3`
             c.execute('''insert or ignore into overComparisonTest (ocId, testId, innings, teamBat, overs, runs, wkts, runsReq, ballsRem, day, winOdds, drawOdds, adjWinOdds, adjDrawOdds, result)
                       values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                      (ocId, testId, 3, teamBat3, overs, runs3, wkts3, runsReq3, ballsRem3, day, None, None, None, None, result3))            
+                      (ocId, testId, 3, teamBat3, overs, runs3, wkts3, runsReq3, ballsRem3, day, None, None, None, None, result3))
             if j >= len(dataTable) : continue
             if dataTable[j] == str(i+1):
                 j = j + 1
@@ -283,7 +288,7 @@ for x in range(0, len(testsInfo)):
             if overs == totalOvers4 and runs4 == totalRuns4 and wkts4 == totalWkts4 : allOutDec4 = 1
             j = j + 5
             ocId = `testId` + `4` + `int(overs)`
-                        
+
             for i in range(len(closeDay)):
                 if teamBat4 == closeTeam[i]:
                     if closeTeamInn[i] == 2:
@@ -295,7 +300,7 @@ for x in range(0, len(testsInfo)):
             dayBalls = (450 - 90*(day-1)) * 6
             if dayBalls < ballsRem4:
                 ballsRem4 = dayBalls
-            
+
             print `ocId` + ' ' + `testId` + ' ' +  teamBat4 + ' ' + `runs4` + '/' + `wkts4` + ' ' + `day` + ' ' + `result4`
             c.execute('''insert or ignore into overComparisonTest (ocId, testId, innings, teamBat, overs, runs, wkts, runsReq, ballsRem, day, winOdds, drawOdds, adjWinOdds, adjDrawOdds, result)
                       values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',

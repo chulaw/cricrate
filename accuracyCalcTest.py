@@ -13,16 +13,16 @@ for overRem in oversRem:
     winCount = []
     drawCount = []
     overs = []
-    f = open("testOdds2.csv","rb")
+    f = open("testMLPred.csv","rb")
     reader = csv.reader(f, delimiter=',')
     for row in reader:
-        if row[4] == "None" or row[5] == "None": continue
-        if int(row[0]) < 2069: continue
-        if int(row[3]) == overRem:
-            winOdds.append(float(row[4]))
-            drawOdds.append(float(row[5]))
-            if int(row[6]) == 2:
-                winCount.append(float(row[6])/2)
+        if row[5] == "None" or row[6] == "None": continue
+        # if int(row[0]) < 2069: continue
+        if int(row[2]) == overRem:
+            winOdds.append(float(row[3]))
+            drawOdds.append(float(row[4]))
+            if int(row[5]) == 2:
+                winCount.append(float(row[5])/2)
             else:
                 winCount.append(0.0)
             if int(row[6]) == 1:
@@ -92,7 +92,7 @@ for overRem in oversRem:
     if perfModelDiff == 0.0: continue
     accuracyRatio.append(curModelDiff / perfModelDiff)
 
-    fd = open('accuracyRatioTest2.csv','a')
+    fd = open('accuracyRatioMLTest.csv','a')
     print `overRem` + " " + `round(accuracyRatio[0] * 100, 2)` + " " + `round(accuracyRatio[1] * 100, 2)`
     fd.write(`overRem` + "," + `round(accuracyRatio[0] * 100, 2)` + "," + `round(accuracyRatio[1] * 100, 2)` + "\n")
     fd.close()
@@ -101,15 +101,15 @@ winOdds = []
 drawOdds = []
 winCount = []
 drawCount = []
-f = open("testOdds2.csv","rb")
+f = open("testMLPred.csv","rb")
 reader = csv.reader(f, delimiter=',')
 for row in reader:
-    if row[4] == "None" or row[5] == "None": continue
-    if int(row[0]) < 2069: continue
-    winOdds.append(float(row[4]))
-    drawOdds.append(float(row[5]))
-    if int(row[6]) == 2:
-        winCount.append(float(row[6])/2)
+    if row[5] == "None" or row[6] == "None": continue
+    # if int(row[0]) < 2069: continue
+    winOdds.append(float(row[3]))
+    drawOdds.append(float(row[4]))
+    if int(row[5]) == 2:
+        winCount.append(float(row[5])/2)
     else:
         winCount.append(0.0)
     if int(row[6]) == 1:
@@ -175,7 +175,7 @@ for dO in descOrder:
     r += 1
 overallAccuracyRatio.append(curModelDiff / perfModelDiff)
 
-fd = open('accuracyRatioTest2.csv','a')
+fd = open('accuracyRatioMLTest.csv','a')
 print "Overall " + `round(overallAccuracyRatio[0] * 100, 2)` + " " + `round(overallAccuracyRatio[1] * 100, 2)`
 fd.write("Overall," + `round(overallAccuracyRatio[0] * 100, 2)` + "," + `round(overallAccuracyRatio[1] * 100, 2)` + "\n")
 fd.close()
