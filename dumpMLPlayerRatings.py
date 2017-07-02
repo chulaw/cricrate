@@ -14,13 +14,13 @@ c.execute('select distinct odiId from overComparisonODI order by odiId asc')
 result = c.fetchall()
 
 # loop through odi matches
-# fd1 = open('odiML1PR.csv','a')
-# fd1.write("Id,Overs,BattingRating,BowlingRating\n")
-# fd1.close()
+fd1 = open('odiML1PRLive2.csv','a')
+fd1.write("Id,Overs,BattingRating,BowlingRating\n")
+fd1.close()
 #
-# fd2 = open('odiML2PR.csv','a')
-# fd2.write("Id,Overs,BattingRating,BowlingRating\n")
-# fd2.close()
+fd2 = open('odiML2PRLive2.csv','a')
+fd2.write("Id,Overs,BattingRating,BowlingRating\n")
+fd2.close()
 for x in range(0, len(result)):
     odiId = result[x][0]
     if odiId < 1952: continue
@@ -158,30 +158,30 @@ for x in range(0, len(result)):
     battingWktWeight = [0.15, 0.15, 0.15, 0.15, 0.125, 0.1, 0.075, 0.05, 0.025, 0.025]
     c.execute('select overs, wkts from overComparisonODI where odiId=? and innings=1', (odiId, ))
     overComp = c.fetchall()
-    fd1 = open('odiML1PR.csv','a')
+    fd1 = open('odiML1PRLive2.csv','a')
     for i in range(0, len(overComp)):
         overs = overComp[i][0]
         wkts = overComp[i][1]
-        battingRating = team1BattingRating * (300 - float(overs)) / 300
+        battingRating = team1BattingRating
         if wkts > 0:
             for w in range(0, wkts):
                 battingRating = battingRating - team1BattingRating * battingWktWeight[w]
-        battingRating = 0 if battingRating < 0 else battingRating
+        battingRating = battingRating * (50 - float(overs)) / 50
         bowlingRating = team2BowlingRating * (50 - float(overs)) / 50
         fd1.write(`odiId` + ","  + `overs` + "," + `battingRating` + "," + `bowlingRating` + "\n")
     fd1.close()
 
     c.execute('select overs, wkts from overComparisonODI where odiId=? and innings=2', (odiId, ))
     overComp = c.fetchall()
-    fd2 = open('odiML2PR.csv','a')
+    fd2 = open('odiML2PRLive2.csv','a')
     for i in range(0, len(overComp)):
         overs = overComp[i][0]
         wkts = overComp[i][1]
-        battingRating = team2BattingRating * (300 - float(overs)) / 300
+        battingRating = team2BattingRating
         if wkts > 0:
             for w in range(0, wkts):
                 battingRating = battingRating - team2BattingRating * battingWktWeight[w]
-        battingRating = 0 if battingRating < 0 else battingRating
+        battingRating = battingRating * (50 - float(overs)) / 50
         bowlingRating = team1BowlingRating * (50 - float(overs)) / 50
         fd2.write(`odiId` + ","  + `overs` + "," + `battingRating` + "," + `bowlingRating` + "\n")
     fd2.close()

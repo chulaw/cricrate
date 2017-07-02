@@ -112,7 +112,7 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         economy = 7.5 * (float(teamEcon / econRate) + 50 / math.pow((econRate + 2), 2)) * math.pow(float(ballsBowled), 2) / float(totalBalls)
         dismissalRatingMod = dismissalRating * 2 / float(15 + runsConceded) if wkts > 0 else 0
         battingRatingMod = teamBattingRating * sigContrib / 75
-        print teamRating
+        teamBat = "Rising Pune Supergiants" if teamBat == "Rising Pune Supergiant" else teamBat
         resultRating = resultNum * sigContrib * teamRating[teamBat] / 625
         milestone = 15 if wkts >= 3 else 0
 
@@ -170,6 +170,7 @@ def dumpInningsDetails(inningsNum, detailInnings, batInnings, bowlInnings, teamR
         pointOfEntry = 35 if entryWkts == 0 else entryRunsMod / entryWkts
         pointOfEntry = 10 if pointOfEntry < 10 else pointOfEntry
         pointOfEntry = sigContrib * math.sqrt(entryWkts) * 50 / pointOfEntry
+        teamBowl = "Rising Pune Supergiants" if teamBowl == "Rising Pune Supergiant" else teamBowl
         resultRating = resultNum * sigContrib * teamRating[teamBowl] / 625
         bowlingRatingMod = teamBowlingRating * sigContrib / 60
         if float(runs) >= 50: milestone = 15

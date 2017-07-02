@@ -66,19 +66,19 @@ if ($matchFormat == "ODI") {
 } else {
   if ($inn == 1) {
     if ($runs == 0) {
-      $sql = 'select avg(o.runRate), avg(o.result) from overComparison where innings=1 and overs>='.($overs-1).' and overs<'.($overs+1).' and runs<=1 and wkts>='.($wkts-1).' and wkts<='.($wkts+1).' group by ocId';
+      $sql = 'select avg(runRate), avg(result) from overComparison where innings=1 and overs>='.($overs-1).' and overs<'.($overs+1).' and runs<=1 and wkts>='.($wkts-1).' and wkts<='.($wkts+1).' group by ocId';
     } else {
-      $sql = 'select avg(o.runRate), avg(o.result) from overComparison where innings=1 and overs>='.($overs-1).' and overs<'.($overs+1).' and runs<='.($runs*1.1).' and runs>'.($runs*0.9).' and wkts>='.($wkts-1).' and wkts<='.($wkts+1).' group by ocId';
+      $sql = 'select avg(runRate), avg(result) from overComparison where innings=1 and overs>='.($overs-1).' and overs<'.($overs+1).' and runs<='.($runs*1.1).' and runs>'.($runs*0.9).' and wkts>='.($wkts-1).' and wkts<='.($wkts+1).' group by ocId';
     }
   } else if ($inn == 2) {
     if ($ballsRem < 60) {
-      $sql = 'select avg(o.reqRate), avg(o.result) from overComparison where innings=2 and ballsRem>'.($ballsRem*0.75).' and ballsRem<='.($ballsRem*1.25).' and runsReq<'.($runs*1.25).' and runsReq>='.($runs*0.75).' and wkts>='.($wkts-1).' and wkts<='.($wkts+1).' group by ocId';
+      $sql = 'select avg(reqRate), avg(result) from overComparison where innings=2 and ballsRem>'.($ballsRem*0.75).' and ballsRem<='.($ballsRem*1.25).' and runsReq<'.($runs*1.25).' and runsReq>='.($runs*0.75).' and wkts>='.($wkts-1).' and wkts<='.($wkts+1).' group by ocId';
     } else {
-      $sql = 'select avg(o.reqRate), avg(o.result) from overComparison where innings=2 and ballsRem>'.($ballsRem*0.9).' and ballsRem<='.($ballsRem*1.1).' and runsReq<'.($runs*1.1).' and runsReq>='.($runs*0.9).' and wkts>='.($wkts-1).' and wkts<='.($wkts+1).' group by ocId';
+      $sql = 'select avg(reqRate), avg(result) from overComparison where innings=2 and ballsRem>'.($ballsRem*0.9).' and ballsRem<='.($ballsRem*1.1).' and runsReq<'.($runs*1.1).' and runsReq>='.($runs*0.9).' and wkts>='.($wkts-1).' and wkts<='.($wkts+1).' group by ocId';
     }
   }
 }
-//echo $sql;
+// echo $sql;
 $result = $db->query($sql);
 if (!$result) die("Cannot execute query.");
 

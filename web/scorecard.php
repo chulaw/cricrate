@@ -6,6 +6,7 @@
         $matchFormat = $_GET["matchFormat"];
         echo "<title>cricrate | $matchFormat #".$matchId."</title>";
     ?>
+    <meta charset="UTF-8">
     <link rel="icon" href="images/cricrate.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link type="text/css" href="style.css" />
@@ -51,14 +52,16 @@
                 <ul class="nav navbar-nav navbar">
                     <li><a href="index.php">Home</a></li>
                     <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Team <span class="caret"></span></a>
-                        <ul class="dropdown-menu">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Team <span class="caret"></span></a>
+                      <ul class="dropdown-menu">
                             <li><a href="methodology.php?matchFormat=Test&disc=Team"><b>Test</b></a></li>
                             <li><a href="current.php?matchFormat=Test&disc=Team">&nbsp;&nbsp;Current</a></li>
+                            <li><a href="peaks.php?matchFormat=Test&disc=Player">&nbsp;&nbsp;Peaks</a></li>
                             <li><a href="career.php?matchFormat=Test&disc=Team">&nbsp;&nbsp;Overall</a></li>
                             <li role="separator" class="divider"></li>
                             <li><a href="methodology.php?matchFormat=ODI&disc=Team"><b>ODI</b></a></li>
                             <li><a href="current.php?matchFormat=ODI&disc=Team">&nbsp;&nbsp;Current</a></li>
+                            <li><a href="peaks.php?matchFormat=ODI&disc=Player">&nbsp;&nbsp;Peaks</a></li>
                             <li><a href="career.php?matchFormat=ODI&disc=Team">&nbsp;&nbsp;Overall</a></li>
                             <li role="separator" class="divider"></li>
                             <li><a href="methodology.php?matchFormat=T20I&disc=Team"><b>T20I</b></a></li>
@@ -67,6 +70,7 @@
                             <li role="separator" class="divider"></li>
                             <li><a href="methodology.php?matchFormat=FT20&disc=Team"><b>FT20</b></a></li>
                             <li><a href="current.php?matchFormat=FT20&disc=Team">&nbsp;&nbsp;Current</a></li>
+                            <li><a href="peaks.php?matchFormat=FT20&disc=Player">&nbsp;&nbsp;Peaks</a></li>
                             <li><a href="career.php?matchFormat=FT20&disc=Team">&nbsp;&nbsp;Overall</a></li>
                         </ul>
                     </li>
@@ -175,8 +179,15 @@
                             <li><a href="performances.php?matchFormat=FT20&disc=Win Shares">&nbsp;&nbsp;Performances</a></li>
                         </ul>
                     </li>
-                    <li><a href="cricinsight.php"><b>cricinsight</b></a></li>
-		                <li><a href="cricodds.php"><b>cricodds <span class="label label-warning">new</span></b></a></li>
+                    <li><a href="insight.php">Insight</a></li>
+                    <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Odds <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                          <li><a href="liveodds.php">Live</a></li>
+                          <li><a href="customodds.php">Custom</a></li>
+                      </ul>
+                    </li>
+                    <li><a href="blog.php">Blog <span class="label label-warning">new</span></a></li>
                     <li><a href="about.php">About</a></li>
                 </ul>
                 <div class="twitter navbar-text pull-right"><a href="https://twitter.com/cricrate" class="twitter-follow-button" data-show-count="false" data-show-screen-name="false">Follow @cricrate</a></div>
@@ -432,7 +443,7 @@ echo "</div>";
 <div id="fb-root"></div>
 <div class="navbar navbar-default navbar-fixed-bottom">
     <div class="container">
-	<p class="navbar-text">© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>
+	<p class="navbar-text">Â© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>
     </div>
 </div>
 <script>(function(d, s, id) {

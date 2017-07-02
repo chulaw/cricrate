@@ -21,6 +21,7 @@ c.execute('''create table allRoundODICareer (startDate text, endDate text, playe
 
 c.execute('select playerId, player, country from playerInfo')
 for player in c.fetchall():
+    # print player[1]
     country = player[2]
     if country == "United Arab Emirates": country = "U.A.E."
     if country == "United States of America": country = "U.S.A."
@@ -50,6 +51,7 @@ for player in c.fetchall():
         balls = balls + battingInning[3]
         if battingInning[2] >= 50 and battingInning[2] < 100: fifties += 1
         if battingInning[2] >= 100: hundreds += 1
+        # print battingInning
         rating = rating + battingInning[4]
         samples.append(battingInning[4])
 

@@ -44,14 +44,14 @@ for i in range(0, len(data2), 2):
     seriesDescs.append(data2[i])
 
 #on-going test series
-del seriesDescs[-1]
-del seriesDescs[-1]
+# del seriesDescs[-1]
+# del seriesDescs[-1]
 del seriesDescs[38]
 del seriesDescs[37]
 del seriesDescs[36]
-
-del seriesLinks[-1]
-del seriesLinks[-1]
+#
+# del seriesLinks[-1]
+# del seriesLinks[-1]
 del seriesLinks[38]
 del seriesLinks[37]
 del seriesLinks[36]
@@ -62,7 +62,7 @@ del seriesLinks[36]
 # testsInfo = c.fetchone()
 # print testsInfo
 # asd
-del seriesMatches[-1]
+# del seriesMatches[-1]
 # print seriesMatches
 # print seriesDescs
 # print seriesLinks

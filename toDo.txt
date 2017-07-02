@@ -66,16 +66,27 @@ COMPLETED:
 - add wickets after point of entry to test match batting ratings
 - adjust team ratings to be less jumpy
 - option to see more per page for tables
+- add series status to rating
+- best batting line-up/best bowling attack ratings
+- add decay to current player ratings (1% per match missed?)
+- big partnership second fiddle factor
+- cricodds add option to show more rows of table
+- add confidence interval to compare page
+- modify home page by replacing T20I ratings with Test + ODI team player ratings
+- add pitch quality factor to ODIs
+- add decay to ODI current player ratings (1% per match missed?)
+- fix t20i scorecard dismissals
+- fix FT20 team page
 
 TODO:
-- add series status to rating
+- fix FT20 scorecard title (#911)
+- add series status factor to ODIs
+- display update log on site
+- add article section with fb comments
 - update team ratings to take series wins into account
-- fix t20i scorecard dismissals
-- best batting line-up/best bowling attack ratings
 
 - fix last over (non-50th) fielder wicket (runout non-direct hit) win shares being credited to bowler
 - parse fielder properly when he hasn't bowled or batted (check did not bat list) raina drop vs UAE WC
-- display site update log on homepage
 - fix franchise team assignment bug
 - research adding logins, commenting articles, forums with social login support
 

@@ -7,19 +7,24 @@ if(isset($_GET['matchFormat'])) {
 } else {
    $matchFormat = "Test";
 }
+if(isset($_GET['disc'])) {
+   $disc = $_GET['disc'];
+} else {
+   $disc = "Team";
+}
 
 if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
 } else if(isset($_REQUEST['width']) AND isset($_REQUEST['height'])) {
     $_SESSION['screen_width'] = $_REQUEST['width'];
     $_SESSION['screen_height'] = $_REQUEST['height'];
-    header("Location: team.php?team=".$team."&matchFormat=".$matchFormat);
+    header("Location: team.php?team=".$team."&matchFormat=".$matchFormat."&disc=".$disc);
 } else {
-    echo '<script type="text/javascript">window.location = "' . $_SERVER['PHP_SELF'] . '?team='.$team.'&matchFormat='.$matchFormat.'&width="+screen.width+"&height="+screen.height;</script>';
+    echo '<script type="text/javascript">window.location = "' . $_SERVER['PHP_SELF'] . '?team='.$team.'&matchFormat='.$matchFormat.'&disc='.$disc.'&width="+screen.width+"&height="+screen.height;</script>';
 }
 ?>
 <html>
-<head>
-    <?php echo "<title>cricrate | ".$team." - ".$matchFormat."</title>"; ?>
+    <?php echo "<title>cricrate | ".$team." - ".$matchFormat." ".$disc."</title>"; ?>
+    <meta charset="UTF-8">
     <link rel="icon" href="images/cricrate.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="css/bootstrap.css" rel="stylesheet">
@@ -39,7 +44,7 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
     if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|ipad|iris|kindle|Android|Silk|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(navigator.userAgent)
     || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(navigator.userAgent.substr(0,4))) isMobile = true;
 
-    var chartWidth = screen.width * 0.45;
+    var chartWidth = screen.width * 0.375;
     var chartHeight = screen.height * 0.4;
     if (isMobile == true) {
 	chartWidth = chartWidth * 2;
@@ -47,13 +52,14 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
 
     var team = <?php echo json_encode($team) ?>;
     var matchFormat = <?php echo json_encode($matchFormat); ?>;
+    var disc = <?php echo json_encode($disc); ?>;
 
     google.charts.load('current', {'packages':['corechart']});
     google.charts.setOnLoadCallback(drawChart);
 
     function drawChart() {
 	var jsonData = $.ajax({
-	    url: "charts/team.php?team="+team+"&matchFormat="+matchFormat,
+	    url: "charts/team.php?team="+team+"&matchFormat="+matchFormat+"&disc="+disc,
 	    dataType:"json",
 	    async: false
 	    }).responseText;
@@ -146,6 +152,10 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
             });
         });
       });
+
+      submitForms = function(){
+   	    window.document.selectForm.submit();
+   	}
     </script>
 </head>
 <body>
@@ -172,14 +182,16 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
                 <ul class="nav navbar-nav navbar">
                     <li><a href="index.php">Home</a></li>
                     <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Team <span class="caret"></span></a>
-                        <ul class="dropdown-menu">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Team <span class="caret"></span></a>
+                      <ul class="dropdown-menu">
                             <li><a href="methodology.php?matchFormat=Test&disc=Team"><b>Test</b></a></li>
                             <li><a href="current.php?matchFormat=Test&disc=Team">&nbsp;&nbsp;Current</a></li>
+                            <li><a href="peaks.php?matchFormat=Test&disc=Player">&nbsp;&nbsp;Peaks</a></li>
                             <li><a href="career.php?matchFormat=Test&disc=Team">&nbsp;&nbsp;Overall</a></li>
                             <li role="separator" class="divider"></li>
                             <li><a href="methodology.php?matchFormat=ODI&disc=Team"><b>ODI</b></a></li>
                             <li><a href="current.php?matchFormat=ODI&disc=Team">&nbsp;&nbsp;Current</a></li>
+                            <li><a href="peaks.php?matchFormat=ODI&disc=Player">&nbsp;&nbsp;Peaks</a></li>
                             <li><a href="career.php?matchFormat=ODI&disc=Team">&nbsp;&nbsp;Overall</a></li>
                             <li role="separator" class="divider"></li>
                             <li><a href="methodology.php?matchFormat=T20I&disc=Team"><b>T20I</b></a></li>
@@ -188,6 +200,7 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
                             <li role="separator" class="divider"></li>
                             <li><a href="methodology.php?matchFormat=FT20&disc=Team"><b>FT20</b></a></li>
                             <li><a href="current.php?matchFormat=FT20&disc=Team">&nbsp;&nbsp;Current</a></li>
+                            <li><a href="peaks.php?matchFormat=FT20&disc=Player">&nbsp;&nbsp;Peaks</a></li>
                             <li><a href="career.php?matchFormat=FT20&disc=Team">&nbsp;&nbsp;Overall</a></li>
                         </ul>
                     </li>
@@ -296,8 +309,15 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
                             <li><a href="performances.php?matchFormat=FT20&disc=Win Shares">&nbsp;&nbsp;Performances</a></li>
                         </ul>
                     </li>
-                    <li><a href="cricinsight.php"><b>cricinsight</b></a></li>
-		                <li><a href="cricodds.php"><b>cricodds <span class="label label-warning">new</span></b></a></li>
+                    <li><a href="insight.php">Insight</a></li>
+                    <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Odds <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                          <li><a href="liveodds.php">Live</a></li>
+                          <li><a href="customodds.php">Custom</a></li>
+                      </ul>
+                    </li>
+                    <li><a href="blog.php">Blog <span class="label label-warning">new</span></a></li>
                     <li><a href="about.php">About</a></li>
                 </ul>
                 <div class="twitter navbar-text pull-right"><a href="https://twitter.com/cricrate" class="twitter-follow-button" data-show-count="false" data-show-screen-name="false">Follow @cricrate</a></div>
@@ -312,6 +332,17 @@ $matchFormats = array("Test", "ODI", "T20I", "FT20");
 $types = array();
 if ($team != "") {
     $teamFound = 1;
+}
+
+$discTypes = array();
+if ($matchFormat == "Test" || $matchFormat == "ODI" || $matchFormat == "FT20") {
+  $discTypes = array("Team", "Player", "Batting", "Bowling");
+} else {
+  $discTypes = array("Team");
+}
+
+if ($disc != "Team") {
+  $matchFormats = array("Test", "ODI", "FT20");
 }
 
 foreach ($matchFormats as $matchFormat) {
@@ -343,13 +374,13 @@ foreach ($matchFormats as $matchFormat) {
 echo "<div class=\"panel panel-inverse\">";
 echo "<div class=\"panel-body\">";
 echo "<div class=\"row\">";
-echo "<div class=\"col-lg-6\">";
+echo "<div class=\"col-lg-5\">";
 echo "<h2><b>".$team."</b></h2>";
 
 $matchFormat = "";
-echo "<form role=\"form\" name=\"typeForm\" method=\"get\" action=\"team.php\">";
+echo "<form class=\"form-inline\" role=\"form\" name=\"selectForm\" method=\"get\" action=\"team.php\">";
 echo "<div class=\"form-group\">";
-echo "<select class=\"form-control\" name=\"matchFormat\" onChange=\"window.document.typeForm.submit()\">";
+echo "<select class=\"form-control\" name=\"matchFormat\" onChange=\"submitForms()\">";
 if(isset($_GET['matchFormat'])) {
     $matchFormat = $_GET['matchFormat'];
     foreach ($types as $mt) {
@@ -373,6 +404,33 @@ if(isset($_GET['matchFormat'])) {
 }
 echo "</select>";
 echo "</div>";
+
+echo "<div class=\"form-group\">";
+echo "<select class=\"form-control\" name=\"disc\" onChange=\"submitForms()\">";
+if(isset($_GET['disc'])) {
+    $disc = $_GET['disc'];
+    foreach ($discTypes as $d) {
+	if ($disc == $d) {
+	    echo "<option selected=\"selected\" value=\"$d\">$d</option>";
+	} else {
+	    echo "<option value=\"$d\">$d</option>";
+	}
+    }
+} else {
+    $count = 0;
+    foreach ($discTypes as $d) {
+	if ($count == 0) {
+	    echo "<option selected=\"selected\" value=\"$d\">$d</option>";
+	    $disc = $d;
+	} else {
+	    echo "<option value=\"$d\">$d</option>";
+	}
+	$count = $count + 1;
+    }
+}
+echo "</select>";
+echo "</div>";
+
 echo "<input type=\"hidden\" name=\"team\" value=\"$team\">";
 echo "</form>";
 
@@ -429,11 +487,16 @@ echo "</tr>";
 echo "</table>";
 echo "</li>";
 
-if ($matchFormat == "FT20") {
-    $sql = "select ".$matchFormatLower."TeamId, startDate, homeRating, awayRating, rating, opposition, ground, result from team".$matchFormat."Live where team='".$team."'";
+if ($disc == "Team") {
+  if ($matchFormat == "FT20") {
+      $sql = "select ".$matchFormatLower."TeamId, startDate, rating, opposition, ground, result from team".$matchFormat."Live where team='".$team."'";
+  } else {
+      $sql = "select ".$matchFormatLower."TeamId, startDate, homeRating, awayRating, rating, opposition, location, result from team".$matchFormat."Live where team='".$team."'";
+  }
 } else {
-    $sql = "select ".$matchFormatLower."TeamId, startDate, homeRating, awayRating, rating, opposition, location, result from team".$matchFormat."Live where team='".$team."'";
+  $sql = "select ".$matchFormatLower."Id, startDate, playerList, rating from team".$disc.$matchFormat."Live where team='".$team."'";
 }
+
 $result = $db->query($sql);
 if (!$result) die("Cannot execute query.");
 $tableHtml .= "<h4>Match List</h4>";
@@ -441,33 +504,50 @@ $tableHtml .= "<table class=\"table table-hover table-condensed\" id=\"matchTabl
 $tableHtml .= "<thead><tr>";
 $tableHtml .= "<th>".$matchFormat." #</th>";
 $tableHtml .= "<th>Match Date</th>";
-$tableHtml .= "<th>LiveHomeRating</th>";
-$tableHtml .= "<th>LiveAwayRating</th>";
-$tableHtml .= "<th>LiveRating</th>";
-$tableHtml .= "<th>Opposition</th>";
-if ($matchFormat == "FT20") {
-    $tableHtml .= "<th>Ground</th>";
+if ($disc == "Team") {
+  if ($matchFormat != "FT20") {
+    $tableHtml .= "<th>LiveHomeRating</th>";
+    $tableHtml .= "<th>LiveAwayRating</th>";
+  }
+  $tableHtml .= "<th>LiveRating</th>";
+  $tableHtml .= "<th>Opposition</th>";
+  if ($matchFormat == "FT20") {
+      $tableHtml .= "<th>Ground</th>";
+  } else {
+      $tableHtml .= "<th>Location</th>";
+  }
+  $tableHtml .= "<th>Result</th>";
 } else {
-    $tableHtml .= "<th>Location</th>";
+  $tableHtml .= "<th>Players</th>";
+  $tableHtml .= "<th>Rating</th>";
 }
-$tableHtml .= "<th>Result</th>";
 $tableHtml .= "</tr></thead>";
 while($res = $result->fetchArray(SQLITE3_NUM)) {
     for ($j = 0; $j < $result->numColumns(); $j++) {
 	if ($j == 0) {
-	    $matchId = substr($res[0], 0, -1);
+      if ($disc == "Team") {
+        $matchId = substr($res[0], 0, -1);
+      } else {
+        $matchId = $res[0];
+      }
 	    $tableHtml .= "<td><a href=\"scorecard.php?matchFormat=".$matchFormat."&matchId=".$matchId."\">".$matchId."</a></td>";
 	} elseif ($j == 1) { # match date
 	    $dateMod = substr($res[1], 0, 4)."-".substr($res[1], 4, 2)."-".substr($res[1], 6, 2);
 	    $tableHtml .= "<td>".$dateMod."</td>";
-	} elseif ($j == 2) { # innings rating or live rating
-      $tableHtml .= "<td>".round($res[2], 0)."</td>";
+	} elseif ($j == 2 && $disc == "Team") { # innings rating or live rating
+      if ($matchFormat != "FT20") {
+        $tableHtml .= "<td>".round($res[2], 0)."</td>";
+        $tableHtml .= "<td>".round($res[3], 0)."</td>";
+        $tableHtml .= "<td><b>".round($res[4], 0)."</b></td>";
+        $j = $j + 2;
+      } else {
+        $tableHtml .= "<td>".round($res[2], 0)."</td>";
+      }
+  } elseif ($j == 3 && $disc != "Team") { # live rating
       $tableHtml .= "<td>".round($res[3], 0)."</td>";
-	    $tableHtml .= "<td><b>".round($res[4], 0)."</b></td>";
-      $j = $j + 2;
-	} elseif ($j == 6) { # location/ground
+  } elseif ($j == 6 && $disc == "Team") { # location/ground
 	    if ($matchFormat == "FT20") {
-    		$tableHtml .= "<td>$res[5]</td>";
+    		$tableHtml .= "<td>$res[4]</td>";
     	} else {
     		if ($res[6] == $team) {
     		    $tableHtml .= "<td>Home</td>";
@@ -485,7 +565,7 @@ $tableHtml .= "</table>";
 
 echo "<li class=\"list-group-item\">";
 if ($numMats > 20) {
-    echo "<h4>Current Rating Timeline</h4>";
+    echo "<h4>Current $disc Rating Timeline</h4>";
     echo "<div class=\"chart\">";
     echo "<div id=\"chart\"></div>";
     echo "</div>";
@@ -497,7 +577,7 @@ if ($numMats > 20) {
 echo "</li>";
 echo "</ul>";
 echo "</div>";
-echo "<div class=\"col-lg-6\">";
+echo "<div class=\"col-lg-7\">";
 echo "<ul class=\"list-group\">";
 echo "<li class=\"list-group-item\">";
 echo $tableHtml;

@@ -25,7 +25,8 @@ teamNameChange = {'Chennai T20':'Chennai Super Kings', 'Delhi T20':'Delhi Darede
                     'KKR':'Kolkata Knight Riders', 'Chargers':'Deccan Chargers', 'Kochi':'Kochi Tuskers Kerala', 'Warriors':'Pune Warriors', 'Tridents':'Barbados Tridents', 'Zouks':'St Lucia Zouks',
                     'Amazon':'Guyana Amazon Warriors', 'Red Steel':'Trinidad & Tobago Red Steel', 'Hawksbills':'Antigua Hawksbills', 'Tallawahs':'Jamaica Tallawahs', 'Melb Stars':'Melbourne Stars',
                     'Melb Reneg':'Melbourne Renegades', 'Syd Sixers':'Sydney Sixers', 'Syd Thunder':'Sydney Thunder', 'Hurricanes':'Hobart Hurricanes', 'Strikers':'Adelaide Strikers', 'Heat':'Brisbane Heat',
-                    'Red Steel':'Trinidad & Tobago Red Steel', 'Patriots':'St Kitts and Nevis Patriots', 'Supergiants':'Rising Pune Supergiants', 'Guj Lions': 'Gujarat Lions', 'T&T Riders': 'Trinbago Knight Riders'}
+                    'Red Steel':'Trinidad & Tobago Red Steel', 'Patriots':'St Kitts and Nevis Patriots', 'Supergiants':'Rising Pune Supergiants', 'Guj Lions': 'Gujarat Lions', 'T&T Riders': 'Trinbago Knight Riders',
+                    'Rising Pune Supergiant': 'Rising Pune Supergiants', 'Supergiant': 'Rising Pune Supergiants'}
 
 relativeURLs = ['/indian-premier-league-2014/engine/records/team/match_results.html?id=2007%2F08;trophy=117;type=season',
                 '/indian-premier-league-2014/engine/records/team/match_results.html?id=2009;trophy=117;type=season',
@@ -44,7 +45,9 @@ relativeURLs = ['/indian-premier-league-2014/engine/records/team/match_results.h
                 '/caribbean-premier-league-2015/engine/records/team/match_results.html?id=2015;trophy=118;type=season',
                 '/big-bash-league-2015/engine/records/team/match_results.html?id=2015%2F16;trophy=158;type=season',
                 '/indian-premier-league-2016/engine/records/team/match_results.html?id=2016;trophy=117;type=season',
-                '/caribbean-premier-league-2016/engine/records/team/match_results.html?id=2016;trophy=118;type=season']
+                '/caribbean-premier-league-2016/engine/records/team/match_results.html?id=2016;trophy=118;type=season',
+                '/big-bash-league-2016/engine/records/team/match_results.html?id=2016%2F17;trophy=158;type=season',
+                '/indian-premier-league-2017/engine/records/team/match_results.html?id=2017;trophy=117;type=season']
 
 defaultTeamRating = 350.0
 expSmoothFactor = 0.05

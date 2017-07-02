@@ -44,11 +44,11 @@ conn.close()
 t20Info = sorted(t20Info, key=t20Info.get)
 startDates = sorted(startDates, key=int)
 
-t20NumId = 0
+t20NumId = 1502
 # loop through matches
 for startDate in startDates:
     print `startDate`
-    if int(startDate) < 20160827: continue
+    if int(startDate) <= 20170501: continue
     matches = [i for i, item in enumerate(t20Info) if re.search(str(startDate), item)]
     for key in matches:
         t20Id = t20Info[key]

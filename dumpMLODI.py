@@ -12,11 +12,11 @@ c = conn.cursor()
 c.execute('select distinct odiId from overComparisonODI order by odiId asc')
 result = c.fetchall()
 
-fd1 = open('odiML1UnqRRHML1000T.csv','a')
+fd1 = open('odiML1Live.csv','a')
 fd1.write("Id,Overs,Runs,Wkts,Team1Rating,Team2Rating,ExpRuns1,ExpRuns2,RuleChg,HomeAway,Momentum,MatchOdds,MatchOddsAdj,Result\n")
 fd1.close()
 
-fd2 = open('odiML2UnqRRHML1000T.csv','a')
+fd2 = open('odiML2Live.csv','a')
 fd2.write("Id,Overs,Runs,Wkts,RunsReq,BallsRem,Team1Rating,Team2Rating,ExpRuns1,ExpRuns2,RuleChg,HomeAway,Momentum,MatchOdds,MatchOddsAdj,Result\n")
 fd2.close()
 
@@ -145,7 +145,7 @@ for x in range(0, len(result)):
     c.execute('select overs, runs, wkts, result, runRate from overComparisonODI where odiId=? and innings=1', (odiId, ))
     overComp = c.fetchall()
     last3OversOdds = []
-    fd1 = open('odiML1UnqRRHML1000T.csv','a')
+    fd1 = open('odiML1Live.csv','a')
     for i in range(0, len(overComp)):
         overs = overComp[i][0]
         runs = overComp[i][1]
@@ -162,12 +162,12 @@ for x in range(0, len(result)):
         else:
             if overs >= 45:
                 c.execute('select avg(result), odiId from overComparisonODI where odiId<'+`odiId`+' and odiId>='+`(odiId - 1000)`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runRate<='+`(runRate*1.1)`+' and runRate>'+`(runRate*0.9)`+' and wkts='+`wkts` + ' group by odiId union '\
-                'select avg(result), odiId from overComparisonODI where odiId<'+`odiId`+' and odiId>='+`(odiId - 1000)`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runRate<='+`(runRate*1.05)`+' and runRate>'+`(runRate*0.85)`+' and wkts<='+`(wkts+2)`+' and wkts>='+`(wkts+1)` + ' group by odiId union '\
-                'select avg(result), odiId from overComparisonODI where odiId<'+`odiId`+' and odiId>='+`(odiId - 1000)`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runRate<='+`(runRate*1.15)`+' and runRate>'+`(runRate*0.95)`+' and wkts<='+`(wkts-1)`+' and wkts>='+`(wkts-2)` + ' group by odiId')
+                'select avg(result), odiId from overComparisonODI where odiId<'+`odiId`+' and odiId>='+`(odiId - 1000)`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runRate<='+`(runRate*1.15)`+' and runRate>'+`(runRate*0.95)`+' and wkts<='+`(wkts+2)`+' and wkts>='+`(wkts+1)` + ' group by odiId union '\
+                'select avg(result), odiId from overComparisonODI where odiId<'+`odiId`+' and odiId>='+`(odiId - 1000)`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runRate<='+`(runRate*1.05)`+' and runRate>'+`(runRate*0.85)`+' and wkts<='+`(wkts-1)`+' and wkts>='+`(wkts-2)` + ' group by odiId')
             else:
                 c.execute('select avg(result), odiId from overComparisonODI where odiId<'+`odiId`+' and odiId>='+`(odiId - 1000)`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runRate<='+`(runRate*1.1)`+' and runRate>'+`(runRate*0.9)`+' and wkts='+`wkts` + ' group by odiId union '\
-                'select avg(result), odiId from overComparisonODI where odiId<'+`odiId`+' and odiId>='+`(odiId - 1000)`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runRate<='+`(runRate*1.05)`+' and runRate>'+`(runRate*0.85)`+' and wkts='+`(wkts+1)` + ' group by odiId union '\
-                'select avg(result), odiId from overComparisonODI where odiId<'+`odiId`+' and odiId>='+`(odiId - 1000)`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runRate<='+`(runRate*1.15)`+' and runRate>'+`(runRate*0.95)`+' and wkts='+`(wkts-1)` + ' group by odiId')
+                'select avg(result), odiId from overComparisonODI where odiId<'+`odiId`+' and odiId>='+`(odiId - 1000)`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runRate<='+`(runRate*1.15)`+' and runRate>'+`(runRate*0.95)`+' and wkts='+`(wkts+1)` + ' group by odiId union '\
+                'select avg(result), odiId from overComparisonODI where odiId<'+`odiId`+' and odiId>='+`(odiId - 1000)`+' and innings=1 and overs>='+`(overs-1)`+' and overs<'+`(overs+1)`+' and runRate<='+`(runRate*1.05)`+' and runRate>'+`(runRate*0.85)`+' and wkts='+`(wkts-1)` + ' group by odiId')
 
         comp = c.fetchall()
         similarCount = len(comp)
@@ -259,7 +259,7 @@ for x in range(0, len(result)):
     c.execute('select overs, runs, wkts, runsReq, ballsRem, result, reqRate from overComparisonODI where odiId=? and innings=2', (odiId, ))
     overComp = c.fetchall()
     last3OversOdds = []
-    fd2 = open('odiML2UnqRRHML1000T.csv','a')
+    fd2 = open('odiML2Live.csv','a')
     for i in range(0, len(overComp)):
         overs = overComp[i][0]
         runs = overComp[i][1]

@@ -75,10 +75,10 @@ for player in c.fetchall():
     matPerGreatFielding = float(ft20s) / float(greatFieldings) if greatFieldings > 0 else None
     rating = rating * 25 / numMat if numMat > 0 else None
     # discount rating for those that have played <100 ft20s
-    if numMat < 40 and numMat >= 20 and rating != None: rating = rating * math.exp(-float(40-numMat)/10)
-    if numMat < 20 and numMat >= 10 and rating != None: rating = rating * math.exp(-float(20-numMat)/5)
-    if numMat < 10 and rating != None: rating = rating * math.exp(-float(10-numMat)/2)
-    if rating != None: rating = rating + rating * numMat / 400
+    if numMat < 40 and numMat >= 20 and rating != None: rating = rating * math.exp(-float(40-numMat)/7)
+    if numMat < 20 and numMat >= 10 and rating != None: rating = rating * math.exp(-float(20-numMat)/3.5)
+    if numMat < 10 and rating != None: rating = rating * math.exp(-float(10-numMat)/1.5)
+    if rating != None: rating = rating + rating * numMat / 100
 
     c.execute('select startDate from ft20Info where ft20Id=?',(firstFT20, ))
     startDate = c.fetchone()

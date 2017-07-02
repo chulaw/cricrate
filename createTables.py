@@ -23,7 +23,7 @@ c.execute('drop table fieldingTestMatch')
 c.execute('drop table fieldingTestLive')
 #
 #c.execute('create table playerInfo (playerId integer unique, player text, fullName text, country text, cid integer)')
-#c.execute('create table retiredPlayers (playerId integer unique)')
+#c.execute('create table retiredPlayers (playerId integer unique, retireDate text)')
 # c.execute('create table battingTestLive (inningsId integer unique, startDate text, playerId integer, testId integer, player text, rating real, nextInningsRating real)')
 # c.execute('create table bowlingTestLive (inningsId integer unique, startDate text, playerId integer, testId integer, player text, rating real, nextInningsRating real)')
 # c.execute('create table allRoundTestLive (matchId integer unique, startDate text, playerId integer, testId integer, player text, rating real, nextTestRating real)')

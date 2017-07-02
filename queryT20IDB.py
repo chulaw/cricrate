@@ -6,21 +6,21 @@ conn = sqlite3.connect('ccrT20I.db')
 c = conn.cursor()
 #for row in c.execute('SELECT * FROM groundInfo'):
 #    print row
-# for row in c.execute('SELECT max(t20iId) FROM t20iInfo'):
-#     print row
-#
+for row in c.execute('SELECT max(t20iId) FROM battingT20IInnings'):
+    print row
+
 # for row in c.execute('delete FROM battingT20IInnings where t20iId>0'):
 #        print row
 # for row in c.execute('delete FROM bowlingT20IInnings where t20iId>0'):
 #        print row
-for row in c.execute('delete FROM allRoundT20IMatch where t20iId>0'):
-     print row
-for row in c.execute('delete FROM allRoundT20ILive where t20iId>0'):
-     print row
-for row in c.execute('delete FROM battingT20ILive where t20iId>0'):
-     print row
-for row in c.execute('delete FROM bowlingT20ILive where t20iId>0'):
-     print row
+# for row in c.execute('delete FROM allRoundT20IMatch where t20iId>0'):
+#      print row
+# for row in c.execute('delete FROM allRoundT20ILive where t20iId>0'):
+#      print row
+# for row in c.execute('delete FROM battingT20ILive where t20iId>0'):
+#      print row
+# for row in c.execute('delete FROM bowlingT20ILive where t20iId>0'):
+#      print row
 #homeAwayFile = open("homeAwayT20I.csv", "w")
 #for row in c.execute('SELECT team1, team2, location, result from t20iInfo'):
 #    homeAwayFile.write(str(row[0]) + "," + str(row[1]) + "," +str(row[2]) + "," +str(row[3]) + "," + "\n")
@@ -57,7 +57,7 @@ for row in c.execute('delete FROM bowlingT20ILive where t20iId>0'):
 #for row in c.execute("select b.playerId, t.startDate, p.country, t.team1, t.team2, b.rating from battingT20ILive b, playerInfo p, t20iInfo t inner join (select playerId, max(rating) maxRating from battingT20ILive group by playerId) as bb on bb.playerId=b.playerId and bb.maxRating=b.rating and p.playerId=b.playerId and t.t20iId=b.t20iId order by b.rating asc"):
 #    print row
 # c.execute('insert into retiredPlayers values (75477)')
-conn.commit()
+# conn.commit()
 conn.close()
 elapsed = (time.clock() - start)
 print elapsed

@@ -1,0 +1,58 @@
+<h3><b><font color="#2f5496">Match Odds - An Evolving Strategy</font></b></h3>
+Post date: 2016-09-26 | Updated: 2017-04-24
+<br/><br/>
+<h4><font color="#2f5496">Project Idea</font></h4>
+Online betting sites allow any cricket enthusiast to bet significant amounts of money on the result of live matches. If all available data was used to generate live odds, it might be possible to gain an edge over the run-of-the-mill gambler and even a somewhat sophisticated bettor.
+<br/><br/>
+<h4><font color="#2f5496">Base Odds: Historical Match Scenarios</font></h4>
+The obvious method to develop odds is to use similar historical match scenarios. Say a team is chasing 150/3 at 30 overs in a 50 over match chasing 275 (125 runs required). If you check similar match scenarios that occurred historically within a certain range (of the runs, wickets and overs) and then check what percentage of those unique scenarios ended up as wins, it is possible to come up with a base win percentage for the chasing team.
+<br/><br/>
+<div align="center"><img src="blog/odds1.png"/></div>
+<br/>
+As the table above shows, for the example scenario this method finds 339 similar unique historical match situations (when multiple instances of the same match that match are identified, the mean values are used). Of those 339 match scenarios, 192 resulted in wins and 135 were losses. Using the ratio of wins, the win odd percentage is 56.64% (192/339). 
+<br/><br/>
+Click <a href="customodds.php">here</a> to find base odds of different match scenarios.
+<br/><br/>
+<h4><font color="#2f5496">Factor Model: Adjust with Additional Features</font></h4>
+Even though using historical match scenarios results in decent odds values, it also ignores some significant factors. For example:
+<br/><br/>
+<ul>
+<li>Team Rating Difference</li>
+<li>Location (Home/Away for international matches)</li>
+<li>Momentum (Increasing odds in recent overs)</li>
+<li>Expected Score (using mean ground run totals)</li>
+</ul>
+<br/>
+Adjusting the base odds using additional factors this way leads to better odds when back-tested historically.
+<br/><br/>
+<h4><font color="#2f5496">Machine Learning: Feature Engineering Focus</font></h4>
+Even though the factor model results in better odds, a disadvantage of that method is that it is unclear how influential each factor should be. Does momentum really matter? Does how difficult or easy run scoring was on a particular ground 5 years ago affect the match outcome today? Even though these factors seem to add value, figuring out how much of an effect they make is cumbersome - involving painstaking back-testing work which does not always give a clear answer.
+<br/><br/>
+Using <a href="https://en.wikipedia.org/wiki/Machine_learning">machine learning</a> techniques solves this issue by letting the algorithm decide how important a feature is. It allows one to focus on creative feature engineering - coming up with ideas for features and getting instant feedback on their impact.
+<br/><br/>
+For example, if India with their strong batting line-up was chasing in the above example scenario against a weak Zimbabwe bowling attack, the odds of them pulling of the win is probably higher. It is also possible to drill down to the player level by aggregating the current ratings of India's batsmen and Zimbabwe's bowlers. Since 60% of the 2nd innings has been completed (30/50 overs), Zimbabwe's bowling resources can be adjusted to be 40% of the starting value. Similarly, the current ratings of the 3 Indian batsmen that were dismissed would also need to be deducted from the aggregate batting rating.
+<br/><br/>
+<a href="https://en.wikipedia.org/wiki/Logistic_regression">Logistic Regression</a>, <a href="https://en.wikipedia.org/wiki/Random_forest">Random Forest</a> and <a href="https://en.wikipedia.org/wiki/Gradient_boosting">Gradient Boosting</a> methods were among the methods used for this exercise. Through this, it was possible to identify specific factors that actually influenced the match outcome:
+<br/><br/>
+<ul>
+<li>Base Odds using similar historical match scenarios</li>
+<li>Run Rate (Required Run Rate for 2nd innings)</li>
+<li>Batting-Bowling Rating Difference</li>
+<li>Team Rating Difference</li>
+<li>Wickets</li>
+<li>Runs (Runs Required for 2nd innings)</li>
+</ul>
+<br/>
+For example, the Required Run Rate factor has a clear connection with the match odds as shown in the graph below:
+<br/><br/>
+<div align="center"><img src="blog/odds2.png"/></div>
+<br/>
+Different machine learning algorithms with specific parameters were found to be effective in different match scenarios (early in an innings vs late and 1st innings vs 2nd). Overall, machine learning methods improved on match odds by 10-15% (using <a href="https://en.wikipedia.org/wiki/F1_score">F1 scores</a> and <a href="https://en.wikipedia.org/wiki/Receiver_operating_characteristic">ROC AUC scores</a> as measures) over the factor odds, which already performed better than the base odds.
+<br/><br/>
+<h4><font color="#2f5496">Live Odds: Live Comparison with Betting Sites</font></h4>
+By pulling in betting site prices and calculating the implied odds (using the inverse of the mean of the best back and lay prices) live, it is possible to display a live snapshot of an ongoing match. This allows one to compare the betting site odds with the calculate odds and potentially profit from significant odds mismatches. The chart below shows a snapshot of a match:
+<br/><br/>
+<div align="center"><img src="blog/odds3.png"/></div>
+<br/>
+Click <a href="liveodds.php">here</a> to track current live matches - updating every 2 minutes.
+<br/><br/>

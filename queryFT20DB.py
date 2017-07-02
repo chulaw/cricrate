@@ -7,25 +7,25 @@ c = conn.cursor()
 #for row in c.execute('SELECT * FROM groundInfo'):
 #    print row
 #for row in c.execute('SELECT * FROM playerInfo where player=?',('MS Dhoni',)):
-#for row in c.execute('SELECT * FROM overComparison where t20Id=495'):
-for row in c.execute('SELECT t20Id FROM overComparison order by t20Id asc'):
-     print row
+# for row in c.execute('SELECT * FROM overComparison where t20Id=1262'):
+for row in c.execute('SELECT ocId FROM overComparison'):
+   print row
 #c.execute("UPDATE detailsFT20Innings SET batTeam='Trinidad & Tobago Red Steel' WHERE inningsId=5941")
 #c.execute("UPDATE detailsFT20Innings SET bowlTeam='Trinidad & Tobago Red Steel' WHERE inningsId=5942")
-#for row in c.execute('SELECT * FROM detailsFT20Innings where ft20Id=594'):
+# for row in c.execute('SELECT avg(runs) FROM detailsFT20Innings'):
 #    print row
 
-# for row in c.execute('delete FROM battingFT20Innings where ft20Id>0'):
+# for row in c.execute('delete FROM battingFT20Innings where ft20Id>911'):
 #         print row
-# for row in c.execute('delete FROM bowlingFT20Innings where ft20Id>0'):
+# for row in c.execute('delete FROM bowlingFT20Innings where ft20Id>911'):
 #         print row
-# for row in c.execute('delete FROM allRoundFT20Match where ft20Id>0'):
+# for row in c.execute('delete FROM allRoundFT20Match where ft20Id>911'):
 #      print row
-# for row in c.execute('delete FROM battingFT20Live where ft20Id>0'):
+# for row in c.execute('delete FROM battingFT20Live where ft20Id>911'):
 #      print row
-# for row in c.execute('delete FROM bowlingFT20Live where ft20Id>0'):
+# for row in c.execute('delete FROM bowlingFT20Live where ft20Id>911'):
 #      print row
-# for row in c.execute('delete FROM allRoundFT20Live where ft20Id>0'):
+# for row in c.execute('delete FROM allRoundFT20Live where ft20Id>911'):
 #      print row
 # for row in c.execute('delete FROM ft20Info where ft20Id>842'):
 #      print row

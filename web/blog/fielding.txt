@@ -1,0 +1,58 @@
+<h3><b><font color="#2f5496">Fielding Statistics - A New Approach</font></b></h3>
+Post date: 2015-01-17 | Updated: 2017-04-24
+<br/><br/>
+<h4><font color="#2f5496">Problem</font></h4>
+Cricket is rich with statistics - probably one of the most numbers-focused sports around. However, there is a glaring lack of fielding statistics in the game - something that a similar sport like baseball has started to handle by using video analysis and error statistics.
+<br/><br/>
+No such setup exists in cricket - mostly because there is the perception that fielding is too subjective to evaluate. Compared to batting - where it's about getting runs and you can get a simple batting average measure on how many runs you get every time you bat, or bowling - where you can measure how many runs you give away per wicket, for fielding there's no clear metric to evaluate players. Because of this there are a lot of myths in the game when it comes to fielding - commentators say "he would've caught that 99 times out of a 100" when some fielder drops a catch. Even though it's just an expression, there is no data on what the actual drop rates of fielders are - or what is an actual acceptable drop rate.
+<br/><br/>
+<h4><font color="#2f5496">Objectives</font></h4>
+The objective of this project is to generate cricket fielding statistics using live text commentary feeds. Fielding events and the players involved are identified and parsed from the text and the data will be used to create useful fielding statistics. If this allows for a method to value fielding performance accurately, franchises would be able to evaluate player value more accurately.
+<br/><br/>
+Fielding events considered:
+<br/>
+<ul>
+<li>Dropped Catches</li>
+<li>Misfields</li>
+<li>Missed Stumpings</li>
+<li>Direct Hits (Run-outs)</li>
+<li>Great Catches</li>
+<li>Catches</li>
+<li>Runs Saved</li>
+</ul>
+<br/>
+There have been multiple calls for the necessity of fielding statistics (<a href="http://www.espncricinfo.com/blogs/content/story/620188.html">here</a>, <a href="http://www.espncricinfo.com/magazine/content/story/745379.html">here</a> and <a href="http://www.theroar.com.au/2015/01/12/time-cricket-catch-value-fielding/">here</a>), but no comprehensive effort has been made to do this using an automated and systematic method till now. Therefore, this project has the potential to revolutionize how cricket values the fielding aspect of the game.
+<br/><br/>
+<h4><font color="#2f5496">Data Source</font></h4>
+There are multiple sites like <a href="www.cricinfo.com">Cricinfo</a>, <a href="www.cricbuzz.com">Cricbuzz</a> and <a href="www.bbc.com/sport/cricket">BBC Cricket</a> that offer live text commentary during games, but only Cricinfo has done it for a significant period of time (10+ years) and has had a consistent structure that enables systematic parsing:
+<br/><br/>
+<div align="center"><img src="blog/fielding1.png"/></div>
+<br/>
+In the highlighted dropped event above, the capitalized words are checked to identify the players involved. Here Buttler and Raina are both in the text, but from the initial part of the text where it says "Jadeja to Buttler" it is known that Buttler is the batsman so therefore not the fielder. This way Raina is identified as the fielder who dropped the catch. 
+<br/><br/>
+To accurately parse the text commentary data, <a href="https://en.wikipedia.org/wiki/Natural_language_processing">natural language processing</a> packages like <a href="https://en.wikipedia.org/wiki/Natural_Language_Toolkit">NLTK</a> were considered but because cricket-specific terms are not recognized and difficult to evaluate searching for specific keywords in the text to identify events was a better way forward.
+<br/><br/>
+<div align="center"><img src="blog/fielding2.png"/></div>
+<br/>
+The dropped catch fielding event was difficult to accurately evaluate because the keyword "dropped" is used in different ways in cricket. Sometimes it constitutes a dropped catch, but sometimes it might be the batter just "dropping" the ball to the ground or the pitcher "dropping" the ball short (which is a term used to signify that the pitcher has thrown the ball midway through the bases). To distinguish between different types of "dropped" keywords, an additional list of keywords that invalidated the keyword match was utilized - as an example if the text contained "dropped" but the next word was "dropped short", that case is ignored as a fielding non-event. For dropped catches there is the additional complication in that some catches are not expected to be taken because of high difficulty. Specific keywords such as "great effort" or "difficult chance" are used to ignore dropped catches for those cases.
+<br/><br/>
+This complication in keywords is not as much an issue for direct hits or great catches - this is reflected in the keywords list length being smaller for those events.
+<br/><br/>
+<h4><font color="#2f5496">Metrics</font></h4>
+Once fielding events are parsed for all matches with the fielders identified, it is possible to generate meaningful statistics to enable comparison between players. One revealing metric is drop rate - the percentage chance that a fielder would drop a catch that he was supposed to have taken:
+<br/><br/>
+<div align="center"><img src="blog/fielding3.png"/></div>
+<br/>
+<div align="center"><img src="blog/fielding4.png"/></div>
+<br/>
+The histogram above shows that the mean drop rate is 13.26% with the graph showing positive skew - indicating that a majority of players perform around or better than the mean drop rate, with a minority of poor fielders with higher drop rates. A fielder with a drop rate less than 10% can be considered to be above average just based on catches.
+<br/><br/>
+<div align="center"><img src="blog/fielding5.png"/></div>
+<br/>
+The table above displays the top fielders rated based on different fielding attributes. Almost all of their drop rates are below 10%, with those that have higher rates like Ricky Ponting and Paul Collingwood having other positive attributes such as high direct hit rates or high great catch rates. Ricky Ponting, Paul Collingwood and AB de Villiers are all considered great fielders - this provides validation to the data and suggests that it is on the right track.
+<br/><br/>
+Click <a href="http://www.cricrate.com/career.php?matchFormat=ODI&disc=Fielding">here</a> for best/worst ODI fielding careers since 2005.
+<br/><br/>
+<h4><font color="#2f5496">Challenges</font></h4>
+The most obvious challenge with this method of parsing fielding events is that it is impossible to guarantee 100% accuracy. Sometimes there are more than 2 players involved in the text and it would be impossible to identify who the correct fielder is without manual observation. Misattribution becomes an issue that is hard to avoid. Even so, based on manual comparisons of a sample of matches, the parsing method has a 90%+ accuracy.
+<br/><br/>

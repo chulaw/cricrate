@@ -16,9 +16,9 @@ c = conn.cursor()
 # get ft20s info
 c.execute('select ft20Id, startDate, scoreLink, result from ft20Info')
 ft20sInfo = c.fetchall()
-ignoreDL = (47, 66, 72, 198, 246, 315, 317, 497, 679, 683, 738, 854, 873)
-ft20Id2LastOverBowlerInn = {227:2, 575:2, 730:2, 731:2, 830:2}
-ft20Id2LastOverBowler = {2272:"Kieron Pollard", 5752:"Mitchell Starc", 7302:"Kemar Roach", 7312:"Sohail Tanvir", 8302:"Piyush Chawla"}
+ignoreDL = (47, 66, 72, 198, 246, 315, 317, 497, 679, 683, 738, 854, 873, 940)
+ft20Id2LastOverBowlerInn = {227:2, 575:2, 730:2, 731:2, 830:2, 943:2, 957:2}
+ft20Id2LastOverBowler = {2272:"Kieron Pollard", 5752:"Mitchell Starc", 7302:"Kemar Roach", 7312:"Sohail Tanvir", 8302:"Piyush Chawla", 9432:"Kagiso Rabada", 9572:"Pawan Negi"}
 rainedStops = {1:2, 40:2, 41:2, 226:2, 364:2, 644:2}
 newPlayerPenaltyFactor = 0.0425
 expSmoothFactor = 0.05
@@ -1901,7 +1901,7 @@ for x in range(startFT20, len(ft20sInfo)):
                         elif totDismissedBallFaced < 6:
                             battingWinShares1[batsman1] = team1WinShares * float(batsmanBallDiff1) / (6 - totDismissedBallFaced)
                             battingWinSharesAdj1[batsman1] = team1WinSharesAdj * float(batsmanBallDiff1) / (6 - totDismissedBallFaced)
-    
+
                     if lastBallDismissal == 0 and batsmanHasNotFaced == 0:
                         if batsman2 in battingWinShares1:
                             if runsDiff > 0 and team1WinShares > 0:
@@ -2049,7 +2049,7 @@ for x in range(startFT20, len(ft20sInfo)):
                         elif totDismissedBallFaced < 6:
                             battingWinShares2[batsman1] = team2WinShares * float(batsmanBallDiff1) / (6 - totDismissedBallFaced)
                             battingWinSharesAdj2[batsman1] = team2WinSharesAdj * float(batsmanBallDiff1) / (6 - totDismissedBallFaced)
-    
+
                     if lastBallDismissal == 0 and batsmanHasNotFaced == 0:
                         if batsman2 in battingWinShares2:
                             if runsDiff > 0 and team2WinShares > 0:
@@ -3618,7 +3618,7 @@ for x in range(startFT20, len(ft20sInfo)):
         print batsman + ": " + `totalWS` + ": " + `totalWSAdj`
         c.execute('insert or ignore into winSharesFT20Match (matchId, playerId, player, ft20Id, battingWS, bowlingWS, fieldingWS, totalWS, battingAdjWS, bowlingAdjWS, fieldingAdjWS, totalAdjWS) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 (matchId, batsmanId, batsman, ft20Id, battingWS, bowlingWS, fieldingWS, totalWS, battingWSAdj, bowlingWSAdj, fieldingWSAdj, totalWSAdj))
-        
+
         c.execute('select matchId, battingRating, bowlingRating, fieldingRating, totalRating from winSharesFT20Live where playerId=? order by matchId desc', (batsmanId, ))
         liveRating = c.fetchone()
         if liveRating is None:
@@ -3633,7 +3633,7 @@ for x in range(startFT20, len(ft20sInfo)):
             fieldingRating[batsmanId] = liveRating[3]
             totalRating[batsmanId] = liveRating[4]
             numCareerMatches[batsmanId] = len(c.fetchall())+1
-    
+
         battingLiveRating = 0
         bowlingLiveRating = 0
         fieldingLiveRating = 0
@@ -3653,7 +3653,7 @@ for x in range(startFT20, len(ft20sInfo)):
             bowlingLiveRating = expSmoothFactor * bowlingWSAdj + (1 - expSmoothFactor) * bowlingRating[batsmanId]
             fieldingLiveRating = expSmoothFactor * fieldingWSAdj + (1 - expSmoothFactor) * fieldingRating[batsmanId]
             totalLiveRating = expSmoothFactor * totalWSAdj + (1 - expSmoothFactor) * totalRating[batsmanId]
-    
+
         c.execute('insert or ignore into winSharesFT20Live(matchId, startDate, playerId, ft20Id, battingRating, bowlingRating, fieldingRating, totalRating) values ' '(?, ?, ?, ?, ?, ?, ?, ?)',
                 (matchId, startDate, batsmanId, ft20Id, battingLiveRating, bowlingLiveRating, fieldingLiveRating, totalLiveRating))
 
@@ -3676,7 +3676,7 @@ for x in range(startFT20, len(ft20sInfo)):
             print bowler + ": " + `bowlingWS` + ": " + `bowlingWSAdj`
             c.execute('insert or ignore into winSharesFT20Match (matchId, playerId, player, ft20Id, battingWS, bowlingWS, fieldingWS, totalWS, battingAdjWS, bowlingAdjWS, fieldingAdjWS, totalAdjWS) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 (matchId, bowlerId, bowler, ft20Id, 0, bowlingWS, fieldingWS, totalWS, 0, bowlingWSAdj, fieldingWSAdj, totalWSAdj))
-            
+
         c.execute('select matchId, battingRating, bowlingRating, fieldingRating, totalRating from winSharesFT20Live where playerId=? order by matchId desc', (bowlerId, ))
         liveRating = c.fetchone()
         if liveRating is None:
@@ -3691,7 +3691,7 @@ for x in range(startFT20, len(ft20sInfo)):
             fieldingRating[bowlerId] = liveRating[3]
             totalRating[bowlerId] = liveRating[4]
             numCareerMatches[bowlerId] = len(c.fetchall())+1
-    
+
         battingLiveRating = 0
         bowlingLiveRating = 0
         fieldingLiveRating = 0
@@ -3711,7 +3711,7 @@ for x in range(startFT20, len(ft20sInfo)):
             bowlingLiveRating = expSmoothFactor * bowlingWSAdj + (1 - expSmoothFactor) * bowlingRating[bowlerId]
             fieldingLiveRating = expSmoothFactor * fieldingWSAdj + (1 - expSmoothFactor) * fieldingRating[bowlerId]
             totalLiveRating = expSmoothFactor * totalWSAdj + (1 - expSmoothFactor) * totalRating[bowlerId]
-    
+
         c.execute('insert or ignore into winSharesFT20Live(matchId, startDate, playerId, ft20Id, battingRating, bowlingRating, fieldingRating, totalRating) values ' '(?, ?, ?, ?, ?, ?, ?, ?)',
                 (matchId, startDate, bowlerId, ft20Id, battingLiveRating, bowlingLiveRating, fieldingLiveRating, totalLiveRating))
 

@@ -1,0 +1,4 @@
+- adjust odds by home-away team ratings not overall
+- add test odds
+- dump file by date
+- cronjob to restart script daily

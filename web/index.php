@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>cricrate | Cricket Ratings and Analytics</title>
+    <meta charset="UTF-8">
     <link rel="icon" href="images/cricrate.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link type="text/css" href="style.css" />
@@ -51,10 +52,12 @@
                         <ul class="dropdown-menu">
                             <li><a href="methodology.php?matchFormat=Test&disc=Team"><b>Test</b></a></li>
                             <li><a href="current.php?matchFormat=Test&disc=Team">&nbsp;&nbsp;Current</a></li>
+                            <li><a href="peaks.php?matchFormat=Test&disc=Player">&nbsp;&nbsp;Peaks</a></li>
                             <li><a href="career.php?matchFormat=Test&disc=Team">&nbsp;&nbsp;Overall</a></li>
                             <li role="separator" class="divider"></li>
                             <li><a href="methodology.php?matchFormat=ODI&disc=Team"><b>ODI</b></a></li>
                             <li><a href="current.php?matchFormat=ODI&disc=Team">&nbsp;&nbsp;Current</a></li>
+                            <li><a href="peaks.php?matchFormat=ODI&disc=Player">&nbsp;&nbsp;Peaks</a></li>
                             <li><a href="career.php?matchFormat=ODI&disc=Team">&nbsp;&nbsp;Overall</a></li>
                             <li role="separator" class="divider"></li>
                             <li><a href="methodology.php?matchFormat=T20I&disc=Team"><b>T20I</b></a></li>
@@ -63,6 +66,7 @@
                             <li role="separator" class="divider"></li>
                             <li><a href="methodology.php?matchFormat=FT20&disc=Team"><b>FT20</b></a></li>
                             <li><a href="current.php?matchFormat=FT20&disc=Team">&nbsp;&nbsp;Current</a></li>
+                            <li><a href="peaks.php?matchFormat=FT20&disc=Player">&nbsp;&nbsp;Peaks</a></li>
                             <li><a href="career.php?matchFormat=FT20&disc=Team">&nbsp;&nbsp;Overall</a></li>
                         </ul>
                     </li>
@@ -171,8 +175,15 @@
                             <li><a href="performances.php?matchFormat=FT20&disc=Win Shares">&nbsp;&nbsp;Performances</a></li>
                         </ul>
                     </li>
-                    <li><a href="cricinsight.php"><b>cricinsight</b></a></li>
-		                <li><a href="cricodds.php"><b>cricodds <span class="label label-warning">new</span></b></a></li>
+                    <li><a href="insight.php">Insight</a></li>
+                    <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Odds <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                          <li><a href="liveodds.php">Live</a></li>
+                          <li><a href="customodds.php">Custom</a></li>
+                      </ul>
+                    </li>
+                    <li><a href="blog.php">Blog <span class="label label-warning">new</span></a></li>
                     <li><a href="about.php">About</a></li>
                 </ul>
                 <div class="twitter navbar-text pull-right"><a href="https://twitter.com/cricrate" class="twitter-follow-button" data-show-count="false" data-show-screen-name="false">Follow @cricrate</a></div>
@@ -256,11 +267,73 @@
         echo "</table>";
     }
 
+    function summaryTableTeam($db, $tableTitle, $limitX, $typeDisc) {
+        $typeDiscs = explode(" ", $typeDisc);
+        $matchFormat = $typeDiscs[0];
+        $disc = $typeDiscs[1];
+        $discLower = strtolower($disc);
+        $sql = "select max(startDate) as maxDate from ".$discLower.$matchFormat."Current";
+        $result = $db->query($sql);
+        if (!$result) die("Cannot execute query.");
+        $maxDate = $result->fetchArray(SQLITE3_NUM);
+        $maxDateMod = substr($maxDate[0], 4, 2)."/".substr($maxDate[0], 6, 2);
+
+        $sql = "select rankDiff, team, rating from ".$discLower.$matchFormat."Current order by rating desc limit $limitX";
+        $result = $db->query($sql);
+        if (!$result) die("Cannot execute query.");
+        echo "<h4>$tableTitle</h4>";
+        echo "<table class=\"table table-hover table-condensed\">";
+        echo "<thead><tr>";
+        echo "<th>+/-</th>";
+        echo "<th>Team</th>";
+        echo "<th>Flag</th>";
+        echo "<th>Rating</th>";
+        echo "</tr></thead>";
+
+        $k = 1;
+        while($res = $result->fetchArray(SQLITE3_NUM)) {
+            $rankDiff = $res[0];
+            if ($rankDiff > 0) {
+                echo "<tr><td><font color=\"green\"><b>+".$rankDiff."</b></font></td>";
+            } elseif ($rankDiff == 0) {
+                echo "<tr><td><b>-</b></td>";
+            } else {
+                echo "<tr><td><font color=\"red\"><b>$rankDiff</b></font></td>";
+            }
+            for ($j = 1; $j < $result->numColumns(); $j++) {
+                if ($j == 1) {
+                    echo "<td><a href=\"team.php?team=".$res[1]."&matchFormat=".$matchFormat."&disc=".$disc."\">".$res[$j]."</a></td>";
+                    echo "<td><a href=\"team.php?team=".$res[1]."&matchFormat=".$matchFormat."\"><img src=\"images/".$res[1].".png\" alt=\"$res[1]\" style='border:1px solid #A9A9A9'/></a></td>";
+                } elseif ($j == 2) { # rating
+                    echo "<td><b>".round($res[$j], 0)."</b></td>";
+                }
+            }
+            echo "</tr>";
+            $k++;
+        }
+        echo "<tr><td></td><td><a href=\"current.php?matchFormat=$matchFormat&disc=$disc\"><b>Full list</b></a></td><td>Updated:</td><td>$maxDateMod</td></tr>";
+        echo "</table>";
+    }
+
     echo "<ul class=\"list-group\">";;
     $db = new SQLite3('ccr.db');
     echo "<div class=\"panel panel-inverse\">";
     echo "<div class=\"panel-body\">";
     echo "<div class=\"row\">";
+    echo "<div class=\"col-lg-3\">";
+    echo "<li class=\"list-group-item\">";
+    summaryTableTeam($db, "Test Top Teams", "5", "Test Team");
+    echo "</li>";
+    echo "</div>";
+    $db = new SQLite3('ccrODI.db');
+    echo "<div class=\"col-lg-3\">";
+    echo "<li class=\"list-group-item\">";
+    summaryTableTeam($db, "ODI Top Teams", "5", "ODI Team");
+    echo "</li>";
+    echo "</div>";
+    $db->close();
+
+    $db = new SQLite3('ccr.db');
     echo "<div class=\"col-lg-3\">";
     echo "<li class=\"list-group-item\">";
     summaryTable($db, "Test Top Batsmen", "5", "Test Batting");
@@ -271,9 +344,15 @@
     summaryTable($db, "Test Top Bowlers", "5", "Test Bowling");
     echo "</li>";
     echo "</div>";
+    echo "</div>";
+    echo "</div>";
+    echo "</div>";
     $db->close();
 
     $db = new SQLite3('ccrODI.db');
+    echo "<div class=\"panel panel-inverse\">";
+    echo "<div class=\"panel-body\">";
+    echo "<div class=\"row\">";
     echo "<div class=\"col-lg-3\">";
     echo "<li class=\"list-group-item\">";
     summaryTable($db, "ODI Top Batsmen", "5", "ODI Batting");
@@ -282,25 +361,6 @@
     echo "<div class=\"col-lg-3\">";
     echo "<li class=\"list-group-item\">";
     summaryTable($db, "ODI Top Bowlers", "5", "ODI Bowling");
-    echo "</li>";
-    echo "</div>";
-    echo "</div>";
-    echo "</div>";
-    echo "</div>";
-    $db->close();
-
-    $db = new SQLite3('ccrT20I.db');
-    echo "<div class=\"panel panel-inverse\">";
-    echo "<div class=\"panel-body\">";
-    echo "<div class=\"row\">";
-    echo "<div class=\"col-lg-3\">";
-    echo "<li class=\"list-group-item\">";
-    summaryTable($db, "T20I Top Batsmen", "5", "T20I Batting");
-    echo "</li>";
-    echo "</div>";
-    echo "<div class=\"col-lg-3\">";
-    echo "<li class=\"list-group-item\">";
-    summaryTable($db, "T20I Top Bowlers", "5", "T20I Bowling");
     echo "</li>";
     echo "</div>";
     $db->close();
@@ -326,7 +386,7 @@
     <div id="fb-root"></div>
     <div class="navbar navbar-default navbar-fixed-bottom">
         <div class="container">
-            <p class="navbar-text">© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>
+            <p class="navbar-text">Â© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>
         </div>
     </div>    <script>(function(d, s, id) {
       var js, fjs = d.getElementsByTagName(s)[0];

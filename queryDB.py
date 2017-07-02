@@ -76,14 +76,14 @@ c = conn.cursor()
 # for row in c.execute('SELECT wkts, result from bowlingTestInnings'):
 #     csvF.write(str(row[0]) +"," + str(row[1]) + "\n")
 # csvF.close()
-for row in c.execute('delete FROM allRoundTestMatch'):
-     print row
-for row in c.execute('delete FROM battingTestLive'):
-     print row
-for row in c.execute('delete FROM bowlingTestLive'):
-     print row
-for row in c.execute('delete FROM allRoundTestLive'):
-     print row
+# for row in c.execute('delete FROM allRoundTestMatch'):
+#      print row
+# for row in c.execute('delete FROM battingTestLive'):
+#      print row
+# for row in c.execute('delete FROM bowlingTestLive'):
+#      print row
+# for row in c.execute('delete FROM allRoundTestLive'):
+#      print row
 #for row in c.execute('select count(commentary) FROM fieldingEventTest where directHit>0'):
 #            print row
 #for row in c.execute('select commentary FROM fieldingEventTest where droppedCatch=1 and fielder=?',("Rahul Dravid",)):
@@ -102,6 +102,12 @@ for row in c.execute('delete FROM allRoundTestLive'):
 #        print row
 #for row in c.execute('SELECT max(balls) FROM detailsTestInnings'):
 #       print row
+# for row in c.execute('SELECT * FROM teamTestPeaks where ratingType="Bowling"'):
+#        print row
+# for row in c.execute('SELECT * FROM teamBattingTestLive where team="Sri Lanka"'):
+#        print row
+
+
 # for row in c.execute('SELECT player FROM fieldingTestCareer where droppedCatches>0 and catches=0'):
 #        print row
 #for row in c.execute('SELECT player,tests,catches,dropRate,matPerMisfield,rating FROM fieldingTestCareer where rating>0 order by rating desc'):
@@ -196,7 +202,9 @@ for row in c.execute('delete FROM allRoundTestLive'):
 # c.execute('update testInfo set seriesStatus=? where testId=?', ("Decider", 2254))
 # c.execute('update testInfo set seriesStatus=? where testId=?', ("All-to-Play-for", 2255))
 # c.execute('update testInfo set seriesStatus=? where testId=?', ("All-to-Play-for", 2256))
-conn.commit()
+for row in c.execute('SELECT * FROM retiredPlayers'):
+    print row
+#conn.commit()
 conn.close()
 elapsed = (time.clock() - start)
 print(elapsed)

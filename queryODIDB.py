@@ -12,14 +12,16 @@ c = conn.cursor()
 #        print row
 # for row in c.execute('delete FROM bowlingODIInnings where odiId>3481'):
 #        print row
-for row in c.execute('delete FROM allRoundODIMatch where odiId>3777'):
-     print row
-for row in c.execute('delete FROM battingODILive where odiId>3777'):
-     print row
-for row in c.execute('delete FROM bowlingODILive where odiId>3777'):
-     print row
-for row in c.execute('delete FROM allRoundODILive where odiId>3777'):
-    print row
+# for row in c.execute('delete FROM allRoundODIMatch'):
+#      print row
+# for row in c.execute('delete FROM battingODILive'):
+#      print row
+# for row in c.execute('delete FROM bowlingODILive'):
+#      print row
+# for row in c.execute('delete FROM allRoundODILive'):
+#     print row
+# for row in c.execute('SELECT avg(runs) from detailsODIInnings where odiId>=3305 and balls=300'):
+#       print(row)
 #for row in c.execute('delete FROM odiInfo where odiId=3598'):
 #     print row
 # for row in c.execute('delete FROM fieldingEventODI where odiId>3644'):
@@ -124,8 +126,9 @@ for row in c.execute('delete FROM allRoundODILive where odiId>3777'):
 #    print row
 #for row in c.execute('SELECT * FROM bowlingODICurrent order by rating asc'):
 #    print row
-#for row in c.execute('SELECT * FROM allRoundODICurrent order by rating asc'):
-#    print row
+for row in c.execute('SELECT * FROM retiredPlayers'):
+    print row
+
 #c.execute('update odiInfo set team2=?,result=? where odiId=3541', ("Papua New Guinea", "Papua New Guinea"))
 #c.execute('update odiInfo set team2=?,result=? where odiId=3542', ("Papua New Guinea", "Papua New Guinea"))
 #for row in c.execute('select * from odiInfo where odiId=3541'):
@@ -135,7 +138,9 @@ for row in c.execute('delete FROM allRoundODILive where odiId>3777'):
 #for row in c.execute('SELECT max(odiId) FROM odiInfo'):
 #    print row
 # c.execute('insert into retiredPlayers values (12069)')
-conn.commit()
+# for row in c.execute('SELECT * from retiredPlayers'):
+#     print row[0]
+#conn.commit()
 conn.close()
 elapsed = (time.clock() - start)
 print(elapsed)

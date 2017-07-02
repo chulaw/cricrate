@@ -4,6 +4,8 @@ from lxml import html
 import requests
 import sqlite3
 import math
+import numpy as np
+from scipy.stats import t
 
 # connect to db
 conn = sqlite3.connect('ccrFT20.db')
@@ -13,11 +15,11 @@ c.execute('drop table battingFT20Career')
 c.execute('drop table bowlingFT20Career')
 c.execute('drop table allRoundFT20Career')
 c.execute('''create table battingFT20Career (startDate text, endDate text, playerId integer unique, player text, innings integer, notOuts integer, runs integer, average real, strikeRate real,
-          fifties integer, hundreds integer, rating real)''')
+          fifties integer, hundreds integer, rating real, confInt95 real)''')
 c.execute('''create table bowlingFT20Career (startDate text, endDate text, playerId integer unique, player text, innings integer, balls integer, runs integer, wickets integer, average real,
-          strikeRate real, econRate real, threeWkts integer, fiveWkts integer, rating real)''')
+          strikeRate real, econRate real, threeWkts integer, fiveWkts integer, rating real, confInt95 real)''')
 c.execute('''create table allRoundFT20Career (startDate text, endDate text, playerId integer unique, player text, ft20s integer, runs integer, battingAverage real, fifties integer, wickets integer,
-          bowlingAverage real, threeWkts integer, thirtyTwoWkts integer, rating real)''')
+          bowlingAverage real, threeWkts integer, thirtyTwoWkts integer, rating real, confInt95 real)''')
 
 c.execute('select playerId, player from playerInfo')
 for player in c.fetchall():
@@ -32,6 +34,7 @@ for player in c.fetchall():
     lastFT20 = 0
     fifties = 0
     hundreds = 0
+    samples = []
     for battingInning in c.fetchall():
         if battingInning[0] < firstFT20: firstFT20 = battingInning[0]
         if battingInning[0] > lastFT20: lastFT20 = battingInning[0]
@@ -42,6 +45,16 @@ for player in c.fetchall():
         if battingInning[2] >= 50 and battingInning[2] < 100: fifties += 1
         if battingInning[2] >= 100: hundreds += 1
         rating = rating + battingInning[4]
+        samples.append(battingInning[4])
+
+    if innings > 1:
+        mean = np.mean(samples)
+        std = np.std(samples, ddof=1)
+        tstat = (t.interval(0.95, innings-1))[1]
+        ci95 = tstat * std / math.sqrt(innings)
+    else:
+        ci95 = None
+
     battingAverage = float(runs) / float(innings - notOuts) if innings != notOuts else None
     strikeRate = 100 * float(runs) / float(balls) if balls > 0 else 100 * float(runs)
     rating = rating / innings if innings > 0 else None
@@ -50,18 +63,19 @@ for player in c.fetchall():
     if innings < 20 and innings >= 10 and rating != None: rating = rating * math.exp(-float(20-innings)/10)
     if innings < 10 and rating != None: rating = rating * math.exp(-float(10-innings)/5)
     if rating != None: rating = rating + rating * innings / 400
-    
+    if ci95 != None and mean != 0: ci95 = ci95 * rating / mean
+
     c.execute('select startDate from ft20Info where ft20Id=?',(firstFT20, ))
     startDate = c.fetchone()
     if startDate != None: startDate = startDate[0]
     c.execute('select startDate from ft20Info where ft20Id=?',(lastFT20, ))
     endDate = c.fetchone()
     if endDate != None: endDate = endDate[0]
-    
-    c.execute('''insert or ignore into battingFT20Career (startDate, endDate, playerId, player, innings, notOuts, runs, average, strikeRate, fifties, hundreds, rating)
-              values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-              (startDate, endDate, player[0], player[1], innings, notOuts, runs, battingAverage, strikeRate, fifties, hundreds, rating))  
-               
+
+    c.execute('''insert or ignore into battingFT20Career (startDate, endDate, playerId, player, innings, notOuts, runs, average, strikeRate, fifties, hundreds, rating, confInt95)
+              values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+              (startDate, endDate, player[0], player[1], innings, notOuts, runs, battingAverage, strikeRate, fifties, hundreds, rating, ci95))
+
     # Bowling career
     c.execute('select ft20Id, wkts, balls, runs, rating from bowlingFT20Innings where playerId=?',(player[0], ))
     innings = 0
@@ -73,16 +87,27 @@ for player in c.fetchall():
     lastFT20 = 0
     threeWkts = 0
     fiveWkts = 0
+    samples = []
     for bowlingInning in c.fetchall():
         if bowlingInning[0] < firstFT20: firstFT20 = bowlingInning[0]
-        if bowlingInning[0] > lastFT20: lastFT20 = bowlingInning[0]                
-        innings += 1        
+        if bowlingInning[0] > lastFT20: lastFT20 = bowlingInning[0]
+        innings += 1
         wkts = wkts + bowlingInning[1]
         balls = balls + bowlingInning[2]
         runs = runs + bowlingInning[3]
         if bowlingInning[1] >= 3 and bowlingInning[1] < 5: threeWkts += 1
         if bowlingInning[1] >= 5: fiveWkts += 1
-        rating = rating + bowlingInning[4]        
+        rating = rating + bowlingInning[4]
+        samples.append(bowlingInning[4])
+
+    if innings > 1:
+        mean = np.mean(samples)
+        std = np.std(samples, ddof=1)
+        tstat = (t.interval(0.95, innings-1))[1]
+        ci95 = tstat * std / math.sqrt(innings)
+    else:
+        ci95 = None
+
     bowlingAverage = float(runs) / float(wkts) if wkts != 0 else None
     strikeRate = float(balls) / float(wkts) if wkts != 0 else None
     econRate = float(runs) * 6 / float(balls) if balls != 0 else None
@@ -92,18 +117,19 @@ for player in c.fetchall():
     if innings < 20 and innings >= 10 and rating != None: rating = rating * math.exp(-float(20-innings)/10)
     if innings < 10 and rating != None: rating = rating * math.exp(-float(10-innings)/5)
     if rating != None: rating = rating + rating * innings / 400
-    
+    if ci95 != None and mean != 0: ci95 = ci95 * rating / mean
+
     c.execute('select startDate from ft20Info where ft20Id=?',(firstFT20, ))
     startDate = c.fetchone()
     if startDate != None: startDate = startDate[0]
     c.execute('select startDate from ft20Info where ft20Id=?',(lastFT20, ))
     endDate = c.fetchone()
     if endDate != None: endDate = endDate[0]
-    c.execute('''insert or ignore into bowlingFT20Career (startDate, endDate, playerId, player, innings, balls, runs, wickets, average, strikeRate, econRate, threeWkts, fiveWkts, rating)
-              values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-              (startDate, endDate, player[0], player[1], innings, balls, runs, wkts, bowlingAverage, strikeRate, econRate, threeWkts, fiveWkts, rating))
-        
-    # All-round career        
+    c.execute('''insert or ignore into bowlingFT20Career (startDate, endDate, playerId, player, innings, balls, runs, wickets, average, strikeRate, econRate, threeWkts, fiveWkts, rating, confInt95)
+              values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+              (startDate, endDate, player[0], player[1], innings, balls, runs, wkts, bowlingAverage, strikeRate, econRate, threeWkts, fiveWkts, rating, ci95))
+
+    # All-round career
     c.execute('select ft20Id, runs, wkts, rating from allRoundFT20Match where playerId=?',(player[0], ))
     wkts = 0
     runs = 0
@@ -112,9 +138,10 @@ for player in c.fetchall():
     lastFT20 = 0
     thirtyTwoWkts = 0
     ft20s = 0
+    samples = []
     for allRoundMatch in c.fetchall():
         if allRoundMatch[0] < firstFT20: firstFT20 = allRoundMatch[0]
-        if allRoundMatch[0] > lastFT20: lastFT20 = allRoundMatch[0]                
+        if allRoundMatch[0] > lastFT20: lastFT20 = allRoundMatch[0]
         ft20s += 1
         runsInns = 0 if allRoundMatch[1] == None else allRoundMatch[1]
         wktsInns = 0 if allRoundMatch[2] == None else allRoundMatch[2]
@@ -122,7 +149,17 @@ for player in c.fetchall():
         wkts = wkts + wktsInns
         if runsInns >= 30 and wktsInns >= 2 : thirtyTwoWkts += 1
         rating = rating + allRoundMatch[3]
-    rating = rating / ft20s if ft20s > 0 else None    
+        samples.append(allRoundMatch[3])
+
+    if ft20s > 1:
+        mean = np.mean(samples)
+        std = np.std(samples, ddof=1)
+        tstat = (t.interval(0.95, ft20s-1))[1]
+        ci95 = tstat * std / math.sqrt(ft20s)
+    else:
+        ci95 = None
+
+    rating = rating / ft20s if ft20s > 0 else None
     # discount rating for those that have played <20 ft20s
     if ft20s < 40 and ft20s >= 20 and rating != None: rating = rating * math.exp(-float(40-ft20s)/25)
     if ft20s < 20 and ft20s >= 10 and rating != None: rating = rating * math.exp(-float(20-ft20s)/10)
@@ -132,15 +169,15 @@ for player in c.fetchall():
         battingAverageMod = 50.0 if float(battingAverage) > 50.0 else float(battingAverage)
         bowlingAverageMod = 15.0 if float(bowlingAverage) < 15.0 else float(bowlingAverage)
         rating = rating + float(battingAverageMod) * 50 /float(bowlingAverageMod) # add battingAvg/bowlingAvg bonus
-    
+    if ci95 != None and mean != 0: ci95 = ci95 * rating / mean
     c.execute('select startDate from ft20Info where ft20Id=?',(firstFT20, ))
     startDate = c.fetchone()
     if startDate != None: startDate = startDate[0]
     c.execute('select startDate from ft20Info where ft20Id=?',(lastFT20, ))
     endDate = c.fetchone()
     if endDate != None: endDate = endDate[0]
-    c.execute('''insert or ignore into allRoundFT20Career (startDate, endDate, playerId, player, ft20s, runs, battingAverage, fifties, wickets, bowlingAverage, threeWkts, thirtyTwoWkts, rating)
-              values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-              (startDate, endDate, player[0], player[1], ft20s, runs, battingAverage, fifties, wkts, bowlingAverage, threeWkts, thirtyTwoWkts, rating))    
-    conn.commit()    
+    c.execute('''insert or ignore into allRoundFT20Career (startDate, endDate, playerId, player, ft20s, runs, battingAverage, fifties, wickets, bowlingAverage, threeWkts, thirtyTwoWkts, rating, confInt95)
+              values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+              (startDate, endDate, player[0], player[1], ft20s, runs, battingAverage, fifties, wkts, bowlingAverage, threeWkts, thirtyTwoWkts, rating, ci95))
+    conn.commit()
 conn.close()

@@ -74,6 +74,7 @@ $player = getPlayerName($db, $playerId, $player);
 <html>
 <head>
     <?php echo "<title>cricrate | ".$player." - ".$matchFormat." ".$disc."</title>"; ?>
+    <meta charset="UTF-8">
     <link rel="icon" href="images/cricrate.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="css/bootstrap.css" rel="stylesheet">
@@ -239,14 +240,16 @@ $player = getPlayerName($db, $playerId, $player);
                 <ul class="nav navbar-nav navbar">
                     <li><a href="index.php">Home</a></li>
                     <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Team <span class="caret"></span></a>
-                        <ul class="dropdown-menu">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Team <span class="caret"></span></a>
+                      <ul class="dropdown-menu">
                             <li><a href="methodology.php?matchFormat=Test&disc=Team"><b>Test</b></a></li>
                             <li><a href="current.php?matchFormat=Test&disc=Team">&nbsp;&nbsp;Current</a></li>
+                            <li><a href="peaks.php?matchFormat=Test&disc=Player">&nbsp;&nbsp;Peaks</a></li>
                             <li><a href="career.php?matchFormat=Test&disc=Team">&nbsp;&nbsp;Overall</a></li>
                             <li role="separator" class="divider"></li>
                             <li><a href="methodology.php?matchFormat=ODI&disc=Team"><b>ODI</b></a></li>
                             <li><a href="current.php?matchFormat=ODI&disc=Team">&nbsp;&nbsp;Current</a></li>
+                            <li><a href="peaks.php?matchFormat=ODI&disc=Player">&nbsp;&nbsp;Peaks</a></li>
                             <li><a href="career.php?matchFormat=ODI&disc=Team">&nbsp;&nbsp;Overall</a></li>
                             <li role="separator" class="divider"></li>
                             <li><a href="methodology.php?matchFormat=T20I&disc=Team"><b>T20I</b></a></li>
@@ -255,6 +258,7 @@ $player = getPlayerName($db, $playerId, $player);
                             <li role="separator" class="divider"></li>
                             <li><a href="methodology.php?matchFormat=FT20&disc=Team"><b>FT20</b></a></li>
                             <li><a href="current.php?matchFormat=FT20&disc=Team">&nbsp;&nbsp;Current</a></li>
+                            <li><a href="peaks.php?matchFormat=FT20&disc=Player">&nbsp;&nbsp;Peaks</a></li>
                             <li><a href="career.php?matchFormat=FT20&disc=Team">&nbsp;&nbsp;Overall</a></li>
                         </ul>
                     </li>
@@ -363,8 +367,15 @@ $player = getPlayerName($db, $playerId, $player);
                             <li><a href="performances.php?matchFormat=FT20&disc=Win Shares">&nbsp;&nbsp;Performances</a></li>
                         </ul>
                     </li>
-                    <li><a href="cricinsight.php"><b>cricinsight</b></a></li>
-		                <li><a href="cricodds.php"><b>cricodds <span class="label label-warning">new</span></b></a></li>
+                    <li><a href="insight.php">Insight</a></li>
+                    <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Odds <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                          <li><a href="liveodds.php">Live</a></li>
+                          <li><a href="customodds.php">Custom</a></li>
+                      </ul>
+                    </li>
+                    <li><a href="blog.php">Blog <span class="label label-warning">new</span></a></li>
                     <li><a href="about.php">About</a></li>
                 </ul>
                 <div class="twitter navbar-text pull-right"><a href="https://twitter.com/cricrate" class="twitter-follow-button" data-show-count="false" data-show-screen-name="false">Follow @cricrate</a></div>
@@ -496,9 +507,9 @@ echo "<ul class=\"list-group\">";
 if ($disc == "Batting") {
     # batting career
     if ($matchFormat == "Test") {
-	$sql = "select startDate, endDate, ".$matchFormatLower."s, innings, notOuts, runs, average, strikeRate, fifties, hundreds, dblHundreds, tripleHundreds, rating from batting".$matchFormat."Career where playerId=".$playerId;
+	$sql = "select startDate, endDate, ".$matchFormatLower."s, innings, notOuts, runs, average, strikeRate, fifties, hundreds, dblHundreds, tripleHundreds, rating, confInt95 from batting".$matchFormat."Career where playerId=".$playerId;
     } else {
-	$sql = "select startDate, endDate, innings, notOuts, runs, average, strikeRate, fifties, hundreds, rating from batting".$matchFormat."Career where playerId=".$playerId;
+	$sql = "select startDate, endDate, innings, notOuts, runs, average, strikeRate, fifties, hundreds, rating, confInt95 from batting".$matchFormat."Career where playerId=".$playerId;
     }
     $result = $db->query($sql);
     if (!$result) die("Cannot execute query.");
@@ -536,7 +547,7 @@ if ($disc == "Batting") {
 		echo "<td></td>";
 	    }
 	    echo "<td>$res[8]</td><td>$res[9]</td><td>$res[10]</td><td>$res[11]</td>";
-	    echo "<td><b>".round($res[12], 0)."</b></td>";
+	    echo "<td><b>".round($res[12], 0)."</b> &plusmn; ".round($res[13], 0)."</td>";
 	} else {
 	    echo "<th>Span</th>";
 	    echo "<th>Inns</th>";
@@ -554,7 +565,7 @@ if ($disc == "Batting") {
 	    echo "<td>$res[2]</td><td>$res[3]</td><td>$res[4]</td>";
 	    echo "<td>".number_format(round($res[5], 2), 2)."</td><td>".number_format(round($res[6], 2), 2)."</td>";
 	    echo "<td>$res[7]</td><td>$res[8]</td>";
-	    echo "<td><b>".round($res[9], 0)."</b></td>";
+      echo "<td><b>".round($res[9], 0)."</b> &plusmn; ".round($res[10], 0)."</td>";
 	}
 	echo "</tr>";
 	echo "</table><br/>";
@@ -661,9 +672,9 @@ if ($disc == "Batting") {
 } else if ($disc == "Bowling") {
     # bowling career
     if ($matchFormat == "Test") {
-	$sql = "select startDate, endDate, ".$matchFormatLower."s, innings, balls, runs, wickets, average, econRate, strikeRate, fiveWkts, tenWkts, rating from bowling".$matchFormat."Career where playerId=".$playerId;
+	$sql = "select startDate, endDate, ".$matchFormatLower."s, innings, balls, runs, wickets, average, econRate, strikeRate, fiveWkts, tenWkts, rating, confInt95 from bowling".$matchFormat."Career where playerId=".$playerId;
     } else {
-	$sql = "select startDate, endDate, innings, balls, runs, wickets, average, econRate, strikeRate, threeWkts, fiveWkts, rating from bowling".$matchFormat."Career where playerId=".$playerId;
+	$sql = "select startDate, endDate, innings, balls, runs, wickets, average, econRate, strikeRate, threeWkts, fiveWkts, rating, confInt95 from bowling".$matchFormat."Career where playerId=".$playerId;
     }
     $result = $db->query($sql);
     if (!$result) die("Cannot execute query.");
@@ -696,7 +707,7 @@ if ($disc == "Batting") {
 	    echo "<td>".number_format(round($res[7], 2), 2)."</td><td>".number_format(round($res[8], 2), 2)."</td>";
 	    echo "<td>".number_format(round($res[9], 2), 1)."</td>";
 	    echo "<td>$res[10]</td><td>$res[11]</td>";
-	    echo "<td><b>".round($res[12], 0)."</b></td>";
+      echo "<td><b>".round($res[12], 0)."</b> &plusmn; ".round($res[13], 0)."</td>";
 	} else {
 	    echo "<th>Span</th>";
 	    echo "<th>Inns</th>";
@@ -716,7 +727,7 @@ if ($disc == "Batting") {
 	    echo "<td>$res[2]</td><td>$res[3]</td><td>$res[4]</td><td>$res[5]</td>";
 	    echo "<td>".number_format(round($res[6], 2), 2)."</td><td>".number_format(round($res[7], 2), 2)."</td><td>".number_format(round($res[8], 2), 1)."</td>";
 	    echo "<td>$res[9]</td><td>$res[10]</td>";
-	    echo "<td><b>".round($res[11], 0)."</b></td>";
+      echo "<td><b>".round($res[11], 0)."</b> &plusmn; ".round($res[12], 0)."</td>";
 	}
 	echo "</tr>";
 	echo "</table><br/>";
@@ -828,12 +839,12 @@ if ($disc == "Batting") {
 } else if ($disc == "All-Round") {
     # all-round career
     if ($matchFormat == "Test") {
-	$sql = "select startDate, endDate, ".$matchFormatLower."s, runs, battingAverage, hundreds, wickets, bowlingAverage, fiveWkts, hundredFiveWkts, rating from allRound".$matchFormat."Career where playerId=".$playerId;
+	$sql = "select startDate, endDate, ".$matchFormatLower."s, runs, battingAverage, hundreds, wickets, bowlingAverage, fiveWkts, hundredFiveWkts, rating, confInt95 from allRound".$matchFormat."Career where playerId=".$playerId;
     } else {
 	if ($matchFormat == "FT20" || $matchFormat == "T20I") {
-	    $sql = "select startDate, endDate, ".$matchFormatLower."s, runs, battingAverage, fifties, wickets, bowlingAverage, threeWkts, thirtyTwoWkts, rating from allRound".$matchFormat."Career where playerId=".$playerId;
+	    $sql = "select startDate, endDate, ".$matchFormatLower."s, runs, battingAverage, fifties, wickets, bowlingAverage, threeWkts, thirtyTwoWkts, rating, confInt95 from allRound".$matchFormat."Career where playerId=".$playerId;
 	} else {
-	    $sql = "select startDate, endDate, ".$matchFormatLower."s, runs, battingAverage, fifties, wickets, bowlingAverage, threeWkts, fiftyThreeWkts, rating from allRound".$matchFormat."Career where playerId=".$playerId;
+	    $sql = "select startDate, endDate, ".$matchFormatLower."s, runs, battingAverage, fifties, wickets, bowlingAverage, threeWkts, fiftyThreeWkts, rating, confInt95 from allRound".$matchFormat."Career where playerId=".$playerId;
 	}
     }
     $result = $db->query($sql);
@@ -866,7 +877,7 @@ if ($disc == "Batting") {
 	    echo "<td>$res[5]</td><td>$res[6]</td>";
 	    echo "<td>".number_format(round($res[7], 2), 2)."</td>";
 	    echo "<td>$res[8]</td><td>$res[9]</td>";
-	    echo "<td><b>".round($res[10], 0)."</b></td>";
+      echo "<td><b>".round($res[10], 0)."</b> &plusmn; ".round($res[11], 0)."</td>";
 	} else {
 	    echo "<th>Span</th>";
 	    echo "<th>Mat</th>";
@@ -891,7 +902,7 @@ if ($disc == "Batting") {
 	    echo "<td>$res[5]</td><td>$res[6]</td>";
 	    echo "<td>".number_format(round($res[7], 2), 2)."</td>";
 	    echo "<td>$res[8]</td><td>$res[9]</td>";
-	    echo "<td><b>".round($res[10], 0)."</b></td>";
+      echo "<td><b>".round($res[10], 0)."</b> &plusmn; ".round($res[11], 0)."</td>";
 	}
 	echo "</tr>";
 	echo "</table><br/>";

@@ -223,7 +223,7 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
     $_SESSION['screen_width'] = $_REQUEST['width'];
     $_SESSION['screen_height'] = $_REQUEST['height'];
 
-    header("Location: cricinsight.php?matchFormat=".$matchFormat."&disc=".$disc."&xVal=".$xVal."&yVal=".$yVal."&histVal=".$histVal.$submitLink.$teamsLink.$oppositionsLink.$hostsLink."&homeAway=".$homeAway."&batFieldFirst=".$batFieldFirst."&matchType=".$matchType.$winLossLink."&player=".$player."&league=".$league."&ground=".$ground.$inningsLink."&groupBy=".$groupBy."&startDate=".$startDate."&endDate=".$endDate."&resultQual=".$resultQual."&resultQualFrom=".$resultQualFrom."&resultQualTo=".$resultQualTo."&sortBy=".$sortBy);
+    header("Location: insight.php?matchFormat=".$matchFormat."&disc=".$disc."&xVal=".$xVal."&yVal=".$yVal."&histVal=".$histVal.$submitLink.$teamsLink.$oppositionsLink.$hostsLink."&homeAway=".$homeAway."&batFieldFirst=".$batFieldFirst."&matchType=".$matchType.$winLossLink."&player=".$player."&league=".$league."&ground=".$ground.$inningsLink."&groupBy=".$groupBy."&startDate=".$startDate."&endDate=".$endDate."&resultQual=".$resultQual."&resultQualFrom=".$resultQualFrom."&resultQualTo=".$resultQualTo."&sortBy=".$sortBy);
 } else {
     echo '<script type="text/javascript">window.location = "' . $_SERVER['PHP_SELF'] . '?matchFormat='.$matchFormat.'&disc='.$disc.'&xVal='.$xVal.'&yVal='.$yVal.'&histVal='.$histVal.$submitLink.$teamsLink.$oppositionsLink.$hostsLink.'&homeAway='.$homeAway."&batFieldFirst=".$batFieldFirst."&matchType=".$matchType.$winLossLink.'&player='.$player."&league=".$league.'&ground='.$ground.$inningsLink.'&groupBy='.$groupBy.'&startDate='.$startDate.'&endDate='.$endDate.'&resultQual='.$resultQual.'&resultQualFrom='.$resultQualFrom.'&resultQualTo='.$resultQualTo.'&sortBy='.$sortBy.'&width="+screen.width+"&height="+screen.height;</script>';
 }
@@ -231,7 +231,8 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
 ?>
 <html>
 <head>
-    <title>cricrate | cricinsight</title>
+    <title>cricrate | insight</title>
+    <meta charset="UTF-8">
     <link rel="icon" href="images/cricrate.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="css/bootstrap.css" rel="stylesheet">
@@ -300,7 +301,7 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
 
     function drawChartHist() {
        var jsonData = $.ajax({
-	   url: "charts/cricinsightHist.php?matchFormat="+matchFormat+"&batBowl="+batBowl+"&histVal="+histVal+teams+oppositions+hosts+winLoss+"&homeAway="+homeAway+"&batFieldFirst="+batFieldFirst+"&ground="+ground+"&matchType="+matchType+"&player="+player+"&league="+league+innings+"&startDate="+startDate+"&endDate="+endDate+"&groupBy="+groupBy+"&resultQual="+resultQual+"&resultQualFrom="+resultQualFrom+"&resultQualTo="+resultQualTo,
+	   url: "charts/insightHist.php?matchFormat="+matchFormat+"&batBowl="+batBowl+"&histVal="+histVal+teams+oppositions+hosts+winLoss+"&homeAway="+homeAway+"&batFieldFirst="+batFieldFirst+"&ground="+ground+"&matchType="+matchType+"&player="+player+"&league="+league+innings+"&startDate="+startDate+"&endDate="+endDate+"&groupBy="+groupBy+"&resultQual="+resultQual+"&resultQualFrom="+resultQualFrom+"&resultQualTo="+resultQualTo,
 	   dataType:"json",
 	   async: false
 	   }).responseText;
@@ -367,7 +368,7 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
 
     function drawChartBubble() {
        var jsonData = $.ajax({
-	   url: "charts/cricinsightBubble.php?matchFormat="+matchFormat+"&batBowl="+batBowl+"&xVal="+xVal+"&yVal="+yVal+teams+oppositions+hosts+winLoss+"&homeAway="+homeAway+"&batFieldFirst="+batFieldFirst+"&ground="+ground+"&matchType="+matchType+"&player="+player+"&league="+league+innings+"&startDate="+startDate+"&endDate="+endDate+"&groupBy="+groupBy+"&resultQual="+resultQual+"&resultQualFrom="+resultQualFrom+"&resultQualTo="+resultQualTo,
+	   url: "charts/insightBubble.php?matchFormat="+matchFormat+"&batBowl="+batBowl+"&xVal="+xVal+"&yVal="+yVal+teams+oppositions+hosts+winLoss+"&homeAway="+homeAway+"&batFieldFirst="+batFieldFirst+"&ground="+ground+"&matchType="+matchType+"&player="+player+"&league="+league+innings+"&startDate="+startDate+"&endDate="+endDate+"&groupBy="+groupBy+"&resultQual="+resultQual+"&resultQualFrom="+resultQualFrom+"&resultQualTo="+resultQualTo,
 	   dataType:"json",
 	   async: false
 	   }).responseText;
@@ -461,8 +462,8 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
 
      $(document).ready(function() {
        $('#ratingsTable').DataTable( {
-       "lengthChange":   false,
        "pageLength": 11,
+       "lengthMenu": [[11, 25, 50, 100, -1], [11, 25, 50, 100, "All"]],
        "order": [[ 0, "asc" ]],
     } );
     } );
@@ -509,14 +510,16 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
                 <ul class="nav navbar-nav navbar">
                     <li><a href="index.php">Home</a></li>
                     <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Team <span class="caret"></span></a>
-                        <ul class="dropdown-menu">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Team <span class="caret"></span></a>
+                      <ul class="dropdown-menu">
                             <li><a href="methodology.php?matchFormat=Test&disc=Team"><b>Test</b></a></li>
                             <li><a href="current.php?matchFormat=Test&disc=Team">&nbsp;&nbsp;Current</a></li>
+                            <li><a href="peaks.php?matchFormat=Test&disc=Player">&nbsp;&nbsp;Peaks</a></li>
                             <li><a href="career.php?matchFormat=Test&disc=Team">&nbsp;&nbsp;Overall</a></li>
                             <li role="separator" class="divider"></li>
                             <li><a href="methodology.php?matchFormat=ODI&disc=Team"><b>ODI</b></a></li>
                             <li><a href="current.php?matchFormat=ODI&disc=Team">&nbsp;&nbsp;Current</a></li>
+                            <li><a href="peaks.php?matchFormat=ODI&disc=Player">&nbsp;&nbsp;Peaks</a></li>
                             <li><a href="career.php?matchFormat=ODI&disc=Team">&nbsp;&nbsp;Overall</a></li>
                             <li role="separator" class="divider"></li>
                             <li><a href="methodology.php?matchFormat=T20I&disc=Team"><b>T20I</b></a></li>
@@ -525,6 +528,7 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
                             <li role="separator" class="divider"></li>
                             <li><a href="methodology.php?matchFormat=FT20&disc=Team"><b>FT20</b></a></li>
                             <li><a href="current.php?matchFormat=FT20&disc=Team">&nbsp;&nbsp;Current</a></li>
+                            <li><a href="peaks.php?matchFormat=FT20&disc=Player">&nbsp;&nbsp;Peaks</a></li>
                             <li><a href="career.php?matchFormat=FT20&disc=Team">&nbsp;&nbsp;Overall</a></li>
                         </ul>
                     </li>
@@ -633,8 +637,15 @@ if(isset($_SESSION['screen_width']) AND isset($_SESSION['screen_height'])){
                             <li><a href="performances.php?matchFormat=FT20&disc=Win Shares">&nbsp;&nbsp;Performances</a></li>
                         </ul>
                     </li>
-		                <li class="active"><a href="cricinsight.php"><b>cricinsight</b></a></li>
-		                <li><a href="cricodds.php"><b>cricodds <span class="label label-warning">new</span></b></a></li>
+		                <li class="active"><a href="insight.php">Insight <span class="sr-only">(current)</span></a></li>
+                    <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Odds <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                          <li><a href="liveodds.php">Live</a></li>
+                          <li><a href="customodds.php">Custom</a></li>
+                      </ul>
+                    </li>
+                    <li><a href="blog.php">Blog <span class="label label-warning">new</span></a></li>
                     <li><a href="about.php">About</a></li>
                 </ul>
                 <div class="twitter navbar-text pull-right"><a href="https://twitter.com/cricrate" class="twitter-follow-button" data-show-count="false" data-show-screen-name="false">Follow @cricrate</a></div>
@@ -649,12 +660,12 @@ if (!isset($_GET["Submit"])) {
     echo "<div class=\"container\">";
     echo "<div class=\"panel panel-default\">";
     echo "<div class=\"panel-body\">";
-    echo "<h2><b style=\"color:#2c518d;\">cric</b><b style=\"color:#FFBC00;\">insight</b></h2><br/>";
+    echo "<h2><b>Insight</b></h2><br/>";
     echo "<div class=\"row\">";
    $matchFormat = "Test";
    $disc = "Batting";
    $groupBy = "Player";
-   echo "<form class=\"form-inline\" role=\"form\" name=\"selectForm\" method=\"get\" action=\"cricinsight.php\">";
+   echo "<form class=\"form-inline\" role=\"form\" name=\"selectForm\" method=\"get\" action=\"insight.php\">";
    echo "<div class=\"col-lg-6\">";
    echo "<div class=\"form-group\">";
    echo "<b>Match format:</b>";
@@ -1100,7 +1111,7 @@ if (!isset($_GET["Submit"])) {
     echo "<div class=\"panel-body\">";
     echo "<div class=\"row\">";
     echo "<div class=\"col-lg-3\">";
-    echo "<h2><b style=\"color:#2c518d;\">&nbsp;&nbsp;cric</b><b style=\"color:#FFBC00;\">insight&nbsp;&nbsp;</b><b><small><a href=\"#\" onclick=\"history.go(-1)\">edit</a>&nbsp;&nbsp;<a href=\"cricinsight.php\">clear</a></small></b></h2>";
+    echo "<h2><b>Insight</b><b><small>&nbsp;&nbsp;<a href=\"#\" onclick=\"history.go(-1)\">edit</a>&nbsp;&nbsp;<a href=\"insight.php\">clear</a></small></b></h2>";
     echo "<ul class=\"list-group\">";
     echo "<li class=\"list-group-item\">";
 
@@ -1698,7 +1709,7 @@ if (!isset($_GET["Submit"])) {
     echo "<div id=\"chart\"></div>";
     echo "</div>";
 
-    echo "<form class=\"form-inline\" role=\"form\" name=\"chartFormH\" method=\"get\" action=\"cricinsight.php\">";
+    echo "<form class=\"form-inline\" role=\"form\" name=\"chartFormH\" method=\"get\" action=\"insight.php\">";
     echo "<div class=\"form-group\">";
     echo "<select class=\"form-control\" name=\"histVal\" onChange=\"chartFormsH()\">";
     if (isset($_GET['histVal'])) {
@@ -2505,7 +2516,7 @@ if (!isset($_GET["Submit"])) {
 	}
     }
 
-    echo "<form class=\"form-inline\" role=\"form\" name=\"chartForm\" method=\"get\" action=\"cricinsight.php\">";
+    echo "<form class=\"form-inline\" role=\"form\" name=\"chartForm\" method=\"get\" action=\"insight.php\">";
     echo "<div class=\"form-group\">";
     echo "<select class=\"form-control\" name=\"yVal\" onChange=\"chartForms()\">";
     if (isset($_GET['yVal'])) {
@@ -2617,7 +2628,7 @@ if (!isset($_GET["Submit"])) {
     <div id="fb-root"></div>
     <div class="navbar navbar-default navbar-fixed-bottom">
         <div class="container">
-            <p class="navbar-text">© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>
+            <p class="navbar-text">Â© 2014-<?php date_default_timezone_set('America/New_York'); echo date('Y'); ?> by cricrate. All rights reserved.</p>
         </div>
     </div>
  <script>(function(d, s, id) {

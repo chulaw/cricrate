@@ -72,7 +72,7 @@ def dumpInningsDetails(inningsNum, teamBat, teamBowl, playerLinksBat, playersBat
                 ballsBowled = int(detailsBowl[j*6].split('.')[0]) * 6 + int(detailsBowl[j*6].split('.')[1])
             else:
                 ballsBowled = int(detailsBowl[j*6]) * 6
-        elif t20iId in (3, 9, 14, 17, 18, 19, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 78, 79, 128, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 142, 143, 219, 224, 225, 227, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 249, 250, 251, 252, 253, 254, 269, 282, 290, 295, 301, 302, 304, 307, 309, 310, 311, 313, 314, 319, 320, 330, 332, 333, 335, 337, 338, 339, 342, 344, 345, 346, 347, 348, 349, 359, 360, 410, 419, 420, 421, 422, 424, 425, 426, 427, 458, 459, 464, 465, 466, 467, 470, 471, 472, 487, 488, 490, 491, 492, 493, 494, 495, 498, 500, 501, 502, 504, 505, 507, 508, 564, 571, 572, 573, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587, 588, 599):
+        elif t20iId in (3, 9, 14, 17, 18, 19, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 78, 79, 128, 129, 130, 131, 132, 133, 135, 136, 137, 138, 139, 140, 141, 142, 143, 219, 224, 225, 227, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 249, 250, 251, 252, 253, 254, 269, 282, 290, 295, 301, 302, 304, 307, 309, 310, 311, 313, 314, 319, 320, 330, 332, 333, 335, 337, 338, 339, 342, 344, 345, 346, 347, 348, 349, 359, 360, 410, 419, 420, 421, 422, 424, 425, 426, 427, 458, 459, 464, 465, 466, 467, 470, 471, 472, 487, 488, 490, 491, 492, 493, 494, 495, 498, 500, 501, 502, 504, 505, 507, 508, 564, 571, 572, 573, 577, 578, 579, 580, 581, 582, 583, 584, 585, 586, 587, 588, 599, 600, 601):
             maidens = int(detailsBowl[1+j*5])
             runsConceded = int(detailsBowl[2+j*5])
             wkts = int(detailsBowl[3+j*5])
@@ -232,6 +232,7 @@ for x in range(startT20I, len(t20isInfo)):
         playerLinksBat1 = scoreTree.xpath('(//table[@class="batting-table innings"])[1]/tr/td[@class="batsman-name"]/a[@class="playerName"]/@href')
         playersBat1 = scoreTree.xpath('(//table[@class="batting-table innings"])[1]/tr/td[@class="batsman-name"]/a[@class="playerName"]/text()')
         dismissalsBat1 = scoreTree.xpath('(//table[@class="batting-table innings"])[1]/tr/td[@class="dismissal-info"]/text()')
+        while '\n  ' in dismissalsBat1: dismissalsBat1.remove('\n  ')
         runsBat1 = scoreTree.xpath('(//table[@class="batting-table innings"])[1]/tr/td[@class="bold"]/text()')
         totalBat1 = scoreTree.xpath('(//table[@class="batting-table innings"])[1]/tr[@class="total-wrap"]/td[@class="bold"]/b/text()')[0]
         totalDetails1 = scoreTree.xpath('(//table[@class="batting-table innings"])[1]/tr[@class="total-wrap"]/td[@class="total-details"]/text()')[0]
@@ -278,6 +279,7 @@ for x in range(startT20I, len(t20isInfo)):
         playerLinksBat2 = scoreTree.xpath('(//table[@class="batting-table innings"])[2]/tr/td[@class="batsman-name"]/a[@class="playerName"]/@href')
         playersBat2 = scoreTree.xpath('(//table[@class="batting-table innings"])[2]/tr/td[@class="batsman-name"]/a[@class="playerName"]/text()')
         dismissalsBat2 = scoreTree.xpath('(//table[@class="batting-table innings"])[2]/tr/td[@class="dismissal-info"]/text()')
+        while '\n  ' in dismissalsBat2: dismissalsBat2.remove('\n  ')
         runsBat2 = scoreTree.xpath('(//table[@class="batting-table innings"])[2]/tr/td[@class="bold"]/text()')
         totalBat2 = scoreTree.xpath('(//table[@class="batting-table innings"])[2]/tr[@class="total-wrap"]/td[@class="bold"]/b/text()')[0]
         totalDetails2 = scoreTree.xpath('(//table[@class="batting-table innings"])[2]/tr[@class="total-wrap"]/td[@class="total-details"]/text()')[0]
